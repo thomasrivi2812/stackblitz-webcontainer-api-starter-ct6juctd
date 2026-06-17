@@ -31,11 +31,19 @@ function pin(color: string) {
   });
 }
 
-export function MapClient({ points }: { points: MapPoint[] }) {
+export function MapClient({
+  points,
+  center = [46.6, 2.4],
+  zoom = 5,
+}: {
+  points: MapPoint[];
+  center?: [number, number];
+  zoom?: number;
+}) {
   return (
     <MapContainer
-      center={[46.6, 2.4]}
-      zoom={5}
+      center={center}
+      zoom={zoom}
       scrollWheelZoom={false}
       style={{ height: '100%', width: '100%' }}
     >

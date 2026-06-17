@@ -1,4 +1,12 @@
 import { getDatacenters, statutInfo } from '@/lib/wordpress';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Notre réseau de data centers en France',
+  description:
+    'Découvrez les data centers Nation Data Center : Rennes, Rouen, Vélizy… Un réseau souverain de 15 sites prévus d’ici 2030, conçus Tier III et écoresponsables.',
+  alternates: { canonical: '/datacenters' },
+};
 
 export const dynamic = 'force-dynamic';
 

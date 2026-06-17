@@ -68,7 +68,7 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
 
             {!done ? (
               <>
-                <span className="ndcm-eyebrow">Ressource</span>
+                <span className="ndcm-eyebrow"><span className="ndcm-eyebrow-dot" aria-hidden="true" />Ressource</span>
                 <h3 className="ndcm-title">Télécharger la brochure NDC</h3>
                 <p className="ndcm-text">Renseignez votre e-mail professionnel pour accéder à notre brochure complète.</p>
 
@@ -106,31 +106,42 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
           </div>
 
           <style>{`
-            .ndcm-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,20,36,.6);backdrop-filter:blur(4px);animation:ndcm-fade .15s ease}
+            .ndcm-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,20,36,.55);backdrop-filter:blur(4px);animation:ndcm-fade .15s ease}
             @keyframes ndcm-fade{from{opacity:0}to{opacity:1}}
             @keyframes ndcm-pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
-            .ndcm-card{position:relative;width:100%;max-width:460px;background:var(--surface,#fff);color:var(--ink,#1b3360);border:1px solid var(--line,#e2e8f1);border-radius:12px;padding:36px;box-shadow:0 30px 80px -20px rgba(10,20,36,.55);animation:ndcm-pop .18s ease;font-family:var(--font-jost,system-ui,sans-serif)}
+            .ndcm-card{position:relative;width:100%;max-width:480px;background:var(--surface,#fff);color:var(--ink,#1b3360);border:1px solid var(--line,#e2e8f1);border-radius:14px;padding:40px 36px 32px;box-shadow:0 30px 80px -20px rgba(10,20,36,.55);animation:ndcm-pop .18s ease;font-family:var(--font-jost,system-ui,sans-serif)}
             .ndcm-close{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:34px;height:34px;border:none;border-radius:8px;background:transparent;color:var(--muted,#5d6b85);cursor:pointer;transition:background .15s ease,color .15s ease}
             .ndcm-close:hover{background:var(--surface-alt,#f1f5fa);color:var(--ink,#1b3360)}
-            .ndcm-eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--turquoise-700,#1c8cbd);margin-bottom:12px}
-            .ndcm-title{position:relative;padding-left:16px;font-size:23px;font-weight:700;line-height:1.1;color:var(--heading,#1b3360);margin:0 0 10px}
-            .ndcm-title::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:4px;border-radius:2px;background:var(--red,#ff0000)}
-            .ndcm-text{color:var(--muted,#5d6b85);font-size:15px;line-height:1.5;margin:0 0 22px}
-            .ndcm-label{display:block;font-size:13px;font-weight:600;color:var(--heading,#1b3360);margin-bottom:6px}
-            .ndcm-input{width:100%;padding:12px 14px;border:1px solid var(--line,#e2e8f1);border-radius:8px;font:inherit;font-size:15px;background:var(--bg,#fff);color:var(--ink,#1b3360);margin-bottom:18px}
-            .ndcm-input:focus{outline:none;border-color:var(--turquoise,#2dafe6);box-shadow:0 0 0 3px rgba(45,175,230,.18)}
-            .ndcm-consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:var(--muted,#5d6b85);margin-bottom:18px;cursor:pointer}
-            .ndcm-consent input{margin-top:3px;flex-shrink:0;accent-color:var(--turquoise,#2dafe6)}
-            .ndcm-error{color:var(--red,#ff0000);font-size:13.5px;margin:0 0 14px}
-            .ndcm-submit{width:100%;padding:13px 22px;border:none;border-radius:8px;font:inherit;font-size:15px;font-weight:600;color:#fff;background:var(--turquoise,#2dafe6);cursor:pointer;transition:background .15s ease,transform .15s ease}
-            .ndcm-submit:hover{background:var(--turquoise-700,#1c8cbd);transform:translateY(-1px)}
+
+            .ndcm-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--turquoise-700,#1c8cbd);margin-bottom:18px}
+            .ndcm-eyebrow-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red,#ff0000);flex-shrink:0}
+
+            .ndcm-title{font-size:clamp(24px,3vw,28px);font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--heading,#1b3360);margin:0 0 12px;padding-left:14px;position:relative}
+            .ndcm-title::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--red,#ff0000)}
+            .ndcm-text{color:var(--muted,#5d6b85);font-size:15.5px;line-height:1.55;margin:0 0 26px}
+
+            .ndcm-label{display:block;font-size:13px;font-weight:600;color:var(--heading,#1b3360);margin-bottom:8px;letter-spacing:.01em}
+            .ndcm-input{width:100%;padding:12px 14px;border:1.5px solid var(--line,#e2e8f1);border-radius:8px;font:inherit;font-size:15px;background:var(--bg,#fff);color:var(--ink,#1b3360);margin-bottom:20px;transition:border-color .15s ease,box-shadow .15s ease}
+            .ndcm-input:focus{outline:none;border-color:var(--marine,#1b3360);box-shadow:0 0 0 3px rgba(27,51,96,.10)}
+
+            .ndcm-consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--muted,#5d6b85);margin-bottom:22px;cursor:pointer}
+            .ndcm-consent input{margin-top:3px;flex-shrink:0;accent-color:var(--marine,#1b3360)}
+            .ndcm-error{color:var(--red,#ff0000);font-size:13.5px;margin:0 0 14px;font-weight:500}
+
+            /* Submit : style btn-v2-primary (marine + accent rouge en bas) */
+            .ndcm-submit{position:relative;width:100%;padding:15px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-size:15px;font-weight:600;color:#fff;background:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,transform .15s ease,border-color .15s ease}
+            .ndcm-submit::after{content:'';position:absolute;left:14px;right:14px;bottom:6px;height:2px;background:var(--red,#ff0000);opacity:.85;border-radius:1px}
+            .ndcm-submit:hover{background:var(--marine-800,#102240);border-color:var(--marine-800,#102240);transform:translateY(-1px)}
+
             .ndcm-done{text-align:center}
-            .ndcm-check{width:58px;height:58px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:rgba(45,175,230,.12);color:var(--turquoise-700,#1c8cbd)}
+            .ndcm-check{width:58px;height:58px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:rgba(27,51,96,.10);color:var(--marine,#1b3360)}
             .ndcm-done .ndcm-title{padding-left:0;text-align:center}
             .ndcm-done .ndcm-title::before{display:none}
-            .ndcm-done a{color:var(--turquoise-700,#1c8cbd);font-weight:600}
-            .ndcm-ghost{margin-top:8px;padding:11px 22px;border:1.5px solid var(--line,#e2e8f1);border-radius:8px;font:inherit;font-weight:600;background:transparent;color:var(--ink,#1b3360);cursor:pointer}
-            .ndcm-ghost:hover{border-color:var(--turquoise,#2dafe6);color:var(--turquoise-700,#1c8cbd)}
+            .ndcm-done a{color:var(--marine,#1b3360);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+            /* Ghost : style btn-v2-ghost (bordure marine) */
+            .ndcm-ghost{margin-top:8px;padding:13px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-weight:600;background:transparent;color:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,color .15s ease}
+            .ndcm-ghost:hover{background:var(--marine,#1b3360);color:#fff}
           `}</style>
         </div>
       )}

@@ -1,7 +1,29 @@
-import { getDatacenter, getDatacenters, statutInfo } from '@/lib/wordpress';
+import { getDatacenter, getDatacenters, statutInfo, toMapPoints } from '@/lib/wordpress';
 import { notFound } from 'next/navigation';
+import { LocationMap } from '@/components/LocationMap';
+import { DcPhoto } from '@/components/DcPhoto';
+import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const dc = await getDatacenter(params.slug);
+  if (!dc) return { title: 'Data center introuvable' };
+  const f = dc.datacenterFields;
+  const ville = f.ville ? ` à ${f.ville}` : '';
+  const desc = f.accroche
+    || `Data center NDC${ville} : hébergement souverain, conception Tier III et écoresponsable. Découvrez ses caractéristiques techniques.`;
+  return {
+    title: `${dc.title}${ville ? ' — ' + f.ville : ''}`,
+    description: desc,
+    alternates: { canonical: `/datacenters/${dc.slug}` },
+    openGraph: {
+      title: `${dc.title} — Nation Data Center`,
+      description: desc,
+      type: 'article',
+    },
+  };
+}
 
 const CATEGORIE_LABELS: Record<string, string> = {
   securite: 'Sécurité',
@@ -11,7 +33,6 @@ const CATEGORIE_LABELS: Record<string, string> = {
   resilience: 'Résilience',
 };
 
-// Pré-génère les routes connues (utile une fois en statique/ISR).
 export async function generateStaticParams() {
   const dcs = await getDatacenters();
   return dcs.map((d) => ({ slug: d.slug }));
@@ -26,22 +47,32 @@ export default async function DatacenterDetail({ params }: { params: { slug: str
   const kpis = f.kpis ?? [];
   const caracs = f.caracteristiques ?? [];
   const benefices = f.benefices ?? [];
+  const mapPoint = toMapPoints([dc])[0]; // présent seulement si lat/lng renseignés
 
   return (
     <main>
+      {/* HERO + PHOTO */}
       <section className="dc-hero">
-        <div className="container">
-          <a className="back-link" href="/datacenters">← Tous nos data centers</a>
-          <span className={`badge ${key}`} style={{ marginTop: 18 }}>
-            <span className="dot" />
-            {label}
-          </span>
-          <h1 className="fil-rouge">{dc.title}</h1>
-          {f.ville && <p className="dc-city">◍ {f.ville}</p>}
-          {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
+        <div className="container dc-hero-grid">
+          <div>
+            <a className="back-link" href="/datacenters">← Tous nos data centers</a>
+            <span className={`badge ${key}`} style={{ marginTop: 18 }}>
+              <span className="dot" />
+              {label}
+            </span>
+            <h1 className="fil-rouge">{dc.title}</h1>
+            {f.ville && <p className="dc-city">◍ {f.ville}</p>}
+            {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
+            <div className="dc-hero-cta">
+              <a className="btn btn-primary" href="/offres">Découvrir nos offres dédiées</a>
+              <a className="btn btn-ghost" href="/#contact">Demander une visite</a>
+            </div>
+          </div>
+          <DcPhoto slug={dc.slug} title={dc.title} />
         </div>
       </section>
 
+      {/* KPI */}
       {kpis.length > 0 && (
         <section className="kpi-band">
           <div className="container kpi-grid">
@@ -58,6 +89,7 @@ export default async function DatacenterDetail({ params }: { params: { slug: str
         </section>
       )}
 
+      {/* CORPS : présentation + caractéristiques / aside bénéfices + carte */}
       <section className="section">
         <div className="container dc-body">
           <div>
@@ -86,22 +118,33 @@ export default async function DatacenterDetail({ params }: { params: { slug: str
             )}
           </div>
 
-          {benefices.length > 0 && (
-            <aside className="dc-aside">
-              <h3>Ce que cela vous apporte</h3>
-              <ul>
-                {benefices.map((b, i) => (
-                  <li key={i}>
-                    <strong>{b.titre}</strong>
-                    <span>{b.texte}</span>
-                  </li>
-                ))}
-              </ul>
-              <a className="btn btn-primary" href="/" style={{ marginTop: 8 }}>
-                Demander une visite
-              </a>
-            </aside>
-          )}
+          <aside className="dc-aside">
+            {/* Petite carte de localisation */}
+            {mapPoint && (
+              <div className="dc-aside-block">
+                <h3>Localisation</h3>
+                <LocationMap point={mapPoint} />
+                {f.ville && <p className="dc-aside-loc">◍ {f.ville}</p>}
+              </div>
+            )}
+
+            {/* Bénéfices */}
+            {benefices.length > 0 && (
+              <div className="dc-aside-block">
+                <h3>Ce que cela vous apporte</h3>
+                <ul className="dc-benefits">
+                  {benefices.map((b, i) => (
+                    <li key={i}>
+                      <strong>{b.titre}</strong>
+                      <span>{b.texte}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <a className="btn btn-primary dc-aside-cta" href="/offres">Découvrir nos offres dédiées</a>
+          </aside>
         </div>
       </section>
     </main>

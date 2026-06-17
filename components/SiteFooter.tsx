@@ -35,11 +35,28 @@ export async function SiteFooter() {
             <h4>Le site</h4>
             <ul>
               <li><a href="/datacenters">Notre réseau</a></li>
+              <li><a href="/offres">Nos offres</a></li>
               <li><a href="/#services">Nos services</a></li>
               <li><a href="/#engagements">Nos engagements</a></li>
               <li><a href="/#actualites">Actualités</a></li>
               <li><a href="/#contact">Contact</a></li>
             </ul>
+            <a
+              className="footer-portal"
+              href={process.env.NEXT_PUBLIC_PORTAL_URL || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Portail Client — ouvre dans un nouvel onglet"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              <span>Portail Client</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M7 17L17 7M9 7h8v8" />
+              </svg>
+            </a>
           </div>
 
           {/* Légal */}
