@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Jost } from 'next/font/google';
-import { Logo } from '@/components/Logo';
+
+import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { LangSwitcher } from '@/components/LangSwitcher';
 import './globals.css';
 
 const jost = Jost({
@@ -12,27 +12,40 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: 'Nation Data Center — Hébergement souverain & responsable',
+  metadataBase: new URL('https://www.nationdc.fr'),
+  title: {
+    default: 'Nation Data Center — Hébergement souverain & responsable',
+    template: '%s | Nation Data Center',
+  },
   description:
     'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
+  keywords: [
+    'data center France', 'hébergement souverain', 'colocation datacenter',
+    'data center écoresponsable', 'hébergement données France', 'Tier III', 'NDC',
+  ],
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+    siteName: 'Nation Data Center',
+    title: 'Nation Data Center — Hébergement souverain & responsable',
+    description:
+      'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
+    images: [{ url: '/hero-datacenter.jpg', width: 1200, height: 630, alt: 'Nation Data Center' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nation Data Center — Hébergement souverain & responsable',
+    description: 'Un réseau de data centers français, souverains et écoresponsables.',
+    images: ['/hero-datacenter.jpg'],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={jost.variable}>
       <body>
-        <header className="site-header">
-          <div className="container inner">
-            <a href="/"><Logo /></a>
-            <nav className="nav">
-              <a href="/datacenters">Notre réseau</a>
-              <a href="/#services">Nos services</a>
-              <a href="/">Qui sommes-nous</a>
-              <a href="/#contact">Contact</a>
-              <LangSwitcher />
-            </nav>
-          </div>
-        </header>
+        <SiteHeader />
 
         {children}
 
