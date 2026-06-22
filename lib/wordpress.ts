@@ -4,6 +4,11 @@ import { PERSONAS, type Persona } from './personas';
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_ENDPOINT;
 
+/** Log toujours l'erreur WordPress (y compris en production) pour le diagnostic via les logs Vercel. */
+function logWpError(label: string, error: unknown) {
+  console.error(`[NDC] API injoignable — données d'exemple (${label}) :`, error instanceof Error ? error.message : error);
+}
+
 // --- Types -----------------------------------------------------------------
 export type Kpi = { label: string; valeur: string; unite: string };
 export type Caracteristique = { categorie: string; intitule: string; detail: string };
@@ -210,7 +215,7 @@ export async function getDatacenters(): Promise<Datacenter[]> {
     const data = await client.request<{ datacenters: { nodes: Datacenter[] } }>(DATACENTERS_QUERY);
     return data.datacenters.nodes;
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (datacenters).');
+    logWpError('datacenters', error);
     return sampleDatacenters;
   }
 }
@@ -224,7 +229,7 @@ export async function getDatacenter(slug: string): Promise<Datacenter | null> {
     const data = await client.request<{ datacenter: Datacenter | null }>(DATACENTER_BY_SLUG_QUERY, { slug });
     return data.datacenter;
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (datacenter).');
+    logWpError('datacenter', error);
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
   }
 }
@@ -240,7 +245,7 @@ export async function getRecentPosts(): Promise<Post[]> {
     const data = await client.request<{ posts: { nodes: Post[] } }>(RECENT_POSTS_QUERY);
     return data.posts.nodes.map((n) => ({ ...n, title: decodeEntities(n.title) }));
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (articles).');
+    logWpError('articles', error);
     const { samplePosts } = await import('./sample-data');
     return samplePosts;
   }
@@ -264,7 +269,7 @@ export async function getAllPosts(): Promise<WPPost[]> {
       author: n.articleFields?.auteur ? { node: { name: n.articleFields.auteur } } : n.author,
     }));
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (tous les articles).');
+    logWpError('tous les articles', error);
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts;
   }
@@ -288,7 +293,7 @@ export async function getPostBySlug(slug: string): Promise<WPPost | null> {
       author: data.post.articleFields?.auteur ? { node: { name: data.post.articleFields.auteur } } : data.post.author,
     };
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (article).');
+    logWpError('article', error);
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts.find((p) => p.slug === slug) ?? null;
   }
@@ -304,7 +309,7 @@ export async function getCategories(): Promise<WPCategory[]> {
     const data = await client.request<{ categories: { nodes: WPCategory[] } }>(CATEGORIES_QUERY);
     return data.categories.nodes.filter((c) => c.count > 0);
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (catégories).');
+    logWpError('catégories', error);
     const { sampleCategories } = await import('./sample-data');
     return sampleCategories;
   }
@@ -323,7 +328,7 @@ export async function getFaqs(): Promise<Faq[]> {
     }>(FAQS_QUERY);
     return data.faqs.nodes.map((n) => ({ question: n.title, reponse: n.faqFields?.reponse ?? '' }));
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable — données d\'exemple (FAQ).');
+    logWpError('FAQ', error);
     const { sampleFaqs } = await import('./sample-data');
     return sampleFaqs;
   }
@@ -347,7 +352,7 @@ export async function getPage(slug: string): Promise<CustomPage | null> {
         : null,
     };
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn('[NDC] API injoignable (page).');
+    logWpError('page', error);
     return null;
   }
 }
@@ -612,12 +617,7 @@ export async function getPersonas(): Promise<Persona[]> {
     if (nodes.length === 0) return PERSONAS;
     return nodes.map(mapWpPersona);
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(
-        "[NDC] API injoignable — données d'exemple (personas) :",
-        error instanceof Error ? error.message : error
-      );
-    }
+    logWpError('personas', error);
     return PERSONAS;
   }
 }
@@ -690,7 +690,7 @@ export async function getCertifications(): Promise<Certification[]> {
         : null,
     }));
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (certifications).");
+    logWpError('certifications', error);
     const { sampleCertifications } = await import('./sample-data');
     return sampleCertifications;
   }
@@ -780,7 +780,7 @@ export async function getMembres(): Promise<Membre[]> {
         : null,
     }));
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (équipe).");
+    logWpError('équipe', error);
     const { sampleMembres } = await import('./sample-data');
     return sampleMembres;
   }
@@ -859,7 +859,7 @@ export async function getGroupe(): Promise<Groupe> {
       timeline: (f.timeline ?? []).map((t) => ({ annee: t.annee ?? '', evenement: t.evenement ?? '' })),
     };
   } catch (error) {
-    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (groupe).");
+    logWpError('groupe', error);
     return sampleGroupe;
   }
 }
