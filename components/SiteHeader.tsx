@@ -8,8 +8,9 @@ import { LangSwitcher } from '@/components/LangSwitcher';
 const NAV = [
   { href: '/datacenters', label: 'Notre réseau' },
   { href: '/offres', label: 'Nos offres' },
-  { href: '/#services', label: 'Nos services' },
-  { href: '/#faq', label: 'FAQ' },
+  { href: '/certifications', label: 'Certifications' },
+  { href: '/equipes', label: 'Nos équipes' },
+  { href: '/groupe', label: 'Le groupe' },
   { href: '/actualites', label: 'Actualités' },
   { href: '/contact', label: 'Contact' },
 ];

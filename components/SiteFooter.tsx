@@ -39,7 +39,7 @@ export async function SiteFooter() {
               <li><a href="/#services">Nos services</a></li>
               <li><a href="/#engagements">Nos engagements</a></li>
               <li><a href="/#actualites">Actualités</a></li>
-              <li><a href="/#contact">Contact</a></li>
+              <li><a href="/contact">Contact</a></li>
             </ul>
             <a
               className="footer-portal"

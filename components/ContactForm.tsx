@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { sendLead } from '@/lib/send-lead';
 
 type FormData = {
   prenom: string;
@@ -59,14 +60,21 @@ export function ContactForm() {
     if (!validate()) return;
     setStatus('sending');
 
-    // TODO : POST vers /api/contact → Monday / Brevo / email
-    // Simule un envoi réseau
-    try {
-      await new Promise((r) => setTimeout(r, 1200));
-      console.log('[NDC] Contact form submitted:', form);
+    const ok = await sendLead({
+      type: 'contact',
+      email: form.email,
+      prenom: form.prenom,
+      nom: form.nom,
+      telephone: form.telephone,
+      entreprise: form.entreprise,
+      objet: form.objet,
+      message: form.message,
+    });
+
+    if (ok) {
       setStatus('done');
       setForm(INITIAL);
-    } catch {
+    } else {
       setStatus('error');
     }
   }

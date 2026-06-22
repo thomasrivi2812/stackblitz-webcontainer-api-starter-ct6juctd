@@ -68,7 +68,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
             <h1 className="fil-rouge">{highlight(persona.h1, persona.accentWord)}</h1>
             <p className="op-lead">{persona.lead}</p>
             <div className="op-cta-row">
-              <a className="op-btn-primary" href="/#contact">{persona.ctaPrimary} →</a>
+              <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
               <a className="op-btn-ghost" href="/datacenters">Voir nos sites</a>
             </div>
             <div className="op-proofs">
@@ -176,7 +176,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
           <h2 className="fil-rouge">Parlons de votre projet d’hébergement</h2>
           <p className="op-final-lead">Nos équipes étudient votre besoin et vous proposent une réponse sur mesure.</p>
           <div className="op-cta-row">
-            <a className="op-btn-primary" href="/#contact">{persona.ctaPrimary} →</a>
+            <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
             <a className="op-btn-ghost" href="/datacenters">Découvrir nos data centers</a>
           </div>
         </div>

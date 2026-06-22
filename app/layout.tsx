@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
   keywords: [
     'data center France', 'hébergement souverain', 'colocation datacenter',
-    'data center écoresponsable', 'hébergement données France', 'Tier III', 'NDC',
+    'data center écoresponsable', 'hébergement données France', 'Tier 3', 'NDC',
   ],
   openGraph: {
     type: 'website',
@@ -39,6 +39,10 @@ export const metadata: Metadata = {
     images: ['/hero-datacenter.jpg'],
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    shortcut: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

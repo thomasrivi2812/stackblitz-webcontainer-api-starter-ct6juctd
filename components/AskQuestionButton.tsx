@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { sendLead } from '@/lib/send-lead';
 
 // Bouton « Poser votre question » → modale (email + question).
 // L'email/question sont captés côté client ; l'envoi vers le CRM se fera via une route serveur.
@@ -29,7 +30,9 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
     setTimeout(() => { setDone(false); setError(''); }, 200);
   }
 
-  function submit() {
+  const [sending, setSending] = useState(false);
+
+  async function submit() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Merci de saisir une adresse e-mail valide.');
       return;
@@ -39,9 +42,14 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
       return;
     }
     setError('');
-    // TODO (étape CRM) : POST { email, question } vers /api/question → Monday/Brevo.
-    console.log('[NDC] Question posée :', { email, question });
-    setDone(true);
+    setSending(true);
+    const ok = await sendLead({ type: 'question', email, message: question });
+    setSending(false);
+    if (ok) {
+      setDone(true);
+    } else {
+      setError('Une erreur est survenue. Merci de réessayer.');
+    }
   }
 
   return (
@@ -73,7 +81,7 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
 
                 {error && <p className="aq-error">{error}</p>}
 
-                <button type="button" className="aq-submit" onClick={submit}>Envoyer ma question</button>
+                <button type="button" className="aq-submit" onClick={submit} disabled={sending}>{sending ? 'Envoi…' : 'Envoyer ma question'}</button>
               </>
             ) : (
               <div className="aq-done">

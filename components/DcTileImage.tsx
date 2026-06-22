@@ -2,14 +2,24 @@
 
 import { useState } from 'react';
 
-// Image d'une tuile data center avec repli automatique sur public/hero-datacenter.jpg
-// si l'image spécifique au site (dc-{slug}.jpg) n'existe pas.
+// Image d'une tuile data center.
+// Priorité : image mise en avant WordPress (imageUrl) → sinon image locale
+// public/dc-{slug}.jpg si déposée manuellement → sinon repli générique
+// public/hero-datacenter.jpg.
 // Composant client minimal pour éviter de passer toute la home en client.
 
 const GENERIC = '/hero-datacenter.jpg';
 
-export function DcTileImage({ slug, title }: { slug: string; title: string }) {
-  const [src, setSrc] = useState(`/dc-${slug}.jpg`);
+export function DcTileImage({
+  slug,
+  title,
+  imageUrl,
+}: {
+  slug: string;
+  title: string;
+  imageUrl?: string | null;
+}) {
+  const [src, setSrc] = useState(imageUrl || `/dc-${slug}.jpg`);
 
   return (
     <img
@@ -19,3 +29,4 @@ export function DcTileImage({ slug, title }: { slug: string; title: string }) {
     />
   );
 }
+

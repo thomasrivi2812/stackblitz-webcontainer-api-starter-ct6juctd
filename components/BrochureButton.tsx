@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { sendLead } from '@/lib/send-lead';
 
 // Bouton « Télécharger la brochure » → vraie popup modale (centrée, fond assombri).
 // Les styles sont ENCAPSULÉS dans le composant pour ne pas dépendre de globals.css.
@@ -42,8 +43,8 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
       return;
     }
     setError('');
-    // TODO (étape CRM) : POST { email } vers /api/lead → Monday/Brevo.
-    console.log('[NDC] Lead brochure capté :', email);
+    // Enregistre le lead (sans bloquer le téléchargement si l'API est indisponible).
+    void sendLead({ type: 'brochure', email, ressource: 'Brochure NDC' });
     const a = document.createElement('a');
     a.href = PDF_URL;
     a.download = 'Brochure-Nation-Data-Center.pdf';

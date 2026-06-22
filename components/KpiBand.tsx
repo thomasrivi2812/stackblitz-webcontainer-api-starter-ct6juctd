@@ -10,9 +10,11 @@ type Kpi = {
 
 type Props = {
   kpis: Kpi[];
+  title?: string;
+  meta?: string;
 };
 
-export function KpiBand({ kpis }: Props) {
+export function KpiBand({ kpis, title = 'Le réseau en chiffres', meta: metaProp }: Props) {
   function getDuration(k: Kpi): number {
     const cleaned = k.valeur.replace(/\s/g, '').replace(',', '.');
     const num = parseFloat(cleaned);
@@ -24,14 +26,14 @@ export function KpiBand({ kpis }: Props) {
 
   // Date courante au format "MM.YYYY" pour le bandeau "Données réseau · mise à jour ..."
   const now = new Date();
-  const meta = `Données réseau · mise à jour ${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+  const meta = metaProp ?? `Données réseau · mise à jour ${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
 
   return (
     <section className="kpi-band">
       <div className="kpi-band-glow" aria-hidden="true" />
       <div className="container">
         <div className="kpi-band-head">
-          <span className="kpi-overline"><span className="dash" />Le réseau en chiffres</span>
+          <span className="kpi-overline"><span className="dash" />{title}</span>
           <span className="kpi-meta">{meta}</span>
         </div>
         <div className="kpi-grid">

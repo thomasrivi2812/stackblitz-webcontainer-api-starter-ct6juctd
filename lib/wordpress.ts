@@ -12,8 +12,10 @@ export type Benefice = { titre: string; texte: string };
 export type Datacenter = {
   title: string;
   slug: string;
+  featuredImage?: { node: { sourceUrl: string; altText: string } } | null;
   datacenterFields: {
     ville: string | null;
+    region?: string | null;
     statut: string[] | string | null;
     accroche: string | null;
     latitude?: number | null;
@@ -23,7 +25,7 @@ export type Datacenter = {
     kpis?: Kpi[] | null;
     caracteristiques?: Caracteristique[] | null;
     benefices?: Benefice[] | null;
-    document: { url: string; titre: string } | null
+    document?: { url: string; titre: string } | null
   };
 };
 
@@ -68,12 +70,14 @@ export type CustomPage = {
 // --- Requêtes Datacenters --------------------------------------------------
 const DATACENTERS_QUERY = gql`
   query Datacenters {
-    datacenters(first: 100) {
+    datacenters(first: 100, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         slug
+        featuredImage { node { sourceUrl altText } }
         datacenterFields {
           ville
+          region
           statut
           accroche
           latitude
@@ -90,8 +94,10 @@ const DATACENTER_BY_SLUG_QUERY = gql`
     datacenter(id: $slug, idType: SLUG) {
       title
       slug
+      featuredImage { node { sourceUrl altText } }
       datacenterFields {
         ville
+        region
         statut
         accroche
         latitude
@@ -451,12 +457,58 @@ const PERSONAS_QUERY = gql`
   }
 `;
 
+// Normalise la valeur d'accent renvoyée par ACF (quelle que soit sa forme)
+// vers un hex « #rrggbb » utilisable en CSS. Gère :
+//   - string hex  : "#1E7BF5", "1E7BF5", "#abc"
+//   - string rgb  : "rgb(30,123,245)" / "rgba(30,123,245,1)"
+//   - tableau     : [30,123,245] (return format ACF « rgba »)
+//   - objet       : { red, green, blue } / { r, g, b } / { hex }
+// Retourne null si rien d'exploitable → l'appelant choisit alors un fallback.
+function normalizeAccent(raw: unknown): string | null {
+  const toHex = (r: number, g: number, b: number) =>
+    '#' +
+    [r, g, b]
+      .map((n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0'))
+      .join('');
+
+  if (typeof raw === 'string') {
+    const s = raw.trim();
+    if (/^#?[0-9a-fA-F]{6}$/.test(s)) return '#' + s.replace('#', '');
+    if (/^#?[0-9a-fA-F]{3}$/.test(s)) {
+      const h = s.replace('#', '');
+      return '#' + h.split('').map((c) => c + c).join('');
+    }
+    const m = s.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (m) return toHex(+m[1], +m[2], +m[3]);
+    return null;
+  }
+  if (Array.isArray(raw)) {
+    // [r,g,b] numérique (return format ACF « rgba »)
+    if (raw.length >= 3 && [raw[0], raw[1], raw[2]].every((n) => typeof n === 'number')) {
+      return toHex(raw[0], raw[1], raw[2]);
+    }
+    // ["#F5820D"] : WPGraphQL expose le color picker comme tableau à 1 élément
+    if (raw.length >= 1) return normalizeAccent(raw[0]);
+  }
+  if (raw && typeof raw === 'object') {
+    const o = raw as Record<string, unknown>;
+    if (typeof o.hex === 'string') return normalizeAccent(o.hex);
+    const r = o.red ?? o.r;
+    const g = o.green ?? o.g;
+    const b = o.blue ?? o.b;
+    if ([r, g, b].every((n) => typeof n === 'number')) return toHex(r as number, g as number, b as number);
+  }
+  return null;
+}
+
 // Convertit un hex de charte (#1E7BF5) en rgba douce pour les fonds.
 // → accentSoft n'est JAMAIS éditable dans WP : on le dérive pour garantir
 //   qu'il reste toujours cohérent avec l'accent choisi.
 function hexToSoft(hex: string | null | undefined, alpha = 0.1): string {
   const fallback = `rgba(30,123,245,${alpha})`;
-  if (!hex) return fallback;
+  // ACF peut renvoyer autre chose qu'une string (objet couleur, number…) :
+  // on ne tente .replace que sur une vraie chaîne.
+  if (typeof hex !== 'string' || !hex) return fallback;
   const h = hex.replace('#', '').trim();
   if (h.length !== 6) return fallback;
   const r = parseInt(h.slice(0, 2), 16);
@@ -472,7 +524,7 @@ type WpPersonaNode = {
   slug: string | null;
   personaFields: {
     label: string | null;
-    accent: string | null;
+    accent: unknown; // ACF color : string hex, tableau rgba ou objet selon le réglage
     tag: string | null;
     h1: string | null;
     accentWords: string | null;
@@ -495,7 +547,18 @@ type WpPersonaNode = {
 // dérivation de accentSoft, parsing des mots à colorer.
 function mapWpPersona(node: WpPersonaNode): Persona {
   const f = node.personaFields;
-  const accent = f?.accent || '#1E7BF5';
+  // Palette de secours par profil : si WP ne renvoie pas de couleur d'accent
+  // (champ ACF vide), on garde des couleurs distinctes par slug plutôt que
+  // de tout afficher en bleu.
+  const ACCENT_BY_SLUG: Record<string, string> = {
+    dsi: '#1E7BF5',
+    pme: '#00C48C',
+    pub: '#7B5FF5',
+    tel: '#F5820D',
+  };
+  // 1) couleur WordPress si exploitable, 2) palette par profil, 3) bleu charte.
+  const accent =
+    normalizeAccent(f?.accent) || ACCENT_BY_SLUG[node.slug || ''] || '#1E7BF5';
   return {
     id: node.slug || 'persona',
     label: f?.label || node.title || 'Profil',
@@ -527,7 +590,7 @@ function mapWpPersona(node: WpPersonaNode): Persona {
     })),
     stats: (f?.stats ?? []).map((s) => ({ num: s.num || '', label: s.label || '' })),
     // Mots à colorer : champ texte WP « DSI, IT » → string[].
-    accentWord: (f?.accentWords || '')
+    accentWord: (typeof f?.accentWords === 'string' ? f.accentWords : '')
       .split(',')
       .map((w) => w.trim())
       .filter(Boolean),
@@ -536,27 +599,14 @@ function mapWpPersona(node: WpPersonaNode): Persona {
   };
 }
 
-// Requête GraphQL en GET « simple » : aucun en-tête déclencheur de préflight
-// (Accept est safelisted) → contourne le blocage CORS/OPTIONS de StackBlitz.
-// WPGraphQL accepte les queries en GET et renvoie déjà Access-Control-Allow-Origin: *.
-async function wpGet<T>(query: string): Promise<T> {
-  const url = `${endpoint}?query=${encodeURIComponent(query)}`;
-  const res = await fetch(url, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    cache: 'no-store', // données fraîches à chaque chargement pendant le dev
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = (await res.json()) as { data?: T; errors?: { message: string }[] };
-  if (json.errors?.length) throw new Error(json.errors.map((e) => e.message).join(' | '));
-  if (!json.data) throw new Error('Réponse GraphQL sans data');
-  return json.data;
-}
-
 export async function getPersonas(): Promise<Persona[]> {
   if (!endpoint) return PERSONAS;
   try {
-    const data = await wpGet<{ personas: { nodes: WpPersonaNode[] } }>(PERSONAS_QUERY);
+    // POST via GraphQLClient, comme toutes les autres requêtes du fichier.
+    // (Le GET « simple » échouait sur certains WPGraphQL qui n'acceptent pas
+    //  les queries en GET → « fetch failed ».)
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{ personas: { nodes: WpPersonaNode[] } }>(PERSONAS_QUERY);
     const nodes = data.personas?.nodes ?? [];
     // WP vide (CPT pas encore peuplé) → on garde la maquette de référence.
     if (nodes.length === 0) return PERSONAS;
@@ -569,5 +619,247 @@ export async function getPersonas(): Promise<Persona[]> {
       );
     }
     return PERSONAS;
+  }
+}
+
+// ===========================================================================
+// CERTIFICATIONS — CPT `certification` (titre = nom de la certif) ← NOUVEAU
+// ===========================================================================
+export type Certification = {
+  nom: string;            // = titre du post
+  categorie: string;      // securite | sante | souverainete | energie | qualite | conception
+  description: string;
+  garantie: string;
+  statut: string;         // conforme | en-cours | vise
+  souverainete: boolean;
+  logo?: { sourceUrl: string; altText: string } | null;
+};
+
+const CERTIFICATIONS_QUERY = gql`
+  query Certifications {
+    certifications(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+      nodes {
+        title
+        certificationFields {
+          categorie
+          description
+          garantie
+          statut
+          souverainete
+          logo { node { sourceUrl altText } }
+        }
+      }
+    }
+  }
+`;
+
+type WpCertificationNode = {
+  title: string | null;
+  certificationFields: {
+    categorie: string | null;
+    description: string | null;
+    garantie: string | null;
+    statut: string | null;
+    souverainete: boolean | null;
+    logo: { node: { sourceUrl: string; altText: string } | null } | null;
+  } | null;
+};
+
+export async function getCertifications(): Promise<Certification[]> {
+  if (!endpoint) {
+    const { sampleCertifications } = await import('./sample-data');
+    return sampleCertifications;
+  }
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{ certifications: { nodes: WpCertificationNode[] } }>(CERTIFICATIONS_QUERY);
+    const nodes = data.certifications?.nodes ?? [];
+    if (nodes.length === 0) {
+      const { sampleCertifications } = await import('./sample-data');
+      return sampleCertifications;
+    }
+    return nodes.map((n) => ({
+      nom: decodeEntities(n.title) || 'Certification',
+      categorie: n.certificationFields?.categorie ?? '',
+      description: n.certificationFields?.description ?? '',
+      garantie: n.certificationFields?.garantie ?? '',
+      statut: n.certificationFields?.statut ?? 'vise',
+      souverainete: Boolean(n.certificationFields?.souverainete),
+      logo: n.certificationFields?.logo?.node
+        ? { sourceUrl: n.certificationFields.logo.node.sourceUrl, altText: n.certificationFields.logo.node.altText ?? '' }
+        : null,
+    }));
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (certifications).");
+    const { sampleCertifications } = await import('./sample-data');
+    return sampleCertifications;
+  }
+}
+
+const CERTIF_CATEGORIE_LABELS: Record<string, string> = {
+  securite: 'Sécurité de l’information',
+  sante: 'Santé',
+  souverainete: 'Souveraineté',
+  energie: 'Énergie & environnement',
+  qualite: 'Qualité',
+  conception: 'Conception & Tier',
+};
+const CERTIF_STATUT_LABELS: Record<string, string> = {
+  conforme: 'Conforme',
+  'en-cours': 'En cours',
+  vise: 'Visé',
+};
+export function certifCategorieLabel(key: string): string {
+  return CERTIF_CATEGORIE_LABELS[key] ?? 'Certification';
+}
+export function certifStatutInfo(statut: string): { key: string; label: string } {
+  return { key: statut || 'vise', label: CERTIF_STATUT_LABELS[statut] ?? 'Visé' };
+}
+
+// ===========================================================================
+// ÉQUIPE — CPT `membre` (titre = nom ; photo = featuredImage) ← NOUVEAU
+// ===========================================================================
+export type Membre = {
+  nom: string;            // = titre du post
+  poste: string;
+  pole: string;           // direction | technique | commercial | exploitation | support
+  bio: string;
+  linkedin: string | null;
+  photo: { sourceUrl: string; altText: string } | null;
+};
+
+const MEMBRES_QUERY = gql`
+  query Membres {
+    membres(first: 100, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+      nodes {
+        title
+        featuredImage { node { sourceUrl altText } }
+        membreFields {
+          poste
+          pole
+          bio
+          linkedin
+        }
+      }
+    }
+  }
+`;
+
+type WpMembreNode = {
+  title: string | null;
+  featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
+  membreFields: {
+    poste: string | null;
+    pole: string | null;
+    bio: string | null;
+    linkedin: string | null;
+  } | null;
+};
+
+export async function getMembres(): Promise<Membre[]> {
+  if (!endpoint) {
+    const { sampleMembres } = await import('./sample-data');
+    return sampleMembres;
+  }
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{ membres: { nodes: WpMembreNode[] } }>(MEMBRES_QUERY);
+    const nodes = data.membres?.nodes ?? [];
+    if (nodes.length === 0) {
+      const { sampleMembres } = await import('./sample-data');
+      return sampleMembres;
+    }
+    return nodes.map((n) => ({
+      nom: decodeEntities(n.title) || 'Membre',
+      poste: n.membreFields?.poste ?? '',
+      pole: n.membreFields?.pole ?? 'support',
+      bio: n.membreFields?.bio ?? '',
+      linkedin: n.membreFields?.linkedin ?? null,
+      photo: n.featuredImage?.node
+        ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
+        : null,
+    }));
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (équipe).");
+    const { sampleMembres } = await import('./sample-data');
+    return sampleMembres;
+  }
+}
+
+export const POLE_LABELS: Record<string, string> = {
+  direction: 'Direction',
+  technique: 'Technique & Ingénierie',
+  commercial: 'Commercial & Marketing',
+  exploitation: 'Exploitation & Sécurité',
+  support: 'Support & Fonctions transverses',
+};
+// Ordre d'affichage des pôles sur la page Équipes.
+export const POLE_ORDER = ['direction', 'technique', 'exploitation', 'commercial', 'support'];
+
+// ===========================================================================
+// GROUPE ALTAREA — champs ACF sur la Page de slug « groupe » ← NOUVEAU
+// ===========================================================================
+export type GroupeChiffre = { valeur: string; unite: string; label: string };
+export type GroupeValeur = { titre: string; texte: string };
+export type GroupeJalon = { annee: string; evenement: string };
+export type Groupe = {
+  introTitre: string;
+  introTexte: string;
+  chiffres: GroupeChiffre[];
+  valeurs: GroupeValeur[];
+  articulationTitre: string;
+  articulationTexte: string;
+  timeline: GroupeJalon[];
+};
+
+const GROUPE_QUERY = gql`
+  query GroupePage {
+    pages(first: 1, where: { name: "groupe" }) {
+      nodes {
+        groupeFields {
+          introTitre
+          introTexte
+          chiffres { valeur unite label }
+          valeurs { titre texte }
+          articulationTitre
+          articulationTexte
+          timeline { annee evenement }
+        }
+      }
+    }
+  }
+`;
+
+type WpGroupeFields = {
+  introTitre: string | null;
+  introTexte: string | null;
+  chiffres: { valeur: string | null; unite: string | null; label: string | null }[] | null;
+  valeurs: { titre: string | null; texte: string | null }[] | null;
+  articulationTitre: string | null;
+  articulationTexte: string | null;
+  timeline: { annee: string | null; evenement: string | null }[] | null;
+};
+
+export async function getGroupe(): Promise<Groupe> {
+  const { sampleGroupe } = await import('./sample-data');
+  if (!endpoint) return sampleGroupe;
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{ pages: { nodes: { groupeFields: WpGroupeFields | null }[] } }>(GROUPE_QUERY);
+    const f = data.pages?.nodes?.[0]?.groupeFields;
+    // Page « groupe » absente ou champs vides → contenu de référence.
+    if (!f || (!f.introTexte && !(f.chiffres?.length))) return sampleGroupe;
+    return {
+      introTitre: f.introTitre || sampleGroupe.introTitre,
+      introTexte: f.introTexte || sampleGroupe.introTexte,
+      chiffres: (f.chiffres ?? []).map((c) => ({ valeur: c.valeur ?? '', unite: c.unite ?? '', label: c.label ?? '' })),
+      valeurs: (f.valeurs ?? []).map((v) => ({ titre: v.titre ?? '', texte: v.texte ?? '' })),
+      articulationTitre: f.articulationTitre || sampleGroupe.articulationTitre,
+      articulationTexte: f.articulationTexte || sampleGroupe.articulationTexte,
+      timeline: (f.timeline ?? []).map((t) => ({ annee: t.annee ?? '', evenement: t.evenement ?? '' })),
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') console.warn("[NDC] API injoignable — données d'exemple (groupe).");
+    return sampleGroupe;
   }
 }

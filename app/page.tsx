@@ -9,7 +9,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Nation Data Center — Hébergement souverain & responsable',
   description:
-    'Réseau de data centers français, souverains et écoresponsables (Tier III, PUE 1,2, zéro eau). Colocation, haute densité et services de proximité pour vos enjeux IT critiques.',
+    'Réseau de data centers français, souverains et écoresponsables (Tier 3, PUE 1,2, zéro eau). Colocation, haute densité et services de proximité pour vos enjeux IT critiques.',
   alternates: { canonical: '/' },
 };
 
@@ -24,6 +24,7 @@ import {
 } from '@/lib/wordpress';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 /* ------------------------------- Icônes ------------------------------- */
 function Icon({ name }: { name: string }) {
@@ -181,7 +182,7 @@ export default async function Home() {
               return (
                 <a className="dc-tile" key={dc.slug} href={`/datacenters/${dc.slug}`}>
                   <div className="dc-tile-media">
-                    <DcTileImage slug={dc.slug} title={dc.title} />
+                    <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
                     <span className={`dc-tile-status ${key}`}><span className="bar" />{label}</span>
                   </div>
                   <div className="dc-tile-body">
@@ -194,8 +195,8 @@ export default async function Home() {
                         <li><span>Puissance</span><strong>{dc.datacenterFields.puissance}</strong></li>
                       )}
                       <li><span>Statut</span><strong>{label}</strong></li>
-                      {dc.datacenterFields.ville && (
-                        <li><span>Région</span><strong>{dc.datacenterFields.ville}</strong></li>
+                      {dc.datacenterFields.region && (
+                        <li><span>Région</span><strong>{dc.datacenterFields.region}</strong></li>
                       )}
                     </ul>
                   </div>

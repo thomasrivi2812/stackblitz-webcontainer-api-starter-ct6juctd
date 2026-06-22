@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { sendLead } from '@/lib/send-lead';
 
 type Props = {
   url: string;
@@ -54,7 +55,7 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
       return;
     }
     setError('');
-    console.log('[NDC] Download lead :', { email, title, url });
+    void sendLead({ type: 'download', email, ressource: title });
     const link = document.createElement('a');
     link.href = url;
     link.download = '';

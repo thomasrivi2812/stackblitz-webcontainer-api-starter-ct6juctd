@@ -2,9 +2,11 @@ import { getDatacenter, getDatacenters, statutInfo, toMapPoints } from '@/lib/wo
 import { notFound } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
+import { KpiBand } from '@/components/KpiBand';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const dc = await getDatacenter(params.slug);
@@ -65,29 +67,15 @@ export default async function DatacenterDetail({ params }: { params: { slug: str
             {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
             <div className="dc-hero-cta">
               <a className="btn btn-primary" href="/offres">Découvrir nos offres dédiées</a>
-              <a className="btn btn-ghost" href="/#contact">Demander une visite</a>
+              <a className="btn btn-ghost" href="/contact">Demander une visite</a>
             </div>
           </div>
-          <DcPhoto slug={dc.slug} title={dc.title} />
+          <DcPhoto slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
         </div>
       </section>
 
       {/* KPI */}
-      {kpis.length > 0 && (
-        <section className="kpi-band">
-          <div className="container kpi-grid">
-            {kpis.map((k, i) => (
-              <div className="kpi" key={i}>
-                <div className="kpi-val">
-                  {k.valeur}
-                  {k.unite && <span className="kpi-unit"> {k.unite}</span>}
-                </div>
-                <div className="kpi-label">{k.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      {kpis.length > 0 && <KpiBand kpis={kpis} title="Le site en chiffres" meta={dc.title} />}
 
       {/* CORPS : présentation + caractéristiques / aside bénéfices + carte */}
       <section className="section">

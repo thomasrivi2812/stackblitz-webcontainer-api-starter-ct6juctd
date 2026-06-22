@@ -2,6 +2,7 @@ import type { Datacenter } from './wordpress';
 import type { Post } from './wordpress';
 import type { WPPost, WPCategory } from './wordpress';
 import type { Faq } from './wordpress';
+import type { Certification, Membre, Groupe } from './wordpress';
 
 // Données d'exemple enrichies : utilisées tant que WORDPRESS_GRAPHQL_ENDPOINT n'est pas défini.
 export const sampleDatacenters: Datacenter[] = [
@@ -10,6 +11,7 @@ export const sampleDatacenters: Datacenter[] = [
     slug: 'rennes-1',
     datacenterFields: {
       ville: 'Rennes',
+      region: 'Bretagne',
       statut: ['livre'],
       latitude: 48.117,
       longitude: -1.677,
@@ -42,6 +44,7 @@ export const sampleDatacenters: Datacenter[] = [
     slug: 'velizy',
     datacenterFields: {
       ville: 'Vélizy-Villacoublay',
+      region: 'Île-de-France',
       statut: ['construction'],
       latitude: 48.783,
       longitude: 2.196,
@@ -67,6 +70,7 @@ export const sampleDatacenters: Datacenter[] = [
     slug: 'normandie',
     datacenterFields: {
       ville: 'Rouen',
+      region: 'Normandie',
       statut: ['avenir'],
       latitude: 49.443,
       longitude: 1.099,
@@ -83,6 +87,7 @@ export const sampleDatacenters: Datacenter[] = [
     slug: 'lyon-est',
     datacenterFields: {
       ville: 'Lyon',
+      region: 'Auvergne-Rhône-Alpes',
       statut: ['avenir'],
       latitude: 45.764,
       longitude: 4.835,
@@ -301,3 +306,143 @@ export const sampleFaqs: Faq[] = [
   { question: 'Quel est le PUE de vos data centers ?', reponse: 'PUE cible de 1,2 grâce au free cooling et à une conception écoresponsable. Zéro consommation d’eau, chaleur fatale valorisée via réseau de chaleur urbain.' },
   { question: 'Comment demander un devis ?', reponse: 'Remplissez le formulaire de contact ou contactez-nous directement. Réponse sous 24 heures, sans engagement.' },
 ];
+
+// --- Certifications (LISTE TYPE À CONFIRMER avec les vraies certifs NDC) ----
+export const sampleCertifications: Certification[] = [
+  {
+    nom: 'ISO 27001',
+    categorie: 'securite',
+    description: 'Norme internationale de référence pour le management de la sécurité de l’information (SMSI).',
+    garantie: 'Gestion rigoureuse des risques, confidentialité, intégrité et disponibilité de vos données.',
+    statut: 'vise',
+    souverainete: false,
+    logo: null,
+  },
+  {
+    nom: 'HDS — Hébergement de Données de Santé',
+    categorie: 'sante',
+    description: 'Certification française obligatoire pour héberger des données de santé à caractère personnel.',
+    garantie: 'Hébergement conforme au référentiel HDS, sous juridiction française, pour les acteurs de la santé.',
+    statut: 'vise',
+    souverainete: true,
+    logo: null,
+  },
+  {
+    nom: 'SecNumCloud',
+    categorie: 'souverainete',
+    description: 'Visa de sécurité de l’ANSSI qualifiant les offres cloud de confiance, immunes aux lois extraterritoriales.',
+    garantie: 'Souveraineté juridique et technique : vos données restent hors de portée du Cloud Act et de FISA.',
+    statut: 'vise',
+    souverainete: true,
+    logo: null,
+  },
+  {
+    nom: 'ISO 50001',
+    categorie: 'energie',
+    description: 'Norme de management de l’énergie pour optimiser en continu la performance énergétique.',
+    garantie: 'Pilotage de l’efficacité énergétique, PUE maîtrisé et réduction de l’empreinte carbone.',
+    statut: 'vise',
+    souverainete: false,
+    logo: null,
+  },
+  {
+    nom: 'ISO 14001',
+    categorie: 'energie',
+    description: 'Norme internationale de management environnemental.',
+    garantie: 'Maîtrise des impacts environnementaux : eau, énergie, valorisation de la chaleur fatale.',
+    statut: 'vise',
+    souverainete: false,
+    logo: null,
+  },
+  {
+    nom: 'ISO 9001',
+    categorie: 'qualite',
+    description: 'Norme de management de la qualité orientée satisfaction client et amélioration continue.',
+    garantie: 'Processus maîtrisés et engagement de qualité de service sur l’ensemble des prestations.',
+    statut: 'vise',
+    souverainete: false,
+    logo: null,
+  },
+  {
+    nom: 'PCI-DSS',
+    categorie: 'securite',
+    description: 'Standard de sécurité des données pour les environnements traitant des paiements par carte.',
+    garantie: 'Niveau de sécurité requis pour héberger des applications financières et de paiement.',
+    statut: 'vise',
+    souverainete: false,
+    logo: null,
+  },
+  {
+    nom: 'Tier III / EN 50600',
+    categorie: 'conception',
+    description: 'Conception data center maintenable sans interruption (Uptime Institute / norme européenne EN 50600).',
+    garantie: 'Disponibilité de 99,982 %, redondance N+1 et maintenance concurrente sans coupure de service.',
+    statut: 'conforme',
+    souverainete: false,
+    logo: null,
+  },
+];
+
+// --- Équipe (exemple — à remplacer par les vrais membres dans WordPress) ----
+export const sampleMembres: Membre[] = [
+  {
+    nom: 'Direction Générale',
+    poste: 'Direction générale',
+    pole: 'direction',
+    bio: 'Pilote la stratégie de Nation Data Center et le déploiement du réseau souverain à horizon 2030.',
+    linkedin: null,
+    photo: null,
+  },
+  {
+    nom: 'Direction Technique',
+    poste: 'Directeur·rice technique',
+    pole: 'technique',
+    bio: 'Conçoit des infrastructures Tier III écoresponsables : électricité, refroidissement, connectivité.',
+    linkedin: null,
+    photo: null,
+  },
+  {
+    nom: 'Exploitation & Sécurité',
+    poste: 'Responsable exploitation',
+    pole: 'exploitation',
+    bio: 'Garantit la disponibilité, la supervision 24/7 et la sécurité physique des sites.',
+    linkedin: null,
+    photo: null,
+  },
+  {
+    nom: 'Direction Commerciale',
+    poste: 'Directeur·rice commercial·e',
+    pole: 'commercial',
+    bio: 'Accompagne les organisations dans leurs projets d’hébergement souverain et de colocation.',
+    linkedin: null,
+    photo: null,
+  },
+];
+
+// --- Groupe Altarea (contenu éditorial de référence) ------------------------
+export const sampleGroupe: Groupe = {
+  introTitre: 'Nation Data Center, une filiale du Groupe Altarea',
+  introTexte:
+    'Nation Data Center est une filiale à 100 % du Groupe Altarea, leader français de la transformation urbaine bas carbone. Cet adossement à un acteur industriel de premier plan donne à NDC la solidité financière, l’expertise foncière et l’ancrage territorial nécessaires pour bâtir un réseau de data centers souverains et écoresponsables sur l’ensemble du territoire national.',
+  chiffres: [
+    { valeur: '3', unite: 'Md€', label: 'de chiffre d’affaires' },
+    { valeur: '1 700', unite: '', label: 'collaborateurs' },
+    { valeur: '1994', unite: '', label: 'année de création' },
+    { valeur: '100', unite: '%', label: 'capital français' },
+  ],
+  valeurs: [
+    { titre: 'Ancrage territorial', texte: 'Une présence nationale et une connaissance fine des territoires pour implanter nos sites au plus près des besoins.' },
+    { titre: 'Bas carbone', texte: 'La transformation urbaine décarbonée au cœur de l’ADN du groupe, prolongée par des data centers écoresponsables.' },
+    { titre: 'Solidité financière', texte: 'Un actionnariat industriel solide et engagé sur le long terme, au service de projets critiques.' },
+    { titre: 'Souveraineté', texte: 'Un capital 100 % français qui garantit l’indépendance juridique et technologique de nos infrastructures.' },
+  ],
+  articulationTitre: 'NDC ↔ Altarea : une cohérence souveraine',
+  articulationTexte:
+    'Là où Altarea transforme la ville de manière durable, Nation Data Center prolonge cette ambition dans le numérique : des infrastructures critiques conçues, financées et opérées en France, pour rendre aux organisations la maîtrise de leurs données. La même exigence environnementale, le même engagement bas carbone, la même souveraineté.',
+  timeline: [
+    { annee: '1994', evenement: 'Création du Groupe Altarea.' },
+    { annee: '2020', evenement: 'Renforcement de la stratégie bas carbone et de transformation urbaine.' },
+    { annee: '2024', evenement: 'Lancement de Nation Data Center, opérateur de data centers souverains.' },
+    { annee: '2030', evenement: 'Objectif d’un réseau de 15 sites Tier III écoresponsables en France.' },
+  ],
+};

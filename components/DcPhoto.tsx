@@ -3,14 +3,22 @@
 import { useState } from 'react';
 
 // Photo du data center.
-// Par défaut on affiche l'image générique d'infrastructure (public/hero-datacenter.jpg),
-// qui existe toujours. Si un jour tu déposes une photo spécifique par site
-// (public/dc-{slug}.jpg), elle sera utilisée en priorité ; sinon repli propre,
-// sans jamais afficher d'image cassée.
+// Priorité : image mise en avant WordPress (modifiable depuis l'admin WP) →
+// sinon image locale public/dc-{slug}.jpg si déposée manuellement →
+// sinon repli générique public/hero-datacenter.jpg, sans jamais afficher
+// d'image cassée.
 const GENERIC = '/hero-datacenter.jpg';
 
-export function DcPhoto({ slug, title }: { slug: string; title: string }) {
-  const [src, setSrc] = useState(`/dc-${slug}.jpg`);
+export function DcPhoto({
+  slug,
+  title,
+  imageUrl,
+}: {
+  slug: string;
+  title: string;
+  imageUrl?: string | null;
+}) {
+  const [src, setSrc] = useState(imageUrl || `/dc-${slug}.jpg`);
 
   return (
     <div className="dc-photo">
@@ -24,3 +32,4 @@ export function DcPhoto({ slug, title }: { slug: string; title: string }) {
     </div>
   );
 }
+
