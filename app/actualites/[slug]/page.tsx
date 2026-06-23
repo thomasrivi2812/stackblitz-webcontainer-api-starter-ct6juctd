@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Sidebar */}
             <aside className="article-sidebar">
               {/* ── Document à télécharger (modal email) ── */}
-              {post.document && (
+              {post.document?.url && (
                 <div className="article-download-card">
                   <div className="article-download-icon">
                     <Icon name="file" />

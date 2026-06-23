@@ -9,6 +9,23 @@ function logWpError(label: string, error: unknown) {
   console.error(`[NDC] API injoignable — données d'exemple (${label}) :`, error instanceof Error ? error.message : error);
 }
 
+/**
+ * Normalise le groupe ACF « document » : ACF renvoie TOUJOURS un objet
+ * { url: "", titre: "" } (jamais null) même quand le champ est vide.
+ * On ne considère le document présent que si son URL est réellement renseignée,
+ * sinon l'encart « Document à télécharger » s'afficherait sur tous les articles.
+ */
+function cleanDocument(doc?: { url: string | null; titre: string | null } | null): { url: string; titre: string } | null {
+  const url = (doc?.url ?? '').trim();
+  if (!url) return null;
+  return { url, titre: (doc?.titre ?? '').trim() };
+}
+
+/** Décode les noms de catégories/tags WP (renvoyés encodés en HTML par WPGraphQL). */
+function decodeTaxonomy(nodes?: { name: string; slug: string }[]): { name: string; slug: string }[] {
+  return (nodes ?? []).map((t) => ({ ...t, name: decodeEntities(t.name) }));
+}
+
 // --- Types -----------------------------------------------------------------
 export type Kpi = { label: string; valeur: string; unite: string };
 export type Caracteristique = { categorie: string; intitule: string; detail: string };
@@ -265,7 +282,9 @@ export async function getAllPosts(): Promise<WPPost[]> {
     return data.posts.nodes.map((n) => ({
       ...n,
       title: decodeEntities(n.title),
-      document: n.articleFields?.document ?? null,
+      categories: { nodes: decodeTaxonomy(n.categories?.nodes) },
+      tags: { nodes: decodeTaxonomy(n.tags?.nodes) },
+      document: cleanDocument(n.articleFields?.document),
       author: n.articleFields?.auteur ? { node: { name: n.articleFields.auteur } } : n.author,
     }));
   } catch (error) {
@@ -289,7 +308,9 @@ export async function getPostBySlug(slug: string): Promise<WPPost | null> {
     return {
       ...data.post,
       title: decodeEntities(data.post.title),
-      document: data.post.articleFields?.document ?? null,
+      categories: { nodes: decodeTaxonomy(data.post.categories?.nodes) },
+      tags: { nodes: decodeTaxonomy(data.post.tags?.nodes) },
+      document: cleanDocument(data.post.articleFields?.document),
       author: data.post.articleFields?.auteur ? { node: { name: data.post.articleFields.auteur } } : data.post.author,
     };
   } catch (error) {
@@ -307,7 +328,12 @@ export async function getCategories(): Promise<WPCategory[]> {
   try {
     const client = new GraphQLClient(endpoint);
     const data = await client.request<{ categories: { nodes: WPCategory[] } }>(CATEGORIES_QUERY);
-    return data.categories.nodes.filter((c) => c.count > 0);
+    return data.categories.nodes
+      // On garde les catégories qui contiennent au moins un article.
+      // (count peut être null selon la config WPGraphQL → on le borne à 0.)
+      .filter((c) => (c.count ?? 0) > 0)
+      // Les noms arrivent encodés en HTML (« Énergie & climat » → « &Eacute;… »).
+      .map((c) => ({ ...c, name: decodeEntities(c.name) }));
   } catch (error) {
     logWpError('catégories', error);
     const { sampleCategories } = await import('./sample-data');
