@@ -69,7 +69,7 @@ export default async function CertificationsPage() {
                       {c.description && <p className="certif-desc">{c.description}</p>}
                       {c.garantie && (
                         <p className="certif-garantie">
-                          <span>Ce que ça garantit</span>
+                          <span>Ce que cela garantit</span>
                           {c.garantie}
                         </p>
                       )}
