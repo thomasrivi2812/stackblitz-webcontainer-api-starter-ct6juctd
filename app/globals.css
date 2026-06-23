@@ -3341,8 +3341,8 @@ html {
 .nav-dd {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
+  left: 0;
+  transform: translateY(10px);
   min-width: 240px;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -3359,7 +3359,7 @@ html {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateX(-50%) translateY(8px);
+  transform: translateY(8px);
 }
 .nav-dd.wide { min-width: 380px; }
 /* Pont invisible pour ne pas perdre le survol dans l'espace link → panneau */

@@ -115,8 +115,7 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
                   <span aria-hidden="true">→</span>
                 </Link>
                 {offresChildren.map((c) => (
-                  <Link key={c.href} href={c.href} className="nav-dd-item row">
-                    <span className="nav-dd-dot" style={{ background: c.accent }} />
+                  <Link key={c.href} href={c.href} className="nav-dd-item">
                     <span className="nav-dd-name">{c.label}</span>
                   </Link>
                 ))}
@@ -187,7 +186,6 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
               </Link>
               {offresChildren.map((c) => (
                 <Link key={c.href} href={c.href} onClick={close}>
-                  <span className="nav-dd-dot" style={{ background: c.accent }} />
                   {c.label}
                 </Link>
               ))}
