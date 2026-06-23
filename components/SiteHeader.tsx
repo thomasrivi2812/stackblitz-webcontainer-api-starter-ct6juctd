@@ -124,6 +124,7 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
           </div>
 
           <Link href="/certifications" className="nav-link">Certifications</Link>
+          <Link href="/services" className="nav-link">Nos services</Link>
           <Link href="/equipes" className="nav-link">Nos équipes</Link>
           <Link href="/groupe" className="nav-link">Le groupe</Link>
           <Link href="/actualites" className="nav-link">Actualités</Link>
@@ -193,6 +194,7 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
           </div>
 
           <Link href="/certifications" onClick={close}>Certifications</Link>
+          <Link href="/services" onClick={close}>Nos services</Link>
           <Link href="/equipes" onClick={close}>Nos équipes</Link>
           <Link href="/groupe" onClick={close}>Le groupe</Link>
           <Link href="/actualites" onClick={close}>Actualités</Link>

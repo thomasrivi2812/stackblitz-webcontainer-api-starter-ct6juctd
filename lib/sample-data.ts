@@ -2,7 +2,7 @@ import type { Datacenter } from './wordpress';
 import type { Post } from './wordpress';
 import type { WPPost, WPCategory } from './wordpress';
 import type { Faq } from './wordpress';
-import type { Certification, Membre, Groupe } from './wordpress';
+import type { Certification, Membre, Groupe, Service } from './wordpress';
 
 // Données d'exemple enrichies : utilisées tant que WORDPRESS_GRAPHQL_ENDPOINT n'est pas défini.
 export const sampleDatacenters: Datacenter[] = [
@@ -446,3 +446,113 @@ export const sampleGroupe: Groupe = {
     { annee: '2030', evenement: 'Objectif d’un réseau de 15 sites Tier III écoresponsables en France.' },
   ],
 };
+
+// --- Services (CPT `service`) ----------------------------------------------
+// Ordre = ordre d'affichage (menu_order). Les 5 premiers (home: true) alimentent
+// le carrousel d'accueil ; les 8 alimentent la page /services.
+export const sampleServices: Service[] = [
+  {
+    titre: 'Proximité',
+    slug: 'proximite',
+    accroche: 'Services de proximité',
+    description:
+      "Au-delà de l'hébergement, nos équipes d'exploitation interviennent directement sur vos équipements : installation, remplacement de composants, gestion des accès et reporting. Un guichet unique, réactif et local, pour une exploitation sans friction.",
+    benefice: 'Des gestes techniques réalisés sur site, par nos équipes.',
+    icone: 'proximite',
+    image: { sourceUrl: '/services-proximite.jpg', altText: 'Intervention de proximité sur les serveurs dans un data center NDC' },
+    lienLabel: 'Découvrir le catalogue de proximité',
+    lienUrl: '/contact',
+    home: true,
+  },
+  {
+    titre: 'Haute densité & IA',
+    slug: 'haute-densite-ia',
+    accroche: 'Calcul intensif',
+    description:
+      "Jusqu'à 140 kW par baie en refroidissement liquide (DLC). Une infrastructure conçue pour l'IA, le HPC et les charges les plus intensives, sans compromis thermique.",
+    benefice: 'Hébergez vos clusters GPU sans contrainte de densité.',
+    icone: 'ia',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: true,
+  },
+  {
+    titre: 'Hébergement en colocation',
+    slug: 'colocation',
+    accroche: 'Colocation',
+    description:
+      'Baies sécurisées, alimentation et refroidissement mutualisés, conception Tier III. Vous gardez la maîtrise de vos équipements, nous opérons l\u2019infrastructure.',
+    benefice: 'Réduisez vos coûts IT de 30 à 50 % vs salle interne.',
+    icone: 'colocation',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: true,
+  },
+  {
+    titre: 'Accompagnement personnalisé',
+    slug: 'accompagnement',
+    accroche: 'Relation client',
+    description:
+      'Un interlocuteur dédié qui connaît votre dossier, des interventions de proximité, un suivi et une optimisation continue de votre dispositif. Un partenaire, pas un simple fournisseur.',
+    benefice: 'Un contact unique, réactif, qui connaît votre contexte.',
+    icone: 'accompagnement',
+    image: null,
+    lienLabel: 'Échanger avec nos équipes',
+    lienUrl: '/contact',
+    home: true,
+  },
+  {
+    titre: 'Espaces bureau et salles de réunion',
+    slug: 'espaces-bureau',
+    accroche: 'Espaces de travail',
+    description:
+      "Des bureaux et salles de réunion disponibles sur site pour vos équipes : préparez vos déploiements, pilotez vos interventions et travaillez au plus près de vos infrastructures.",
+    benefice: 'Travaillez sur place, au plus près de vos équipements.',
+    icone: 'bureau',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: true,
+  },
+  {
+    titre: 'Connectivité carrier-neutral',
+    slug: 'connectivite',
+    accroche: 'Réseau',
+    description:
+      'Meet-me-room ouverte, opérateurs au choix, interconnexions cloud. Aucun verrouillage : vous choisissez et faites concurrencer vos fournisseurs de connectivité.',
+    benefice: 'Choisissez librement vos opérateurs, sans lock-in.',
+    icone: 'connectivite',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: false,
+  },
+  {
+    titre: 'Espaces modulables',
+    slug: 'espaces-modulables',
+    accroche: 'Flexibilité',
+    description:
+      'Cages privatives, zones dédiées, configurations sur mesure selon vos enjeux. Votre infrastructure évolue avec vos besoins, sans investissement lourd.',
+    benefice: 'Adaptez votre infrastructure à la demande.',
+    icone: 'modulable',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: false,
+  },
+  {
+    titre: 'Continuité de service',
+    slug: 'continuite',
+    accroche: 'Disponibilité',
+    description:
+      'Réseau redondé, alimentation A+B, groupes électrogènes N+1. Une architecture pensée pour la disponibilité de vos applications critiques.',
+    benefice: '99,982 % de disponibilité visée.',
+    icone: 'continuite',
+    image: null,
+    lienLabel: 'En savoir plus',
+    lienUrl: '/contact',
+    home: false,
+  },
+];

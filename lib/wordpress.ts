@@ -946,3 +946,100 @@ export async function getGroupe(): Promise<Groupe> {
     return sampleGroupe;
   }
 }
+
+// ===========================================================================
+// SERVICES — CPT `service` (titre = nom du service) ← NOUVEAU
+// Branché WPGraphQL : champs ACF/SCF dans le groupe `serviceFields`.
+// Retombe sur les données d'exemple si WP est absent ou le CPT vide.
+// ===========================================================================
+export type Service = {
+  titre: string;        // = titre du post WP
+  slug: string;         // sert d'ancre sur la page /services
+  accroche: string;     // sur-titre court (eyebrow contextuel)
+  description: string;  // paragraphe principal
+  benefice: string;     // bénéfice client (optionnel)
+  icone: string;        // clé d'icône (proximite, ia, colocation, …)
+  image: { sourceUrl: string; altText: string } | null;
+  lienLabel: string;    // libellé du bouton
+  lienUrl: string;      // url du bouton
+  home: boolean;        // afficher dans le carrousel d'accueil
+};
+
+const SERVICES_QUERY = gql`
+  query Services {
+    services(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+      nodes {
+        title
+        slug
+        featuredImage { node { sourceUrl altText } }
+        serviceFields {
+          accroche
+          description
+          benefice
+          icone
+          lienLabel
+          lienUrl
+          home
+        }
+      }
+    }
+  }
+`;
+
+type WpServiceNode = {
+  title: string | null;
+  slug: string | null;
+  featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
+  serviceFields: {
+    accroche: string | null;
+    description: string | null;
+    benefice: string | null;
+    icone: string | null;
+    lienLabel: string | null;
+    lienUrl: string | null;
+    home: boolean | null;
+  } | null;
+};
+
+export async function getServices(): Promise<Service[]> {
+  if (!endpoint) {
+    const { sampleServices } = await import('./sample-data');
+    return sampleServices;
+  }
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{ services: { nodes: WpServiceNode[] } }>(SERVICES_QUERY);
+    const nodes = data.services?.nodes ?? [];
+    if (nodes.length === 0) {
+      const { sampleServices } = await import('./sample-data');
+      return sampleServices;
+    }
+    // Coercition systématique en chaîne (cf. getCertifications) : selon la config
+    // ACF/WPGraphQL un champ peut revenir sous une forme inattendue.
+    const asText = (v: unknown): string => (Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v));
+    return nodes.map((n) => ({
+      titre: decodeEntities(n.title) || 'Service',
+      slug: asText(n.slug),
+      accroche: asText(n.serviceFields?.accroche),
+      description: asText(n.serviceFields?.description),
+      benefice: asText(n.serviceFields?.benefice),
+      icone: asText(n.serviceFields?.icone) || 'default',
+      image: n.featuredImage?.node
+        ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
+        : null,
+      lienLabel: asText(n.serviceFields?.lienLabel) || 'En savoir plus',
+      lienUrl: asText(n.serviceFields?.lienUrl) || '/contact',
+      home: Boolean(n.serviceFields?.home),
+    }));
+  } catch (error) {
+    logWpError('services', error);
+    const { sampleServices } = await import('./sample-data');
+    return sampleServices;
+  }
+}
+
+/** Services à afficher dans le carrousel d'accueil (flag `home`), avec repli sur les 5 premiers. */
+export function homeServices(services: Service[], max = 5): Service[] {
+  const flagged = services.filter((s) => s.home);
+  return (flagged.length ? flagged : services).slice(0, max);
+}

@@ -1,4 +1,4 @@
-import { Services } from '@/components/Services';
+import { ServicesCarousel } from '@/components/ServicesCarousel';
 import { DcTileImage } from '@/components/DcTileImage';
 import { KpiBand } from '@/components/KpiBand';
 import { Credibility } from '@/components/Credibility';
@@ -16,6 +16,8 @@ export const metadata: Metadata = {
 import {
   getDatacenters,
   getRecentPosts,
+  getServices,
+  homeServices,
   toMapPoints,
   statutInfo,
   networkKpis,
@@ -113,6 +115,8 @@ export default async function Home() {
   const preview = datacenters.slice(0, 3);
   const posts = await getRecentPosts();
   const kpis = networkKpis(datacenters);
+  const services = await getServices();
+  const carouselServices = homeServices(services, 5);
   const heroImage = '/hero-datacenter.jpg';
 
   return (
@@ -210,8 +214,31 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* NOS SERVICES */}
-      <Services />
+      {/* NOS SERVICES — carrousel */}
+      <section className="section" id="services">
+        <div className="container">
+          <div className="section-head-v2">
+            <div>
+              <span className="eyebrow"><span className="eyebrow-dot" />Nos services</span>
+              <h2 className="section-title">Une infrastructure adaptée<br />à vos exigences.</h2>
+            </div>
+            <p className="section-sub right">
+              NDC vous accompagne de la définition de votre dispositif à son exploitation quotidienne.
+            </p>
+          </div>
+
+          <ServicesCarousel services={carouselServices} />
+
+          <div className="services-cta">
+            <a className="btn-v2 btn-v2-primary" href="/services">
+              Découvrir tous nos services
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <path d="M5 12h14M13 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* NOS ENGAGEMENTS — Pourquoi choisir NDC */}
       <section className="section" id="engagements">
