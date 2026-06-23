@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { type Persona } from '@/lib/personas';
 import { AskQuestionButton } from './AskQuestionButton';
 
@@ -27,9 +28,25 @@ function highlight(text: string, words: string[]) {
 }
 
 export function OffresPersonas({ personas }: { personas: Persona[] }) {
-  const [active, setActive] = useState<string>(personas[0]?.id ?? 'dsi');
+  const searchParams = useSearchParams();
+  const profil = searchParams.get('profil');
+
+  // Persona initial : ?profil=… (depuis le menu déroulant) sinon le premier.
+  const initial =
+    personas.find((p) => p.id === profil)?.id ?? personas[0]?.id ?? 'dsi';
+
+  const [active, setActive] = useState<string>(initial);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const persona = personas.find((p) => p.id === active) ?? personas[0];
+
+  // Si l'URL change (clic sur un autre profil dans le menu sans rechargement),
+  // on met à jour le profil affiché.
+  useEffect(() => {
+    if (profil && personas.some((p) => p.id === profil)) {
+      setActive(profil);
+      setOpenFaq(null);
+    }
+  }, [profil, personas]);
 
   function changePersona(id: string) {
     setActive(id);

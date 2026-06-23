@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { OffresPersonas } from '@/components/OffresPersonas';
 import { getPersonas } from '@/lib/wordpress';
 
@@ -11,7 +12,9 @@ export default async function OffresPage() {
   const personas = await getPersonas();
   return (
     <main>
-      <OffresPersonas personas={personas} />
+      <Suspense fallback={null}>
+        <OffresPersonas personas={personas} />
+      </Suspense>
     </main>
   );
 }

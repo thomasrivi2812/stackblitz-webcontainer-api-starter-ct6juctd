@@ -3327,3 +3327,128 @@ html {
 @media (max-width: 620px) {
   .groupe-timeline li { grid-template-columns: 70px 1fr; gap: 12px; }
 }
+/* ===========================================================================
+   MENUS DÉROULANTS NAV — « Notre réseau » (DCs) & « Nos offres » (personas)
+   =========================================================================== */
+
+/* --- Desktop --- */
+.nav-item { position: relative; display: flex; align-items: center; }
+.nav .nav-link { position: relative; display: inline-flex; align-items: center; gap: 5px; padding: 4px 0; }
+.nav-chev { opacity: 0.7; transition: transform 0.18s ease; }
+.nav-item:hover .nav-chev { transform: rotate(180deg); }
+
+/* Panneau */
+.nav-dd {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  min-width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px -28px rgba(20, 40, 73, 0.45);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  z-index: 1050;
+}
+.nav-dd.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(8px);
+}
+.nav-dd.wide { min-width: 380px; }
+/* Pont invisible pour ne pas perdre le survol dans l'espace link → panneau */
+.nav-dd::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 14px;
+}
+/* Pas de soulignement rouge sur les liens internes du panneau */
+.nav-dd a::after { display: none !important; }
+
+.nav-dd-all {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--marine);
+  border-bottom: 1px solid var(--line);
+}
+.nav-dd-all:hover { color: var(--turquoise-700); }
+
+.nav-dd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+
+.nav-dd-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.nav-dd-item.row { flex-direction: row; align-items: center; gap: 9px; }
+.nav-dd-item:hover { background: var(--surface-alt); color: var(--turquoise-700); }
+.nav-dd-item .sub { font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.nav-dd-name { line-height: 1.25; }
+
+.nav-dd-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+  display: inline-block;
+}
+
+/* --- Mobile (accordéon dans le tiroir) --- */
+.mnav-group { border-bottom: 1px solid var(--line); }
+.mnav-group:first-of-type { border-top: 1px solid var(--line); }
+
+.mnav-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 4px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--heading);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+.mnav-trigger .chev { transition: transform 0.2s ease; opacity: 0.7; }
+.mnav-trigger.open .chev { transform: rotate(180deg); }
+
+.mnav-sub { display: none; padding: 0 0 12px; }
+.mnav-sub.open { display: block; }
+.mnav-sub a {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  border: none !important;
+  border-radius: 8px;
+}
+.mnav-sub a:hover { background: var(--surface-alt); color: var(--turquoise-700); }
+.mnav-sub a.all { color: var(--marine); font-weight: 600; }
+
+/* La 1re ancre simple du tiroir ne doit pas cumuler un bord haut avec le groupe */
+.mobile-nav > a:first-of-type { border-top: none; }

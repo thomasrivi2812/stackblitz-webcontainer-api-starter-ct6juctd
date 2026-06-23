@@ -3,6 +3,7 @@ import { Jost } from 'next/font/google';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { getPersonas, getDatacenters } from '@/lib/wordpress';
 import './globals.css';
 
 const jost = Jost({
@@ -45,11 +46,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Récupéré côté serveur pour alimenter les menus déroulants du header.
+  // Les deux fonctions retombent sur les données d'exemple si WP est absent.
+  const [personas, datacenters] = await Promise.all([getPersonas(), getDatacenters()]);
+
   return (
     <html lang="fr" className={jost.variable}>
       <body>
-        <SiteHeader />
+        <SiteHeader personas={personas} datacenters={datacenters} />
 
         {children}
 
