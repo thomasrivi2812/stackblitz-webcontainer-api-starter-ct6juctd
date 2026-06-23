@@ -761,7 +761,7 @@ export function groupCertifications(certifs: Certification[]): CertifGroup[] {
     items: certifs.filter((c) => g.categories.includes(c.categorie)),
   }));
   const autres = certifs.filter((c) => !assigned.has(c.categorie));
-  if (autres.length) groups.push({ key: 'autres', label: 'Autres certifications', items: autres });
+  if (autres.length) groups.push({ key: 'autres', label: 'Autres', items: autres });
   return groups.filter((g) => g.items.length > 0);
 }
 
