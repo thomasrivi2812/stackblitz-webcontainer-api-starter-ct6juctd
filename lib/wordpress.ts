@@ -704,12 +704,17 @@ export async function getCertifications(): Promise<Certification[]> {
       const { sampleCertifications } = await import('./sample-data');
       return sampleCertifications;
     }
+    // Coercition systématique en chaîne : selon la config ACF/WPGraphQL, un
+    // champ peut revenir sous une forme inattendue (tableau, nombre…). On force
+    // des strings pour éviter tout crash de rendu React (« Objects are not valid
+    // as a React child ») ou d'appel à .normalize() sur un non-string.
+    const asText = (v: unknown): string => (Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v));
     return nodes.map((n) => ({
       nom: decodeEntities(n.title) || 'Certification',
-      categorie: n.certificationFields?.categorie ?? '',
-      description: n.certificationFields?.description ?? '',
-      garantie: n.certificationFields?.garantie ?? '',
-      statut: n.certificationFields?.statut ?? 'vise',
+      categorie: asText(n.certificationFields?.categorie),
+      description: asText(n.certificationFields?.description),
+      garantie: asText(n.certificationFields?.garantie),
+      statut: asText(n.certificationFields?.statut) || 'vise',
       souverainete: Boolean(n.certificationFields?.souverainete),
       logo: n.certificationFields?.logo?.node
         ? { sourceUrl: n.certificationFields.logo.node.sourceUrl, altText: n.certificationFields.logo.node.altText ?? '' }
@@ -754,9 +759,11 @@ const CERTIF_GROUP_ORDER: { key: string; label: string; categories: string[] }[]
 
 // Normalise une catégorie reçue (minuscules, sans accents, espaces réduits) afin
 // de matcher quel que soit le format renvoyé par WPGraphQL : valeur (« securite »)
-// OU libellé (« Sécurité de l'information »).
-function normalizeCertCategorie(raw: string): string {
-  return (raw || '')
+// OU libellé (« Sécurité de l'information »). Tolère aussi les valeurs non-string
+// (tableau, null…) que certaines configs ACF renvoient → évite tout crash serveur.
+function normalizeCertCategorie(raw: unknown): string {
+  const str = Array.isArray(raw) ? raw.join(' ') : raw == null ? '' : String(raw);
+  return str
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '') // retire les accents
     .toLowerCase()
