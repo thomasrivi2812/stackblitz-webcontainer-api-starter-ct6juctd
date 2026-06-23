@@ -3124,6 +3124,26 @@ html {
  * ====================================================================== */
 
 /* ---------- Certifications ---------- */
+.certif-group { margin-bottom: 44px; }
+.certif-group:last-child { margin-bottom: 0; }
+.certif-group-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.certif-group-badge {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 7px 16px; border-radius: 999px;
+  background: var(--turquoise-soft); color: var(--turquoise-700);
+  white-space: nowrap;
+}
+.certif-group-line { flex: 1; height: 1px; background: var(--line); }
+.certif-group-count {
+  font-size: 12.5px; font-weight: 600; color: var(--muted-2);
+  white-space: nowrap;
+}
 .certif-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

@@ -1,4 +1,4 @@
-import { getCertifications, certifCategorieLabel, certifStatutInfo } from '@/lib/wordpress';
+import { getCertifications, groupCertifications, certifCategorieLabel, certifStatutInfo } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -22,6 +22,7 @@ function ShieldIcon() {
 
 export default async function CertificationsPage() {
   const certifs = await getCertifications();
+  const groups = groupCertifications(certifs);
   const souveraines = certifs.filter((c) => c.souverainete);
 
   return (
@@ -39,34 +40,45 @@ export default async function CertificationsPage() {
 
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
-          <div className="certif-grid">
-            {certifs.map((c) => {
-              const statut = certifStatutInfo(c.statut);
-              return (
-                <article className="certif-card" key={c.nom}>
-                  <div className="certif-card-top">
-                    <div className="certif-badge">
-                      {c.logo ? (
-                        <img src={c.logo.sourceUrl} alt={c.logo.altText || c.nom} />
-                      ) : (
-                        <ShieldIcon />
+          {groups.map((group) => (
+            <div className="certif-group" key={group.key}>
+              <div className="certif-group-head">
+                <span className="certif-group-badge">{group.label}</span>
+                <span className="certif-group-line" />
+                <span className="certif-group-count">
+                  {group.items.length} certification{group.items.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="certif-grid">
+                {group.items.map((c) => {
+                  const statut = certifStatutInfo(c.statut);
+                  return (
+                    <article className="certif-card" key={c.nom}>
+                      <div className="certif-card-top">
+                        <div className="certif-badge">
+                          {c.logo ? (
+                            <img src={c.logo.sourceUrl} alt={c.logo.altText || c.nom} />
+                          ) : (
+                            <ShieldIcon />
+                          )}
+                        </div>
+                        <span className={`certif-statut ${statut.key}`}>{statut.label}</span>
+                      </div>
+                      <span className="certif-cat">{certifCategorieLabel(c.categorie)}</span>
+                      <h3>{c.nom}</h3>
+                      {c.description && <p className="certif-desc">{c.description}</p>}
+                      {c.garantie && (
+                        <p className="certif-garantie">
+                          <span>Ce que ça garantit</span>
+                          {c.garantie}
+                        </p>
                       )}
-                    </div>
-                    <span className={`certif-statut ${statut.key}`}>{statut.label}</span>
-                  </div>
-                  <span className="certif-cat">{certifCategorieLabel(c.categorie)}</span>
-                  <h3>{c.nom}</h3>
-                  {c.description && <p className="certif-desc">{c.description}</p>}
-                  {c.garantie && (
-                    <p className="certif-garantie">
-                      <span>Ce que ça garantit</span>
-                      {c.garantie}
-                    </p>
-                  )}
-                </article>
-              );
-            })}
-          </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

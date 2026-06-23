@@ -742,6 +742,29 @@ export function certifStatutInfo(statut: string): { key: string; label: string }
   return { key: statut || 'vise', label: CERTIF_STATUT_LABELS[statut] ?? 'Visé' };
 }
 
+// Macro-groupes d'affichage de la page Certifications, dans l'ordre voulu.
+// Chaque groupe rassemble une ou plusieurs catégories WP (champ `categorie`).
+// Tout ce qui n'entre dans aucun groupe défini tombe dans « Autres certifications ».
+export type CertifGroup = { key: string; label: string; items: Certification[] };
+
+const CERTIF_GROUP_ORDER: { key: string; label: string; categories: string[] }[] = [
+  { key: 'environnement', label: 'Environnement', categories: ['energie'] },
+  { key: 'securite',      label: 'Sécurité',      categories: ['securite', 'souverainete'] },
+];
+
+/** Regroupe les certifications par macro-groupe, dans l'ordre Environnement → Sécurité → Autres. */
+export function groupCertifications(certifs: Certification[]): CertifGroup[] {
+  const assigned = new Set(CERTIF_GROUP_ORDER.flatMap((g) => g.categories));
+  const groups: CertifGroup[] = CERTIF_GROUP_ORDER.map((g) => ({
+    key: g.key,
+    label: g.label,
+    items: certifs.filter((c) => g.categories.includes(c.categorie)),
+  }));
+  const autres = certifs.filter((c) => !assigned.has(c.categorie));
+  if (autres.length) groups.push({ key: 'autres', label: 'Autres certifications', items: autres });
+  return groups.filter((g) => g.items.length > 0);
+}
+
 // ===========================================================================
 // ÉQUIPE — CPT `membre` (titre = nom ; photo = featuredImage) ← NOUVEAU
 // ===========================================================================
