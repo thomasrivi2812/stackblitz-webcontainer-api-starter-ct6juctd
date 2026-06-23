@@ -23,7 +23,6 @@ function ShieldIcon() {
 export default async function CertificationsPage() {
   const certifs = await getCertifications();
   const groups = groupCertifications(certifs);
-  const souveraines = certifs.filter((c) => c.souverainete);
 
   return (
     <main>
@@ -69,7 +68,7 @@ export default async function CertificationsPage() {
                       {c.description && <p className="certif-desc">{c.description}</p>}
                       {c.garantie && (
                         <p className="certif-garantie">
-                          <span>Ce que cela garantit</span>
+                          <span>Ce que ça garantit</span>
                           {c.garantie}
                         </p>
                       )}
@@ -82,35 +81,26 @@ export default async function CertificationsPage() {
         </div>
       </section>
 
-      {/* Éclairage souveraineté */}
-      {souveraines.length > 0 && (
-        <section className="section section-alt">
-          <div className="container">
-            <div className="souv-card">
-              <div className="souv-text">
-                <span className="eyebrow">Souveraineté</span>
-                <h2 className="fil-rouge">Vos données restent en France</h2>
-                <p>
-                  Avec des qualifications comme <strong>SecNumCloud</strong> et <strong>HDS</strong>, et un hébergement
-                  100 % national, Nation Data Center garantit que vos données demeurent sous juridiction française et
-                  européenne — hors de portée des lois extraterritoriales (Cloud Act, FISA).
-                </p>
-              </div>
-              <ul className="souv-list">
-                {souveraines.map((c) => (
-                  <li key={c.nom}>
-                    <ShieldIcon />
-                    <div>
-                      <strong>{c.nom}</strong>
-                      <span>{c.garantie || c.description}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+      {/* En savoir plus → contact */}
+      <section className="section section-alt">
+        <div className="container">
+          <div className="souv-card">
+            <div className="souv-text">
+              <span className="eyebrow">En savoir plus</span>
+              <h2 className="fil-rouge">Une question sur nos certifications ?</h2>
+              <p>
+                Nos équipes vous détaillent nos référentiels, nos engagements de conformité et la
+                manière dont ils s’appliquent à votre projet d’hébergement souverain et écoresponsable.
+              </p>
+            </div>
+            <div className="souv-cta">
+              <a className="btn btn-primary" href="/contact">
+                Contactez nos équipes
+              </a>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
     </main>
   );
 }

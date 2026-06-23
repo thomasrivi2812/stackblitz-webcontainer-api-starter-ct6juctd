@@ -3210,6 +3210,8 @@ html {
 }
 .souv-text h2 { font-size: clamp(26px, 3.4vw, 38px); }
 .souv-text p { color: var(--muted); margin-top: 14px; max-width: 52ch; }
+.souv-cta { display: flex; justify-content: center; }
+.souv-cta .btn { font-size: 16px; padding: 16px 32px; }
 .souv-list { display: flex; flex-direction: column; gap: 14px; }
 .souv-list li {
   display: flex; gap: 14px; align-items: flex-start;
