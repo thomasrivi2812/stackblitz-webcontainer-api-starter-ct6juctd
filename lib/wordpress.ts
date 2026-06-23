@@ -752,15 +752,42 @@ const CERTIF_GROUP_ORDER: { key: string; label: string; categories: string[] }[]
   { key: 'securite',      label: 'Sécurité',      categories: ['securite', 'souverainete'] },
 ];
 
+// Normalise une catégorie reçue (minuscules, sans accents, espaces réduits) afin
+// de matcher quel que soit le format renvoyé par WPGraphQL : valeur (« securite »)
+// OU libellé (« Sécurité de l'information »).
+function normalizeCertCategorie(raw: string): string {
+  return (raw || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // retire les accents
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Pour chaque clé de catégorie (valeur ACF), on accepte aussi son libellé d'affichage.
+// → si WP renvoie le libellé au lieu de la valeur, le regroupement fonctionne quand même.
+const CERTIF_CATEGORIE_ALIASES: Record<string, string[]> = Object.fromEntries(
+  Object.entries(CERTIF_CATEGORIE_LABELS).map(([value, label]) => [
+    value,
+    [normalizeCertCategorie(value), normalizeCertCategorie(label)],
+  ]),
+);
+
+/** Vrai si la catégorie d'une certif correspond à l'une des clés de catégorie attendues. */
+function certMatchesCategorie(certCategorie: string, wantedKeys: string[]): boolean {
+  const c = normalizeCertCategorie(certCategorie);
+  return wantedKeys.some((key) => (CERTIF_CATEGORIE_ALIASES[key] ?? [key]).includes(c));
+}
+
 /** Regroupe les certifications par macro-groupe, dans l'ordre Environnement → Sécurité → Autres. */
 export function groupCertifications(certifs: Certification[]): CertifGroup[] {
-  const assigned = new Set(CERTIF_GROUP_ORDER.flatMap((g) => g.categories));
+  const assignedKeys = CERTIF_GROUP_ORDER.flatMap((g) => g.categories);
   const groups: CertifGroup[] = CERTIF_GROUP_ORDER.map((g) => ({
     key: g.key,
     label: g.label,
-    items: certifs.filter((c) => g.categories.includes(c.categorie)),
+    items: certifs.filter((c) => certMatchesCategorie(c.categorie, g.categories)),
   }));
-  const autres = certifs.filter((c) => !assigned.has(c.categorie));
+  const autres = certifs.filter((c) => !certMatchesCategorie(c.categorie, assignedKeys));
   if (autres.length) groups.push({ key: 'autres', label: 'Autres', items: autres });
   return groups.filter((g) => g.items.length > 0);
 }
