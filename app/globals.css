@@ -1,4 +1,7 @@
 :root {
+  /* Le site s'affiche toujours en thème clair (mode nuit désactivé). */
+  color-scheme: light;
+
   /* Palette principale NDC */
   --marine: #1b3360;
   --marine-600: #2a4576;
@@ -47,8 +50,11 @@
   --shadow-lg: 0 24px 60px -34px rgba(20,40,73,0.45);
 }
 
-/* ===================== MODE NUIT (automatique système) ===================== */
-@media (prefers-color-scheme: dark) {
+/* ===================== MODE NUIT — DÉSACTIVÉ =====================
+   Le mode nuit automatique est désactivé : la condition « and (max-width: 0px) »
+   n'est jamais vraie, donc tous les blocs ci-dessous restent inactifs.
+   Pour le réactiver, retirez « and (max-width: 0px) » sur chaque @media. */
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   :root {
     /* On éclaircit les accents pour le contraste sur fond sombre (style "tech") */
     --turquoise: #3fc6ff;
@@ -679,7 +685,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 560px) { .footer-grid { grid-template-columns: 1fr; } }
 
 /* ===================== Ajustements ciblés MODE NUIT ===================== */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   /* Sections à fond coloré "en dur" : on calme l'intensité sur écran sombre */
   .piliers { background: linear-gradient(160deg, var(--surface-dark-2), var(--surface-dark)); }
   .piliers h2 { color: var(--on-dark); }
@@ -725,7 +731,7 @@ a { color: inherit; text-decoration: none; }
 .lang-opt.active { color: var(--marine); }
 .lang-opt:hover { color: var(--turquoise-700); }
 .lang-sep { color: var(--line); font-size: 13px; }
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   .lang-opt.active { color: var(--turquoise); }
 }
 
@@ -781,7 +787,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ===================== Fix dark : crédibilité ===================== */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   .cert-statut.ok { background: rgba(63,198,255,.15); color: var(--turquoise); }
   .cert-statut.wip { background: #1c2c46; color: #aebed8; }
 }
@@ -1149,7 +1155,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ===================== Dark mode adjustments for actualités ===================== */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   .actu-card:hover, .article-related-card:hover {
     box-shadow: 0 16px 40px -28px rgba(0,0,0,0.6);
   }
@@ -1340,7 +1346,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ── Dark mode ── */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   .contact-form-wrap {
     background: var(--surface-dark-2);
     border-color: #2a4576;
@@ -2283,7 +2289,7 @@ html {
   width: 40px; height: 40px;
 }
 /* ===================== DARK MODE — Fix complet Homepage v2 ===================== */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   /* ── Tokens globaux ── */
   :root {
     --bg: #0e1a2e;
@@ -2897,7 +2903,7 @@ html {
 }
 
 /* ---------- Dark mode : retravailler le fond grille ---------- */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) and (max-width: 0px) {
   .actu-hero,
   .contact-hero,
   .dc-hero,
@@ -3533,7 +3539,7 @@ html {
 .svc-dot {
   width: 9px; height: 9px; border-radius: 50%;
   border: none; padding: 0; cursor: pointer;
-  background: var(--line-2, #e2e8f1);
+  background: #b3bfd4;
   transition: width 0.2s ease, background 0.2s ease;
 }
 .svc-dot:hover { background: var(--muted-2, #8593af); }
