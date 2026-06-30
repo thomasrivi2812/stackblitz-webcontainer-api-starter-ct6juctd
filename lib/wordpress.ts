@@ -9,6 +9,63 @@ function logWpError(label: string, error: unknown) {
   console.error(`[NDC] API injoignable — données d'exemple (${label}) :`, error instanceof Error ? error.message : error);
 }
 
+// ===========================================================================
+// MULTILINGUE (Polylang via wp-graphql-polylang)
+// ---------------------------------------------------------------------------
+// Locale Next (« fr »/« en ») → code de langue WPGraphQL passé au filtre
+// `where: { language: ... }` des connexions, typé `LanguageCodeFilterEnum`.
+//
+// ⚠️ CONTRAT À VALIDER CONTRE LE SCHÉMA RÉEL : selon la version de
+// wp-graphql-polylang, le nom de l'enum (LanguageCodeFilterEnum) et la présence
+// du filtre `where.language` sur chaque type de contenu doivent être vérifiés.
+// Tout est centralisé ici → un seul point à ajuster si le schéma diffère.
+//
+// Stratégie de repli (choix produit « Fallback FR ») : si le contenu n'existe
+// pas encore dans la langue demandée, on réaffiche le FR plutôt qu'une page
+// vide → permet une traduction progressive côté WordPress.
+// ===========================================================================
+export type WpLocale = 'fr' | 'en';
+type WpLangCode = 'FR' | 'EN';
+
+const wpLang = (locale: WpLocale = 'fr'): WpLangCode => (locale === 'en' ? 'EN' : 'FR');
+
+/**
+ * Exécute une requête de LISTE pour la langue demandée. Si la liste revient vide
+ * en langue secondaire (section pas encore traduite), bascule sur le FR (repli).
+ * `pick` extrait le tableau de nodes pour tester s'il est vide.
+ */
+async function wpList<R>(
+  client: GraphQLClient,
+  query: string,
+  locale: WpLocale,
+  pick: (data: R) => readonly unknown[] | null | undefined,
+): Promise<R> {
+  const primary = await client.request<R>(query, { language: wpLang(locale) });
+  if (locale !== 'fr' && (pick(primary)?.length ?? 0) === 0) {
+    return client.request<R>(query, { language: 'FR' });
+  }
+  return primary;
+}
+
+/**
+ * Exécute une requête d'ÉLÉMENT UNIQUE (par slug) pour la langue demandée, avec
+ * repli FR si l'élément n'existe pas dans la langue secondaire. `pick` extrait
+ * l'élément (ou null) pour décider du repli.
+ */
+async function wpSingle<R>(
+  client: GraphQLClient,
+  query: string,
+  variables: Record<string, unknown>,
+  locale: WpLocale,
+  pick: (data: R) => unknown,
+): Promise<R> {
+  const primary = await client.request<R>(query, { ...variables, language: wpLang(locale) });
+  if (locale !== 'fr' && !pick(primary)) {
+    return client.request<R>(query, { ...variables, language: 'FR' });
+  }
+  return primary;
+}
+
 /**
  * Normalise le groupe ACF « document » : ACF renvoie TOUJOURS un objet
  * { url: "", titre: "" } (jamais null) même quand le champ est vide.
@@ -91,8 +148,8 @@ export type CustomPage = {
 
 // --- Requêtes Datacenters --------------------------------------------------
 const DATACENTERS_QUERY = gql`
-  query Datacenters {
-    datacenters(first: 100, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Datacenters($language: LanguageCodeFilterEnum) {
+    datacenters(first: 100, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         slug
@@ -111,25 +168,30 @@ const DATACENTERS_QUERY = gql`
   }
 `;
 
+// Filtre par slug + langue via une connexion (where.name) plutôt que par
+// datacenter(id, idType: SLUG) : permet d'appliquer le filtre de langue Polylang
+// et de gérer le repli FR de façon uniforme.
 const DATACENTER_BY_SLUG_QUERY = gql`
-  query Datacenter($slug: ID!) {
-    datacenter(id: $slug, idType: SLUG) {
-      title
-      slug
-      featuredImage { node { sourceUrl altText } }
-      datacenterFields {
-        ville
-        region
-        statut
-        accroche
-        latitude
-        longitude
-        puissance
-        description
-        kpis { label valeur unite }
-        caracteristiques { categorie intitule detail }
-        benefices { titre texte }
-        document { url titre }
+  query Datacenter($slug: String!, $language: LanguageCodeFilterEnum) {
+    datacenters(first: 1, where: { name: $slug, language: $language }) {
+      nodes {
+        title
+        slug
+        featuredImage { node { sourceUrl altText } }
+        datacenterFields {
+          ville
+          region
+          statut
+          accroche
+          latitude
+          longitude
+          puissance
+          description
+          kpis { label valeur unite }
+          caracteristiques { categorie intitule detail }
+          benefices { titre texte }
+          document { url titre }
+        }
       }
     }
   }
@@ -137,8 +199,8 @@ const DATACENTER_BY_SLUG_QUERY = gql`
 
 // --- Requêtes Articles (accueil) -------------------------------------------
 const RECENT_POSTS_QUERY = gql`
-  query RecentPosts {
-    posts(first: 5, where: { orderby: { field: DATE, order: DESC } }) {
+  query RecentPosts($language: LanguageCodeFilterEnum) {
+    posts(first: 5, where: { language: $language, orderby: { field: DATE, order: DESC } }) {
       nodes {
         title
         slug
@@ -152,8 +214,8 @@ const RECENT_POSTS_QUERY = gql`
 
 // --- Requêtes Articles (page Actualités) ----------------------------------
 const ALL_POSTS_QUERY = gql`
-  query AllPosts {
-    posts(first: 100, where: { orderby: { field: DATE, order: DESC } }) {
+  query AllPosts($language: LanguageCodeFilterEnum) {
+    posts(first: 100, where: { language: $language, orderby: { field: DATE, order: DESC } }) {
       nodes {
         slug
         title
@@ -173,27 +235,29 @@ const ALL_POSTS_QUERY = gql`
 `;
 
 const POST_BY_SLUG_QUERY = gql`
-  query PostBySlug($slug: ID!) {
-    post(id: $slug, idType: SLUG) {
-      slug
-      title
-      date
-      excerpt
-      content
-      featuredImage {
-        node { sourceUrl altText }
+  query PostBySlug($slug: String!, $language: LanguageCodeFilterEnum) {
+    posts(first: 1, where: { name: $slug, language: $language }) {
+      nodes {
+        slug
+        title
+        date
+        excerpt
+        content
+        featuredImage {
+          node { sourceUrl altText }
+        }
+        categories { nodes { name slug } }
+        tags { nodes { name slug } }
+        author { node { name } }
+        articleFields { document { url titre } auteur }
       }
-      categories { nodes { name slug } }
-      tags { nodes { name slug } }
-      author { node { name } }
-      articleFields { document { url titre } auteur }
     }
   }
 `;
 
 const CATEGORIES_QUERY = gql`
-  query AllCategories {
-    categories(first: 50) {
+  query AllCategories($language: LanguageCodeFilterEnum) {
+    categories(first: 50, where: { language: $language }) {
       nodes { name slug count }
     }
   }
@@ -201,8 +265,8 @@ const CATEGORIES_QUERY = gql`
 
 // --- Requête FAQ ← NOUVEAU --------------------------------------------------
 const FAQS_QUERY = gql`
-  query Faqs {
-    faqs(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Faqs($language: LanguageCodeFilterEnum) {
+    faqs(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         faqFields { reponse }
@@ -213,8 +277,8 @@ const FAQS_QUERY = gql`
 
 // --- Requête Page personnalisée ← NOUVEAU ----------------------------------
 const PAGE_BY_SLUG_QUERY = gql`
-  query CustomPage($slug: String!) {
-    pages(first: 1, where: { name: $slug }) {
+  query CustomPage($slug: String!, $language: LanguageCodeFilterEnum) {
+    pages(first: 1, where: { name: $slug, language: $language }) {
       nodes {
         title
         content
@@ -225,11 +289,13 @@ const PAGE_BY_SLUG_QUERY = gql`
 `;
 
 // --- Accès aux données : Datacenters ---------------------------------------
-export async function getDatacenters(): Promise<Datacenter[]> {
+export async function getDatacenters(locale: WpLocale = 'fr'): Promise<Datacenter[]> {
   if (!endpoint) return sampleDatacenters;
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ datacenters: { nodes: Datacenter[] } }>(DATACENTERS_QUERY);
+    const data = await wpList<{ datacenters: { nodes: Datacenter[] } }>(
+      client, DATACENTERS_QUERY, locale, (d) => d.datacenters.nodes,
+    );
     return data.datacenters.nodes;
   } catch (error) {
     logWpError('datacenters', error);
@@ -237,14 +303,16 @@ export async function getDatacenters(): Promise<Datacenter[]> {
   }
 }
 
-export async function getDatacenter(slug: string): Promise<Datacenter | null> {
+export async function getDatacenter(slug: string, locale: WpLocale = 'fr'): Promise<Datacenter | null> {
   if (!endpoint) {
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ datacenter: Datacenter | null }>(DATACENTER_BY_SLUG_QUERY, { slug });
-    return data.datacenter;
+    const data = await wpSingle<{ datacenters: { nodes: Datacenter[] } }>(
+      client, DATACENTER_BY_SLUG_QUERY, { slug }, locale, (d) => d.datacenters.nodes[0],
+    );
+    return data.datacenters.nodes[0] ?? null;
   } catch (error) {
     logWpError('datacenter', error);
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
@@ -252,14 +320,16 @@ export async function getDatacenter(slug: string): Promise<Datacenter | null> {
 }
 
 // --- Accès aux données : Articles (accueil) --------------------------------
-export async function getRecentPosts(): Promise<Post[]> {
+export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
   if (!endpoint) {
     const { samplePosts } = await import('./sample-data');
     return samplePosts;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ posts: { nodes: Post[] } }>(RECENT_POSTS_QUERY);
+    const data = await wpList<{ posts: { nodes: Post[] } }>(
+      client, RECENT_POSTS_QUERY, locale, (d) => d.posts.nodes,
+    );
     return data.posts.nodes.map((n) => ({ ...n, title: decodeEntities(n.title) }));
   } catch (error) {
     logWpError('articles', error);
@@ -269,16 +339,16 @@ export async function getRecentPosts(): Promise<Post[]> {
 }
 
 // --- Accès aux données : Articles (page Actualités) ------------------------
-export async function getAllPosts(): Promise<WPPost[]> {
+export async function getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
   if (!endpoint) {
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{
+    const data = await wpList<{
       posts: { nodes: (WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null })[] };
-    }>(ALL_POSTS_QUERY);
+    }>(client, ALL_POSTS_QUERY, locale, (d) => d.posts.nodes);
     return data.posts.nodes.map((n) => ({
       ...n,
       title: decodeEntities(n.title),
@@ -294,24 +364,26 @@ export async function getAllPosts(): Promise<WPPost[]> {
   }
 }
 
-export async function getPostBySlug(slug: string): Promise<WPPost | null> {
+export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Promise<WPPost | null> {
   if (!endpoint) {
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts.find((p) => p.slug === slug) ?? null;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{
-      post: (WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null }) | null;
-    }>(POST_BY_SLUG_QUERY, { slug });
-    if (!data.post) return null;
+    type PostNode = WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null };
+    const data = await wpSingle<{ posts: { nodes: PostNode[] } }>(
+      client, POST_BY_SLUG_QUERY, { slug }, locale, (d) => d.posts.nodes[0],
+    );
+    const post = data.posts.nodes[0];
+    if (!post) return null;
     return {
-      ...data.post,
-      title: decodeEntities(data.post.title),
-      categories: { nodes: decodeTaxonomy(data.post.categories?.nodes) },
-      tags: { nodes: decodeTaxonomy(data.post.tags?.nodes) },
-      document: cleanDocument(data.post.articleFields?.document),
-      author: data.post.articleFields?.auteur ? { node: { name: data.post.articleFields.auteur } } : data.post.author,
+      ...post,
+      title: decodeEntities(post.title),
+      categories: { nodes: decodeTaxonomy(post.categories?.nodes) },
+      tags: { nodes: decodeTaxonomy(post.tags?.nodes) },
+      document: cleanDocument(post.articleFields?.document),
+      author: post.articleFields?.auteur ? { node: { name: post.articleFields.auteur } } : post.author,
     };
   } catch (error) {
     logWpError('article', error);
@@ -320,14 +392,16 @@ export async function getPostBySlug(slug: string): Promise<WPPost | null> {
   }
 }
 
-export async function getCategories(): Promise<WPCategory[]> {
+export async function getCategories(locale: WpLocale = 'fr'): Promise<WPCategory[]> {
   if (!endpoint) {
     const { sampleCategories } = await import('./sample-data');
     return sampleCategories;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ categories: { nodes: WPCategory[] } }>(CATEGORIES_QUERY);
+    const data = await wpList<{ categories: { nodes: WPCategory[] } }>(
+      client, CATEGORIES_QUERY, locale, (d) => d.categories.nodes,
+    );
     return data.categories.nodes
       // On garde les catégories qui contiennent au moins un article.
       // (count peut être null selon la config WPGraphQL → on le borne à 0.)
@@ -342,16 +416,16 @@ export async function getCategories(): Promise<WPCategory[]> {
 }
 
 // --- Accès aux données : FAQ ← NOUVEAU -------------------------------------
-export async function getFaqs(): Promise<Faq[]> {
+export async function getFaqs(locale: WpLocale = 'fr'): Promise<Faq[]> {
   if (!endpoint) {
     const { sampleFaqs } = await import('./sample-data');
     return sampleFaqs;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{
+    const data = await wpList<{
       faqs: { nodes: { title: string; faqFields: { reponse: string | null } | null }[] };
-    }>(FAQS_QUERY);
+    }>(client, FAQS_QUERY, locale, (d) => d.faqs.nodes);
     return data.faqs.nodes.map((n) => ({ question: n.title, reponse: n.faqFields?.reponse ?? '' }));
   } catch (error) {
     logWpError('FAQ', error);
@@ -361,13 +435,13 @@ export async function getFaqs(): Promise<Faq[]> {
 }
 
 // --- Accès aux données : Page personnalisée ← NOUVEAU ----------------------
-export async function getPage(slug: string): Promise<CustomPage | null> {
+export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<CustomPage | null> {
   if (!endpoint) return null;
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{
+    const data = await wpSingle<{
       pages: { nodes: { title: string; content: string | null; featuredImage: { node: { sourceUrl: string; altText: string } } | null }[] };
-    }>(PAGE_BY_SLUG_QUERY, { slug });
+    }>(client, PAGE_BY_SLUG_QUERY, { slug }, locale, (d) => d.pages.nodes[0]);
     const node = data.pages.nodes[0];
     if (!node) return null;
     return {
@@ -460,8 +534,8 @@ export function networkKpis(datacenters: Datacenter[]): NetworkKpi[] {
 // soit auto-générés (numéros de réponses), soit contraints côté ACF (accent).
 
 const PERSONAS_QUERY = gql`
-  query Personas {
-    personas(first: 20, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Personas($language: LanguageCodeFilterEnum) {
+    personas(first: 20, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         slug
@@ -630,14 +704,16 @@ function mapWpPersona(node: WpPersonaNode): Persona {
   };
 }
 
-export async function getPersonas(): Promise<Persona[]> {
+export async function getPersonas(locale: WpLocale = 'fr'): Promise<Persona[]> {
   if (!endpoint) return PERSONAS;
   try {
     // POST via GraphQLClient, comme toutes les autres requêtes du fichier.
     // (Le GET « simple » échouait sur certains WPGraphQL qui n'acceptent pas
     //  les queries en GET → « fetch failed ».)
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ personas: { nodes: WpPersonaNode[] } }>(PERSONAS_QUERY);
+    const data = await wpList<{ personas: { nodes: WpPersonaNode[] } }>(
+      client, PERSONAS_QUERY, locale, (d) => d.personas?.nodes ?? [],
+    );
     const nodes = data.personas?.nodes ?? [];
     // WP vide (CPT pas encore peuplé) → on garde la maquette de référence.
     if (nodes.length === 0) return PERSONAS;
@@ -662,8 +738,8 @@ export type Certification = {
 };
 
 const CERTIFICATIONS_QUERY = gql`
-  query Certifications {
-    certifications(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Certifications($language: LanguageCodeFilterEnum) {
+    certifications(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         certificationFields {
@@ -691,14 +767,16 @@ type WpCertificationNode = {
   } | null;
 };
 
-export async function getCertifications(): Promise<Certification[]> {
+export async function getCertifications(locale: WpLocale = 'fr'): Promise<Certification[]> {
   if (!endpoint) {
     const { sampleCertifications } = await import('./sample-data');
     return sampleCertifications;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ certifications: { nodes: WpCertificationNode[] } }>(CERTIFICATIONS_QUERY);
+    const data = await wpList<{ certifications: { nodes: WpCertificationNode[] } }>(
+      client, CERTIFICATIONS_QUERY, locale, (d) => d.certifications?.nodes ?? [],
+    );
     const nodes = data.certifications?.nodes ?? [];
     if (nodes.length === 0) {
       const { sampleCertifications } = await import('./sample-data');
@@ -812,8 +890,8 @@ export type Membre = {
 };
 
 const MEMBRES_QUERY = gql`
-  query Membres {
-    membres(first: 100, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Membres($language: LanguageCodeFilterEnum) {
+    membres(first: 100, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         featuredImage { node { sourceUrl altText } }
@@ -839,14 +917,16 @@ type WpMembreNode = {
   } | null;
 };
 
-export async function getMembres(): Promise<Membre[]> {
+export async function getMembres(locale: WpLocale = 'fr'): Promise<Membre[]> {
   if (!endpoint) {
     const { sampleMembres } = await import('./sample-data');
     return sampleMembres;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ membres: { nodes: WpMembreNode[] } }>(MEMBRES_QUERY);
+    const data = await wpList<{ membres: { nodes: WpMembreNode[] } }>(
+      client, MEMBRES_QUERY, locale, (d) => d.membres?.nodes ?? [],
+    );
     const nodes = data.membres?.nodes ?? [];
     if (nodes.length === 0) {
       const { sampleMembres } = await import('./sample-data');
@@ -896,8 +976,8 @@ export type Groupe = {
 };
 
 const GROUPE_QUERY = gql`
-  query GroupePage {
-    pages(first: 1, where: { name: "groupe" }) {
+  query GroupePage($language: LanguageCodeFilterEnum) {
+    pages(first: 1, where: { name: "groupe", language: $language }) {
       nodes {
         groupeFields {
           introTitre
@@ -923,12 +1003,14 @@ type WpGroupeFields = {
   timeline: { annee: string | null; evenement: string | null }[] | null;
 };
 
-export async function getGroupe(): Promise<Groupe> {
+export async function getGroupe(locale: WpLocale = 'fr'): Promise<Groupe> {
   const { sampleGroupe } = await import('./sample-data');
   if (!endpoint) return sampleGroupe;
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ pages: { nodes: { groupeFields: WpGroupeFields | null }[] } }>(GROUPE_QUERY);
+    const data = await wpSingle<{ pages: { nodes: { groupeFields: WpGroupeFields | null }[] } }>(
+      client, GROUPE_QUERY, {}, locale, (d) => d.pages?.nodes?.[0]?.groupeFields,
+    );
     const f = data.pages?.nodes?.[0]?.groupeFields;
     // Page « groupe » absente ou champs vides → contenu de référence.
     if (!f || (!f.introTexte && !(f.chiffres?.length))) return sampleGroupe;
@@ -966,8 +1048,8 @@ export type Service = {
 };
 
 const SERVICES_QUERY = gql`
-  query Services {
-    services(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+  query Services($language: LanguageCodeFilterEnum) {
+    services(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
       nodes {
         title
         slug
@@ -1001,14 +1083,16 @@ type WpServiceNode = {
   } | null;
 };
 
-export async function getServices(): Promise<Service[]> {
+export async function getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
   if (!endpoint) {
     const { sampleServices } = await import('./sample-data');
     return sampleServices;
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await client.request<{ services: { nodes: WpServiceNode[] } }>(SERVICES_QUERY);
+    const data = await wpList<{ services: { nodes: WpServiceNode[] } }>(
+      client, SERVICES_QUERY, locale, (d) => d.services?.nodes ?? [],
+    );
     const nodes = data.services?.nodes ?? [];
     if (nodes.length === 0) {
       const { sampleServices } = await import('./sample-data');

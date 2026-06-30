@@ -1,26 +1,26 @@
 // Section « Crédibilité » : certifications exigeantes + endossement Groupe Altarea.
-// Reprend la logique de la maquette NDC (réassurance pro/technique).
+import type { WpLocale } from '@/lib/wordpress';
 
 const certifications = [
-  { code: 'ISO 27001', label: 'Sécurité de l’information', statut: 'Visée' },
-  { code: 'HDS', label: 'Hébergement de données de santé', statut: 'Visée' },
-  { code: 'ISO 14001', label: 'Management environnemental', statut: 'Visée' },
-  { code: 'ISO 50001', label: 'Management de l’énergie', statut: 'Visée' },
-  { code: 'EN 50600', label: 'Conception Tier III', statut: 'Conforme' },
-  { code: 'Code of Conduct', label: 'Datacenters européens', statut: 'Visée' },
+  { code: 'ISO 27001', labelKey: 'labelIso27001', statut: 'visee' },
+  { code: 'HDS', labelKey: 'labelHds', statut: 'visee' },
+  { code: 'ISO 14001', labelKey: 'labelIso14001', statut: 'visee' },
+  { code: 'ISO 50001', labelKey: 'labelIso50001', statut: 'visee' },
+  { code: 'EN 50600', labelKey: 'labelEn50600', statut: 'conforme' },
+  { code: 'Code of Conduct', labelKey: 'labelCoc', statut: 'visee' },
 ];
 
-export function Credibility() {
+export async function Credibility({ locale = 'fr' }: { locale?: WpLocale }) {
+  const t = (await import(`../messages/${locale}.json`)).default.credibility as Record<string, string>;
+  const statutLabel = (k: string) => (k === 'conforme' ? t.statutConforme : t.statutVisee);
+
   return (
     <section className="section section-alt" id="credibilite">
       <div className="container">
         <div className="section-head">
-          <span className="eyebrow">Crédibilité</span>
-          <h2 className="fil-rouge">Des certifications exigeantes, un groupe solide</h2>
-          <p>
-            La conformité de nos infrastructures aux référentiels les plus stricts du marché,
-            portée par un actionnariat de premier plan.
-          </p>
+          <span className="eyebrow">{t.eyebrow}</span>
+          <h2 className="fil-rouge">{t.title}</h2>
+          <p>{t.intro}</p>
         </div>
 
         <div className="cred-grid">
@@ -33,9 +33,9 @@ export function Credibility() {
               </div>
               <div className="cert-main">
                 <strong>{c.code}</strong>
-                <span>{c.label}</span>
+                <span>{t[c.labelKey]}</span>
               </div>
-              <span className={`cert-statut ${c.statut === 'Conforme' ? 'ok' : 'wip'}`}>{c.statut}</span>
+              <span className={`cert-statut ${c.statut === 'conforme' ? 'ok' : 'wip'}`}>{statutLabel(c.statut)}</span>
             </div>
           ))}
         </div>
@@ -43,16 +43,11 @@ export function Credibility() {
         {/* Endossement Groupe Altarea */}
         <div className="altarea-card">
           <div className="altarea-logo" aria-label="Groupe Altarea">
-            {/* Emplacement logo : dépose le fichier dans public/altarea-logo.svg (ou .png) */}
             <span className="altarea-mark">ALTAREA</span>
           </div>
           <div className="altarea-text">
-            <h3>Une marque du Groupe Altarea</h3>
-            <p>
-              Nation Data Center est une filiale à 100 % du Groupe Altarea, leader de la
-              transformation urbaine bas carbone en France. Un actionnariat solide et engagé au
-              service de vos projets critiques.
-            </p>
+            <h3>{t.altareaTitle}</h3>
+            <p>{t.altareaText}</p>
           </div>
         </div>
       </div>

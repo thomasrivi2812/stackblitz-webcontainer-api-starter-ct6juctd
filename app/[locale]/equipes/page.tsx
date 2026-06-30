@@ -1,12 +1,14 @@
-import { getMembres, POLE_LABELS, POLE_ORDER } from '@/lib/wordpress';
+import { getMembres, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Nos équipes',
-  description:
-    'Rencontrez les équipes de Nation Data Center : direction, ingénierie, exploitation et accompagnement. Les femmes et les hommes qui bâtissent un réseau de data centers souverains.',
-  alternates: { canonical: '/equipes' },
-};
+export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  return {
+    title: m.equipesTitle,
+    description: m.equipesDesc,
+    alternates: { canonical: '/equipes', languages: { fr: '/equipes', en: '/en/equipes' } },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -28,8 +30,10 @@ function LinkedInIcon() {
   );
 }
 
-export default async function EquipesPage() {
-  const membres = await getMembres();
+export default async function EquipesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+  const t = (await import(`../../../messages/${locale}.json`)).default.team as Record<string, string>;
+  const pole = (k: string) => t[`pole${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.poleFallback;
+  const membres = await getMembres(locale);
 
   // Groupement par pôle, dans l'ordre défini (pôles inconnus en fin de liste).
   const groupes = POLE_ORDER
@@ -42,19 +46,16 @@ export default async function EquipesPage() {
     <main>
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
-          <span className="eyebrow">Les femmes & les hommes de NDC</span>
-          <h1 className="fil-rouge">Nos équipes</h1>
-          <p>
-            Une équipe pluridisciplinaire — ingénierie, exploitation, sécurité et accompagnement —
-            au service de vos infrastructures critiques.
-          </p>
+          <span className="eyebrow">{t.eyebrow}</span>
+          <h1 className="fil-rouge">{t.h1}</h1>
+          <p>{t.intro}</p>
         </div>
       </section>
 
       {groupes.map((g, gi) => (
         <section className={`section ${gi % 2 === 1 ? 'section-alt' : ''}`} style={gi === 0 ? { paddingTop: 0 } : undefined} key={g.pole}>
           <div className="container">
-            <h2 className="team-pole-title fil-rouge">{POLE_LABELS[g.pole] ?? 'Équipe'}</h2>
+            <h2 className="team-pole-title fil-rouge">{pole(g.pole)}</h2>
             <div className="team-grid">
               {g.items.map((m) => (
                 <article className="team-card" key={m.nom + m.poste}>
@@ -70,7 +71,7 @@ export default async function EquipesPage() {
                     {m.poste && <span className="team-poste">{m.poste}</span>}
                     {m.bio && <p className="team-bio">{m.bio}</p>}
                     {m.linkedin && (
-                      <a className="team-linkedin" href={m.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`LinkedIn de ${m.nom}`}>
+                      <a className="team-linkedin" href={m.linkedin} target="_blank" rel="noopener noreferrer" aria-label={t.linkedinAria.replace('{name}', m.nom)}>
                         <LinkedInIcon />
                         LinkedIn
                       </a>

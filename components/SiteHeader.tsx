@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { Logo } from '@/components/Logo';
 import { LangSwitcher } from '@/components/LangSwitcher';
 import type { Persona } from '@/lib/personas';
@@ -32,6 +33,7 @@ function Chevron({ className }: { className?: string }) {
 }
 
 export function SiteHeader({ personas = [], datacenters = [] }: Props) {
+  const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
   const [mobileSub, setMobileSub] = useState<string | null>(null); // accordéon mobile ouvert
@@ -77,13 +79,13 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
             onMouseLeave={() => setDesktopOpen(null)}
           >
             <Link href="/datacenters" className="nav-link">
-              Notre réseau
+              {t('reseau')}
               <Chevron className="nav-chev" />
             </Link>
             {reseauChildren.length > 0 && (
               <div className={`nav-dd wide${desktopOpen === 'reseau' ? ' open' : ''}`}>
                 <Link href="/datacenters" className="nav-dd-all">
-                  Voir tout le réseau
+                  {t('reseauAll')}
                   <span aria-hidden="true">→</span>
                 </Link>
                 <div className="nav-dd-grid">
@@ -105,13 +107,13 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
             onMouseLeave={() => setDesktopOpen(null)}
           >
             <Link href="/offres" className="nav-link">
-              Nos offres
+              {t('offres')}
               <Chevron className="nav-chev" />
             </Link>
             {offresChildren.length > 0 && (
               <div className={`nav-dd${desktopOpen === 'offres' ? ' open' : ''}`}>
                 <Link href="/offres" className="nav-dd-all">
-                  Toutes nos offres
+                  {t('offresAll')}
                   <span aria-hidden="true">→</span>
                 </Link>
                 {offresChildren.map((c) => (
@@ -123,12 +125,12 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
             )}
           </div>
 
-          <Link href="/certifications" className="nav-link">Certifications</Link>
-          <Link href="/services" className="nav-link">Nos services</Link>
-          <Link href="/equipes" className="nav-link">Nos équipes</Link>
-          <Link href="/groupe" className="nav-link">Le groupe</Link>
-          <Link href="/actualites" className="nav-link">Actualités</Link>
-          <Link href="/contact" className="nav-link">Contact</Link>
+          <Link href="/certifications" className="nav-link">{t('certifications')}</Link>
+          <Link href="/services" className="nav-link">{t('services')}</Link>
+          <Link href="/equipes" className="nav-link">{t('equipes')}</Link>
+          <Link href="/groupe" className="nav-link">{t('groupe')}</Link>
+          <Link href="/actualites" className="nav-link">{t('actualites')}</Link>
+          <Link href="/contact" className="nav-link">{t('contact')}</Link>
           <LangSwitcher />
         </nav>
 
@@ -136,7 +138,7 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
         <button
           className={open ? 'burger open' : 'burger'}
           onClick={toggle}
-          aria-label="Menu"
+          aria-label={t('menu')}
           type="button"
         >
           <span></span>
@@ -154,12 +156,12 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
               aria-expanded={mobileSub === 'reseau'}
               onClick={() => setMobileSub((v) => (v === 'reseau' ? null : 'reseau'))}
             >
-              Notre réseau
+              {t('reseau')}
               <Chevron className="chev" />
             </button>
             <div className={`mnav-sub${mobileSub === 'reseau' ? ' open' : ''}`}>
               <Link href="/datacenters" className="all" onClick={close}>
-                Voir tout le réseau
+                {t('reseauAll')}
               </Link>
               {reseauChildren.map((c) => (
                 <Link key={c.href} href={c.href} onClick={close}>
@@ -178,12 +180,12 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
               aria-expanded={mobileSub === 'offres'}
               onClick={() => setMobileSub((v) => (v === 'offres' ? null : 'offres'))}
             >
-              Nos offres
+              {t('offres')}
               <Chevron className="chev" />
             </button>
             <div className={`mnav-sub${mobileSub === 'offres' ? ' open' : ''}`}>
               <Link href="/offres" className="all" onClick={close}>
-                Toutes nos offres
+                {t('offresAll')}
               </Link>
               {offresChildren.map((c) => (
                 <Link key={c.href} href={c.href} onClick={close}>
@@ -193,12 +195,12 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
             </div>
           </div>
 
-          <Link href="/certifications" onClick={close}>Certifications</Link>
-          <Link href="/services" onClick={close}>Nos services</Link>
-          <Link href="/equipes" onClick={close}>Nos équipes</Link>
-          <Link href="/groupe" onClick={close}>Le groupe</Link>
-          <Link href="/actualites" onClick={close}>Actualités</Link>
-          <Link href="/contact" onClick={close}>Contact</Link>
+          <Link href="/certifications" onClick={close}>{t('certifications')}</Link>
+          <Link href="/services" onClick={close}>{t('services')}</Link>
+          <Link href="/equipes" onClick={close}>{t('equipes')}</Link>
+          <Link href="/groupe" onClick={close}>{t('groupe')}</Link>
+          <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
+          <Link href="/contact" onClick={close}>{t('contact')}</Link>
           <LangSwitcher />
         </nav>
 

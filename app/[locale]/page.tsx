@@ -6,12 +6,14 @@ import { FaqSection } from '@/components/FaqSection';
 import { NetworkMap } from '@/components/NetworkMap';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Nation Data Center — Hébergement souverain & responsable',
-  description:
-    'Réseau de data centers français, souverains et écoresponsables (Tier 3, PUE 1,2, zéro eau). Colocation, haute densité et services de proximité pour vos enjeux IT critiques.',
-  alternates: { canonical: '/' },
-};
+export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+  const m = (await import(`../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  return {
+    title: m.homeTitle,
+    description: m.homeDesc,
+    alternates: { canonical: '/', languages: { fr: '/', en: '/en' } },
+  };
+}
 
 import {
   getDatacenters,
@@ -22,7 +24,7 @@ import {
   statutInfo,
   networkKpis,
   stripHtml,
-  formatDateFr,
+  type WpLocale,
 } from '@/lib/wordpress';
 
 export const dynamic = 'force-dynamic';
@@ -102,22 +104,30 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-const engagements = [
-  { icon: 'decarbon', titre: 'Décarbonation', desc: 'Énergies, matériaux, construction. Une approche bas carbone de bout en bout.' },
-  { icon: 'sobriete', titre: 'Sobriété énergétique', desc: 'Isolation, pilotage, optimisation — chaque kWh est mesuré et justifié.' },
-  { icon: 'chaleur', titre: 'Chaleur fatale', desc: 'Redistribution vers les réseaux urbains, piscines et logements voisins.' },
-  { icon: 'eau', titre: 'Ressource en eau', desc: "Zéro consommation d\u2019eau pour le refroidissement — protection des nappes." },
-];
+export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
+  // Dictionnaire de la page chargé par import direct (compatible WebContainer).
+  const t = (await import(`../../messages/${locale}.json`)).default.home as Record<string, string>;
 
-export default async function Home() {
-  const datacenters = await getDatacenters();
+  const datacenters = await getDatacenters(locale);
   const points = toMapPoints(datacenters);
   const preview = datacenters.slice(0, 3);
-  const posts = await getRecentPosts();
+  const posts = await getRecentPosts(locale);
   const kpis = networkKpis(datacenters);
-  const services = await getServices();
+  const services = await getServices(locale);
   const carouselServices = homeServices(services, 5);
   const heroImage = '/hero-datacenter.jpg';
+  const fmtDate = (iso: string) => {
+    try {
+      return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+    } catch { return ''; }
+  };
+
+  const engagements = [
+    { icon: 'decarbon', titre: t.engDecarbonTitre, desc: t.engDecarbonDesc },
+    { icon: 'sobriete', titre: t.engSobrieteTitre, desc: t.engSobrieteDesc },
+    { icon: 'chaleur', titre: t.engChaleurTitre, desc: t.engChaleurDesc },
+    { icon: 'eau', titre: t.engEauTitre, desc: t.engEauDesc },
+  ];
 
   return (
     <main>
@@ -126,22 +136,19 @@ export default async function Home() {
         <div className="hero-bg-grid" aria-hidden="true" />
         <div className="container hero-grid">
           <div className="hero-text">
-            <span className="eyebrow"><span className="eyebrow-dot" />Souverain · Responsable · De proximité</span>
+            <span className="eyebrow"><span className="eyebrow-dot" />{t.heroEyebrow}</span>
             <h1 className="hero-title">
-              Construire les infrastructures IT <span className="title-accent">de demain</span>.
+              {t.heroTitle1} <span className="title-accent">{t.heroTitleAccent}</span>.
             </h1>
-            <p className="hero-lead">
-              Premier réseau français de data centers souverains, locaux et écoresponsables —
-              pour les organisations qui veulent reprendre la main sur leurs données.
-            </p>
+            <p className="hero-lead">{t.heroLead}</p>
             <div className="cta-row">
               <a className="btn-v2 btn-v2-primary" href="/datacenters">
-                Découvrir notre réseau
+                {t.heroCtaPrimary}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn-v2 btn-v2-ghost" href="/contact">Demander un échange</a>
+              <a className="btn-v2 btn-v2-ghost" href="/contact">{t.heroCtaSecondary}</a>
             </div>
           </div>
           <div className="hero-visual">
@@ -153,7 +160,7 @@ export default async function Home() {
             <div className="hero-caption">
               <span className="hero-cap-dot" aria-hidden="true" />
               <div>
-                <strong>Rennes — site livré</strong>
+                <strong>{t.heroCaptionTitle}</strong>
                 <span>3 MW · PUE&nbsp;1,2</span>
               </div>
             </div>
@@ -169,12 +176,12 @@ export default async function Home() {
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />Le réseau NDC</span>
-              <h2 className="section-title">Nos data centers.</h2>
-              <p className="section-sub">Un réseau 100&nbsp;% implanté sur le territoire, à l&apos;horizon de 15 sites en 2030.</p>
+              <span className="eyebrow"><span className="eyebrow-dot" />{t.dcEyebrow}</span>
+              <h2 className="section-title">{t.dcTitle}</h2>
+              <p className="section-sub">{t.dcSub}</p>
             </div>
             <a className="link-arrow" href="/datacenters">
-              Voir tous les sites
+              {t.dcSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -196,11 +203,11 @@ export default async function Home() {
                     </div>
                     <ul className="dc-tile-specs">
                       {dc.datacenterFields.puissance && (
-                        <li><span>Puissance</span><strong>{dc.datacenterFields.puissance}</strong></li>
+                        <li><span>{t.specPuissance}</span><strong>{dc.datacenterFields.puissance}</strong></li>
                       )}
-                      <li><span>Statut</span><strong>{label}</strong></li>
+                      <li><span>{t.specStatut}</span><strong>{label}</strong></li>
                       {dc.datacenterFields.region && (
-                        <li><span>Région</span><strong>{dc.datacenterFields.region}</strong></li>
+                        <li><span>{t.specRegion}</span><strong>{dc.datacenterFields.region}</strong></li>
                       )}
                     </ul>
                   </div>
@@ -219,19 +226,17 @@ export default async function Home() {
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />Nos services</span>
-              <h2 className="section-title">Une infrastructure adaptée<br />à vos exigences.</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{t.servicesEyebrow}</span>
+              <h2 className="section-title">{t.servicesTitle1}<br />{t.servicesTitle2}</h2>
             </div>
-            <p className="section-sub right">
-              NDC vous accompagne de la définition de votre dispositif à son exploitation quotidienne.
-            </p>
+            <p className="section-sub right">{t.servicesSub}</p>
           </div>
 
           <ServicesCarousel services={carouselServices} />
 
           <div className="services-cta">
             <a className="btn-v2 btn-v2-primary" href="/services">
-              Découvrir tous nos services
+              {t.servicesCta}
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -245,11 +250,11 @@ export default async function Home() {
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />Nos engagements</span>
-              <h2 className="section-title">Pourquoi choisir NDC.</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{t.engEyebrow}</span>
+              <h2 className="section-title">{t.engTitle}</h2>
             </div>
             <a className="link-arrow" href="/contact">
-              Voir tous nos engagements
+              {t.engSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -273,38 +278,38 @@ export default async function Home() {
         <div className="amv-glow" aria-hidden="true" />
         <div className="container amv-grid-v2">
           <header className="amv-header">
-            <span className="eyebrow"><span className="eyebrow-dot" />Notre raison d&apos;être</span>
-            <h2>Un réseau <span className="accent">sécurisé et durable</span><br />sur tout le territoire.</h2>
+            <span className="eyebrow"><span className="eyebrow-dot" />{t.amvEyebrow}</span>
+            <h2>{t.amvTitle1} <span className="accent">{t.amvTitleAccent}</span><br />{t.amvTitle2}</h2>
             <p>
-              Après Rouen, Rennes&nbsp;1 et Paris&nbsp;1, NDC développe{' '}
-              <strong>15&nbsp;sites à horizon 2030</strong> — souverains, écoresponsables, opérés par nos équipes.
+              {t.amvIntro1}{' '}
+              <strong>{t.amvIntroStrong}</strong> {t.amvIntro2}
             </p>
             <div className="amv-figures">
-              <div><strong>15</strong><span>sites en 2030</span></div>
-              <div><strong>3</strong><span>en service</span></div>
-              <div><strong>16<i>%</i></strong><span>empreinte numérique FR</span></div>
+              <div><strong>15</strong><span>{t.amvFig1}</span></div>
+              <div><strong>3</strong><span>{t.amvFig2}</span></div>
+              <div><strong>16<i>%</i></strong><span>{t.amvFig3}</span></div>
             </div>
           </header>
           <div className="amv-cards">
             <article className="amv-card">
               <span className="amv-card-key">A.</span>
               <div>
-                <h3>Ambition</h3>
-                <p>Un réseau écoresponsable, souverain et de proximité — conçu et opéré par nos équipes, pour répondre à l&apos;ensemble de vos enjeux IT.</p>
+                <h3>{t.ambitionTitle}</h3>
+                <p>{t.ambitionText}</p>
               </div>
             </article>
             <article className="amv-card">
               <span className="amv-card-key">M.</span>
               <div>
-                <h3>Mission</h3>
-                <p>Réconcilier performance économique et durabilité environnementale, dans une filière qui pèse 16&nbsp;% du carbone numérique français.</p>
+                <h3>{t.missionTitle}</h3>
+                <p>{t.missionText}</p>
               </div>
             </article>
             <article className="amv-card">
               <span className="amv-card-key">V.</span>
               <div>
-                <h3>Vision</h3>
-                <p>Des centres décarbonés, sans eau pour le refroidissement, intégrés à leur territoire, avec un accompagnement client au quotidien.</p>
+                <h3>{t.visionTitle}</h3>
+                <p>{t.visionText}</p>
               </div>
             </article>
           </div>
@@ -312,21 +317,21 @@ export default async function Home() {
       </section>
 
       {/* CRÉDIBILITÉ + GROUPE ALTAREA */}
-      <Credibility />
+      <Credibility locale={locale} />
 
       {/* FAQ */}
-      <FaqSection />
+      <FaqSection locale={locale} />
 
       {/* ACTUALITÉS */}
       <section className="section" id="actualites">
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />Actualités</span>
-              <h2 className="section-title">Ce qui se passe chez NDC.</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{t.newsEyebrow}</span>
+              <h2 className="section-title">{t.newsTitle}</h2>
             </div>
             <a className="link-arrow" href="/actualites">
-              Toutes les actualités
+              {t.newsSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -344,13 +349,13 @@ export default async function Home() {
                 </div>
                 <div className="news-feat-body">
                   <div className="news-meta-v2">
-                    <span className="news-cat">Réseau</span>
-                    <span className="news-date-v2">{formatDateFr(posts[0].date)}</span>
+                    <span className="news-cat">{t.newsCatReseau}</span>
+                    <span className="news-date-v2">{fmtDate(posts[0].date)}</span>
                   </div>
                   <h3>{posts[0].title}</h3>
                   <p>{stripHtml(posts[0].excerpt)}</p>
                   <span className="link-arrow small">
-                    Lire l&apos;article
+                    {t.newsRead}
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                       <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
@@ -370,8 +375,8 @@ export default async function Home() {
                       </div>
                       <div className="news-sm-body">
                         <div className="news-meta-v2">
-                          <span className="news-cat alt">Actualité</span>
-                          <span className="news-date-v2">{formatDateFr(p.date)}</span>
+                          <span className="news-cat alt">{t.newsCatActu}</span>
+                          <span className="news-date-v2">{fmtDate(p.date)}</span>
                         </div>
                         <h3>{p.title}</h3>
                       </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { AnimatedKpi } from './AnimatedKpi';
 
 type Kpi = {
@@ -14,7 +15,8 @@ type Props = {
   meta?: string;
 };
 
-export function KpiBand({ kpis, title = 'Le réseau en chiffres', meta: metaProp }: Props) {
+export function KpiBand({ kpis, title, meta: metaProp }: Props) {
+  const t = useTranslations('kpiBand');
   function getDuration(k: Kpi): number {
     const cleaned = k.valeur.replace(/\s/g, '').replace(',', '.');
     const num = parseFloat(cleaned);
@@ -24,16 +26,17 @@ export function KpiBand({ kpis, title = 'Le réseau en chiffres', meta: metaProp
     return 2000;
   }
 
+  const finalTitle = title ?? t('defaultTitle');
   // Date courante au format "MM.YYYY" pour le bandeau "Données réseau · mise à jour ..."
   const now = new Date();
-  const meta = metaProp ?? `Données réseau · mise à jour ${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+  const meta = metaProp ?? `${t('updated')} ${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
 
   return (
     <section className="kpi-band">
       <div className="kpi-band-glow" aria-hidden="true" />
       <div className="container">
         <div className="kpi-band-head">
-          <span className="kpi-overline"><span className="dash" />{title}</span>
+          <span className="kpi-overline"><span className="dash" />{finalTitle}</span>
           <span className="kpi-meta">{meta}</span>
         </div>
         <div className="kpi-grid">

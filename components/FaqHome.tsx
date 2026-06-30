@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Faq } from '@/lib/wordpress';
 
 // Section FAQ de l'accueil — accordéon, une seule réponse ouverte à la fois.
 // Le contenu vient de WordPress (CPT « faq »), avec repli sur les données d'exemple.
 
 export function FaqHome({ items = [] }: { items?: Faq[] }) {
+  const t = useTranslations('faq');
   const [open, setOpen] = useState<number | null>(0);
 
   if (!items.length) return null;
@@ -15,8 +17,8 @@ export function FaqHome({ items = [] }: { items?: Faq[] }) {
     <section className="section section-alt" id="faq">
       <div className="container faq-home-inner">
         <div className="section-head">
-          <span className="eyebrow">Questions fréquentes</span>
-          <h2 className="fil-rouge">Tout savoir sur l’hébergement chez NDC</h2>
+          <span className="eyebrow">{t('eyebrow')}</span>
+          <h2 className="fil-rouge">{t('title')}</h2>
         </div>
 
         <div className="faq-home-list">

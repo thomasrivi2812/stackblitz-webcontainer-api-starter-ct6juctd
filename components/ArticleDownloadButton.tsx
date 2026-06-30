@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
+  const t = useTranslations('download');
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -47,11 +49,11 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
 
   function handleSubmit() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Merci de saisir une adresse e-mail valide.');
+      setError(t('errEmail'));
       return;
     }
     if (!consent) {
-      setError('Merci de cocher la case.');
+      setError(t('errConsent'));
       return;
     }
     setError('');
@@ -99,7 +101,7 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
       >
         <button
           onClick={doClose}
-          aria-label="Fermer"
+          aria-label={t('close')}
           style={{
             position: 'absolute', top: 14, right: 16, background: 'none',
             border: 'none', fontSize: 28, color: '#5d6b85', cursor: 'pointer',
@@ -112,22 +114,22 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
         {!done ? (
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1c8cbd', marginBottom: 8 }}>
-              Ressource
+              {t('eyebrow')}
             </p>
             <h3 style={{ fontSize: 22, margin: '0 0 10px', color: '#1b3360' }}>
-              Télécharger le document
+              {t('title')}
             </h3>
             <p style={{ color: '#5d6b85', fontSize: 14.5, marginBottom: 20, lineHeight: 1.55 }}>
-              Renseignez votre e-mail professionnel pour accéder à&nbsp;:
+              {t('intro')}
               <br />
               <strong style={{ color: '#1b3360' }}>{title}</strong>
             </p>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#1b3360', marginBottom: 6 }}>
-              E-mail professionnel
+              {t('emailLabel')}
             </label>
             <input
               type="email"
-              placeholder="nom@entreprise.fr"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
@@ -145,15 +147,13 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
                 onChange={(e) => setConsent(e.target.checked)}
                 style={{ marginTop: 3, flexShrink: 0 }}
               />
-              <span>
-                J&rsquo;accepte d&rsquo;être recontacté par Nation Data Center conformément à la politique de confidentialité.
-              </span>
+              <span>{t('consent')}</span>
             </label>
             {error !== '' && (
               <div style={{ color: '#e3051b', fontSize: 13, marginBottom: 14 }}>{error}</div>
             )}
             <button type="button" style={blue} onClick={handleSubmit}>
-              Télécharger le document
+              {t('submit')}
             </button>
           </div>
         ) : (
@@ -163,16 +163,16 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
                 <path d="M20 6L9 17l-5-5" />
               </svg>
             </div>
-            <h3 style={{ fontSize: 22, marginBottom: 10, color: '#1b3360' }}>Merci !</h3>
+            <h3 style={{ fontSize: 22, marginBottom: 10, color: '#1b3360' }}>{t('doneTitle')}</h3>
             <p style={{ color: '#5d6b85', fontSize: 14.5, marginBottom: 22 }}>
-              Votre téléchargement a démarré.
+              {t('doneText')}
             </p>
             <button
               type="button"
               onClick={doClose}
               style={{ ...blue, background: '#fff', color: '#1b3360', border: '1.5px solid #e2e8f1' }}
             >
-              Fermer
+              {t('close')}
             </button>
           </div>
         )}
@@ -183,7 +183,7 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
   return (
     <>
       <button type="button" style={blue} onClick={() => setOpen(true)}>
-        Télécharger
+        {t('trigger')}
       </button>
       {open && mounted && createPortal(modal, document.body)}
     </>

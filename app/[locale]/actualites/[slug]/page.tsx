@@ -2,23 +2,34 @@ import { notFound } from 'next/navigation';
 import {
   getPostBySlug,
   getAllPosts,
-  formatDateFr,
   stripHtml,
+  type WpLocale,
 } from '@/lib/wordpress';
 import { ArticleDownloadButton } from '@/components/ArticleDownloadButton';
 import type { Metadata } from 'next';
 
 interface Props {
-  params: { slug: string };
+  params: { locale: WpLocale; slug: string };
 }
+
+const fmtDate = (iso: string, locale: WpLocale) => {
+  try {
+    return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+  } catch { return ''; }
+};
 
 /* Metadata dynamique */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
-  if (!post) return { title: 'Article introuvable — NDC' };
+  const post = await getPostBySlug(params.slug, params.locale);
+  const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
+  if (!post) return { title: t.notFound };
   return {
     title: `${post.title} — Nation Data Center`,
     description: stripHtml(post.excerpt).slice(0, 160),
+    alternates: {
+      canonical: `/actualites/${params.slug}`,
+      languages: { fr: `/actualites/${params.slug}`, en: `/en/actualites/${params.slug}` },
+    },
   };
 }
 
@@ -84,11 +95,12 @@ function Icon({ name }: { name: string }) {
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const post = await getPostBySlug(params.slug);
+  const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
+  const post = await getPostBySlug(params.slug, params.locale);
   if (!post) notFound();
 
   /* Articles récents pour la sidebar « À lire aussi » */
-  const allPosts = await getAllPosts();
+  const allPosts = await getAllPosts(params.locale);
   const related = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
 
   return (
@@ -98,7 +110,7 @@ export default async function ArticlePage({ params }: Props) {
         <div className="container">
           <a className="back-link" href="/actualites">
             <Icon name="arrow-left" />
-            Retour aux actualités
+            {t.back}
           </a>
 
           <div className="article-hero-meta">
@@ -114,7 +126,7 @@ export default async function ArticlePage({ params }: Props) {
           <div className="article-info">
             <span className="article-info-item">
               <Icon name="calendar" />
-              {formatDateFr(post.date)}
+              {fmtDate(post.date, params.locale)}
             </span>
             {post.author?.node?.name && (
               <span className="article-info-item">
@@ -160,13 +172,13 @@ export default async function ArticlePage({ params }: Props) {
                   </div>
                   <div className="article-download-info">
                     <span className="article-download-label">
-                      Document à télécharger
+                      {t.downloadLabel}
                     </span>
-                    <strong>{post.document.titre || 'Document associé'}</strong>
+                    <strong>{post.document.titre || t.docFallback}</strong>
                   </div>
                   <ArticleDownloadButton
                     url={post.document.url}
-                    title={post.document.titre || 'Document associé'}
+                    title={post.document.titre || t.docFallback}
                   />
                 </div>
               )}
@@ -174,7 +186,7 @@ export default async function ArticlePage({ params }: Props) {
               {/* ── Tags ── */}
               {post.tags.nodes.length > 0 && (
                 <div className="article-sidebar-block">
-                  <h4>Tags</h4>
+                  <h4>{t.tags}</h4>
                   <div className="article-tags">
                     {post.tags.nodes.map((tag) => (
                       <span className="article-tag" key={tag.slug}>
@@ -188,7 +200,7 @@ export default async function ArticlePage({ params }: Props) {
               {/* ── Articles liés ── */}
               {related.length > 0 && (
                 <div className="article-sidebar-block">
-                  <h4>À lire aussi</h4>
+                  <h4>{t.alsoRead}</h4>
                   <div className="article-related">
                     {related.map((r) => (
                       <a
@@ -210,7 +222,7 @@ export default async function ArticlePage({ params }: Props) {
                         </div>
                         <div>
                           <span className="article-related-date">
-                            {formatDateFr(r.date)}
+                            {fmtDate(r.date, params.locale)}
                           </span>
                           <h5>{r.title}</h5>
                         </div>
@@ -222,12 +234,10 @@ export default async function ArticlePage({ params }: Props) {
 
               {/* ── CTA Contact ── */}
               <div className="article-sidebar-cta">
-                <h4>Un projet d'hébergement ?</h4>
-                <p>
-                  Nos équipes sont à votre écoute pour étudier votre besoin.
-                </p>
+                <h4>{t.ctaTitle}</h4>
+                <p>{t.ctaText}</p>
                 <a className="btn btn-primary" href="/contact">
-                  Nous contacter
+                  {t.ctaButton}
                 </a>
               </div>
             </aside>

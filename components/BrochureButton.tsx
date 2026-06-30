@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 
 // Bouton « Télécharger la brochure » → vraie popup modale (centrée, fond assombri).
@@ -10,6 +11,7 @@ import { sendLead } from '@/lib/send-lead';
 const PDF_URL = '/brochure-ndc.pdf';
 
 export function BrochureButton({ className = 'btn btn-ghost' }: { className?: string }) {
+  const t = useTranslations('brochure');
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -35,11 +37,11 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
 
   function handleSubmit() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Merci de saisir une adresse e-mail valide.');
+      setError(t('errEmail'));
       return;
     }
     if (!consent) {
-      setError('Merci d’accepter d’être recontacté pour télécharger la brochure.');
+      setError(t('errConsent'));
       return;
     }
     setError('');
@@ -57,28 +59,28 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
   return (
     <>
       <button type="button" className={className} onClick={() => setOpen(true)}>
-        Télécharger notre brochure
+        {t('trigger')}
       </button>
 
       {open && (
         <div className="ndcm-overlay" role="dialog" aria-modal="true" onClick={close}>
           <div className="ndcm-card" onClick={(e) => e.stopPropagation()}>
-            <button className="ndcm-close" aria-label="Fermer" onClick={close}>
+            <button className="ndcm-close" aria-label={t('close')} onClick={close}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
 
             {!done ? (
               <>
-                <span className="ndcm-eyebrow"><span className="ndcm-eyebrow-dot" aria-hidden="true" />Ressource</span>
-                <h3 className="ndcm-title">Télécharger la brochure NDC</h3>
-                <p className="ndcm-text">Renseignez votre e-mail professionnel pour accéder à notre brochure complète.</p>
+                <span className="ndcm-eyebrow"><span className="ndcm-eyebrow-dot" aria-hidden="true" />{t('eyebrow')}</span>
+                <h3 className="ndcm-title">{t('title')}</h3>
+                <p className="ndcm-text">{t('text')}</p>
 
-                <label className="ndcm-label" htmlFor="ndcm-email">E-mail professionnel</label>
+                <label className="ndcm-label" htmlFor="ndcm-email">{t('emailLabel')}</label>
                 <input
                   id="ndcm-email"
                   type="email"
                   className="ndcm-input"
-                  placeholder="prenom.nom@entreprise.fr"
+                  placeholder={t('emailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
@@ -87,21 +89,21 @@ export function BrochureButton({ className = 'btn btn-ghost' }: { className?: st
 
                 <label className="ndcm-consent">
                   <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-                  <span>J’accepte d’être recontacté par Nation Data Center et la conservation de mes données conformément à la politique de confidentialité.</span>
+                  <span>{t('consent')}</span>
                 </label>
 
                 {error && <p className="ndcm-error">{error}</p>}
 
-                <button type="button" className="ndcm-submit" onClick={handleSubmit}>Recevoir la brochure</button>
+                <button type="button" className="ndcm-submit" onClick={handleSubmit}>{t('submit')}</button>
               </>
             ) : (
               <div className="ndcm-done">
                 <div className="ndcm-check">
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
-                <h3 className="ndcm-title">Merci !</h3>
-                <p className="ndcm-text">Votre téléchargement a démarré. S’il ne se lance pas, <a href={PDF_URL} download>cliquez ici</a>.</p>
-                <button type="button" className="ndcm-ghost" onClick={close}>Fermer</button>
+                <h3 className="ndcm-title">{t('doneTitle')}</h3>
+                <p className="ndcm-text">{t('doneText')} <a href={PDF_URL} download>{t('doneLink')}</a>.</p>
+                <button type="button" className="ndcm-ghost" onClick={close}>{t('close')}</button>
               </div>
             )}
           </div>

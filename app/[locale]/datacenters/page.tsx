@@ -1,12 +1,14 @@
-import { getDatacenters, statutInfo } from '@/lib/wordpress';
+import { getDatacenters, statutInfo, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Notre réseau de data centers en France',
-  description:
-    'Découvrez les data centers Nation Data Center : Rennes, Rouen, Vélizy… Un réseau souverain de 15 sites prévus d’ici 2030, conçus Tier III et écoresponsables.',
-  alternates: { canonical: '/datacenters' },
-};
+export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  return {
+    title: m.datacentersTitle,
+    description: m.datacentersDesc,
+    alternates: { canonical: '/datacenters', languages: { fr: '/datacenters', en: '/en/datacenters' } },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -20,27 +22,27 @@ function PinIcon() {
   );
 }
 
-export default async function DatacentersPage() {
-  const datacenters = await getDatacenters();
+export default async function DatacentersPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+  const t = (await import(`../../../messages/${locale}.json`)).default.datacenters as Record<string, string>;
+  const datacenters = await getDatacenters(locale);
   const isLive = Boolean(process.env.WORDPRESS_GRAPHQL_ENDPOINT);
+
+  const statutLabel = (k: string) =>
+    t[`statut${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.statutInconnu;
 
   return (
     <main>
       <div className={`data-banner ${isLive ? 'live' : 'sample'}`}>
         <div className="container">
-          {isLive
-            ? '● Données en direct depuis votre endpoint WordPress GraphQL.'
-            : '○ Données d’exemple. Renseignez WORDPRESS_GRAPHQL_ENDPOINT (.env.local) pour brancher vos vraies données.'}
+          {isLive ? t.bannerLive : t.bannerSample}
         </div>
       </div>
 
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
-          <span className="eyebrow">Le réseau NDC</span>
-          <h2 className="fil-rouge">Nos data centers</h2>
-          <p>
-            Un réseau 100 % implanté sur le territoire national, à l’horizon de 15 sites en 2030.
-          </p>
+          <span className="eyebrow">{t.eyebrow}</span>
+          <h2 className="fil-rouge">{t.h2}</h2>
+          <p>{t.intro}</p>
         </div>
       </section>
 
@@ -48,12 +50,12 @@ export default async function DatacentersPage() {
         <div className="container">
           <div className="dc-grid">
             {datacenters.map((dc) => {
-              const { key, label } = statutInfo(dc.datacenterFields.statut);
+              const { key } = statutInfo(dc.datacenterFields.statut);
               return (
                 <a className="dc-card" key={dc.slug} href={`/datacenters/${dc.slug}`}>
                   <span className={`badge ${key}`}>
                     <span className="dot" />
-                    {label}
+                    {statutLabel(key)}
                   </span>
                   {dc.datacenterFields.ville && (
                     <div className="city">

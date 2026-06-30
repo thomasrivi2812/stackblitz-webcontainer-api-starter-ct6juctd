@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 
 // Bouton « Poser votre question » → modale (email + question).
 // L'email/question sont captés côté client ; l'envoi vers le CRM se fera via une route serveur.
 
 export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: string }) {
+  const t = useTranslations('askQuestion');
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [question, setQuestion] = useState('');
@@ -34,11 +36,11 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
 
   async function submit() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Merci de saisir une adresse e-mail valide.');
+      setError(t('errEmail'));
       return;
     }
     if (question.trim().length < 5) {
-      setError('Merci de détailler un peu votre question.');
+      setError(t('errQuestion'));
       return;
     }
     setError('');
@@ -48,49 +50,49 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
     if (ok) {
       setDone(true);
     } else {
-      setError('Une erreur est survenue. Merci de réessayer.');
+      setError(t('errGeneric'));
     }
   }
 
   return (
     <>
       <button type="button" className="aq-trigger" style={{ ['--aq-accent' as string]: accent } as React.CSSProperties} onClick={() => setOpen(true)}>
-        Poser votre question
+        {t('trigger')}
       </button>
 
       {open && (
         <div className="aq-overlay" role="dialog" aria-modal="true" onClick={close}>
           <div className="aq-card" style={{ ['--aq-accent' as string]: accent } as React.CSSProperties} onClick={(e) => e.stopPropagation()}>
-            <button className="aq-close" aria-label="Fermer" onClick={close}>
+            <button className="aq-close" aria-label={t('close')} onClick={close}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
 
             {!done ? (
               <>
-                <span className="aq-eyebrow"><span className="aq-eyebrow-dot" aria-hidden="true" />Une question ?</span>
-                <h3 className="aq-title">Poser votre question</h3>
-                <p className="aq-text">Une question précise ? Laissez-nous votre e-mail et votre question, nous vous répondrons dans les plus brefs délais.</p>
+                <span className="aq-eyebrow"><span className="aq-eyebrow-dot" aria-hidden="true" />{t('eyebrow')}</span>
+                <h3 className="aq-title">{t('title')}</h3>
+                <p className="aq-text">{t('text')}</p>
 
-                <label className="aq-label" htmlFor="aq-email">Votre e-mail</label>
-                <input id="aq-email" type="email" className="aq-input" placeholder="prenom.nom@entreprise.fr"
+                <label className="aq-label" htmlFor="aq-email">{t('emailLabel')}</label>
+                <input id="aq-email" type="email" className="aq-input" placeholder={t('emailPlaceholder')}
                   value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
 
-                <label className="aq-label" htmlFor="aq-question">Votre question</label>
-                <textarea id="aq-question" className="aq-input aq-textarea" rows={4} placeholder="Posez votre question ici…"
+                <label className="aq-label" htmlFor="aq-question">{t('questionLabel')}</label>
+                <textarea id="aq-question" className="aq-input aq-textarea" rows={4} placeholder={t('questionPlaceholder')}
                   value={question} onChange={(e) => setQuestion(e.target.value)} />
 
                 {error && <p className="aq-error">{error}</p>}
 
-                <button type="button" className="aq-submit" onClick={submit} disabled={sending}>{sending ? 'Envoi…' : 'Envoyer ma question'}</button>
+                <button type="button" className="aq-submit" onClick={submit} disabled={sending}>{sending ? t('sending') : t('submit')}</button>
               </>
             ) : (
               <div className="aq-done">
                 <div className="aq-check">
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
-                <h3 className="aq-title">Merci !</h3>
-                <p className="aq-text">Votre question a bien été enregistrée. Nos équipes vous répondront dans les plus brefs délais.</p>
-                <button type="button" className="aq-ghost" onClick={close}>Fermer</button>
+                <h3 className="aq-title">{t('doneTitle')}</h3>
+                <p className="aq-text">{t('doneText')}</p>
+                <button type="button" className="aq-ghost" onClick={close}>{t('close')}</button>
               </div>
             )}
           </div>

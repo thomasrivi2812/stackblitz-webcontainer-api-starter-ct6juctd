@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 
 type FormData = {
@@ -25,15 +26,18 @@ const INITIAL: FormData = {
   consent: false,
 };
 
-const OBJETS = [
-  'Demande de devis',
-  'Visite de site',
-  'Renseignements techniques',
-  'Partenariat / presse',
-  'Autre',
+// La valeur envoyée reste stable (FR) quelle que soit la langue → données de lead
+// inchangées ; seul le libellé affiché est traduit via labelKey.
+const OBJETS: { value: string; labelKey: string }[] = [
+  { value: 'Demande de devis', labelKey: 'objDevis' },
+  { value: 'Visite de site', labelKey: 'objVisite' },
+  { value: 'Renseignements techniques', labelKey: 'objTech' },
+  { value: 'Partenariat / presse', labelKey: 'objPartenariat' },
+  { value: 'Autre', labelKey: 'objAutre' },
 ];
 
 export function ContactForm() {
+  const t = useTranslations('contactForm');
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
@@ -45,12 +49,12 @@ export function ContactForm() {
 
   function validate(): boolean {
     const e: Partial<Record<keyof FormData, string>> = {};
-    if (!form.prenom.trim()) e.prenom = 'Le prénom est requis.';
-    if (!form.nom.trim()) e.nom = 'Le nom est requis.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Adresse e-mail invalide.';
-    if (!form.objet) e.objet = 'Veuillez sélectionner un objet.';
-    if (form.message.trim().length < 10) e.message = 'Votre message doit contenir au moins 10 caractères.';
-    if (!form.consent) e.consent = 'Veuillez accepter la politique de confidentialité.';
+    if (!form.prenom.trim()) e.prenom = t('errFirstName');
+    if (!form.nom.trim()) e.nom = t('errLastName');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = t('errEmail');
+    if (!form.objet) e.objet = t('errSubject');
+    if (form.message.trim().length < 10) e.message = t('errMessage');
+    if (!form.consent) e.consent = t('errConsent');
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -88,13 +92,10 @@ export function ContactForm() {
             <path d="M20 6L9 17l-5-5" />
           </svg>
         </div>
-        <h3>Message envoyé !</h3>
-        <p>
-          Merci pour votre message. Nos équipes vous répondront dans les plus
-          brefs délais, généralement sous 24 heures.
-        </p>
+        <h3>{t('successTitle')}</h3>
+        <p>{t('successText')}</p>
         <button className="btn btn-ghost" onClick={() => setStatus('idle')}>
-          Envoyer un autre message
+          {t('successAgain')}
         </button>
       </div>
     );
@@ -107,13 +108,13 @@ export function ContactForm() {
       <div className="contact-row">
         <div className="contact-field">
           <label className="contact-label" htmlFor="prenom">
-            Prénom <span className="contact-req">*</span>
+            {t('firstName')} <span className="contact-req">*</span>
           </label>
           <input
             id="prenom"
             className={`contact-input ${errors.prenom ? 'has-error' : ''}`}
             type="text"
-            placeholder="Jean"
+            placeholder={t('firstNamePlaceholder')}
             value={form.prenom}
             onChange={(e) => update('prenom', e.target.value)}
           />
@@ -121,13 +122,13 @@ export function ContactForm() {
         </div>
         <div className="contact-field">
           <label className="contact-label" htmlFor="nom">
-            Nom <span className="contact-req">*</span>
+            {t('lastName')} <span className="contact-req">*</span>
           </label>
           <input
             id="nom"
             className={`contact-input ${errors.nom ? 'has-error' : ''}`}
             type="text"
-            placeholder="Dupont"
+            placeholder={t('lastNamePlaceholder')}
             value={form.nom}
             onChange={(e) => update('nom', e.target.value)}
           />
@@ -139,13 +140,13 @@ export function ContactForm() {
       <div className="contact-row">
         <div className="contact-field">
           <label className="contact-label" htmlFor="email">
-            E-mail professionnel <span className="contact-req">*</span>
+            {t('email')} <span className="contact-req">*</span>
           </label>
           <input
             id="email"
             className={`contact-input ${errors.email ? 'has-error' : ''}`}
             type="email"
-            placeholder="jean.dupont@entreprise.fr"
+            placeholder={t('emailPlaceholder')}
             value={form.email}
             onChange={(e) => update('email', e.target.value)}
           />
@@ -153,13 +154,13 @@ export function ContactForm() {
         </div>
         <div className="contact-field">
           <label className="contact-label" htmlFor="telephone">
-            Téléphone
+            {t('phone')}
           </label>
           <input
             id="telephone"
             className="contact-input"
             type="tel"
-            placeholder="+33 6 12 34 56 78"
+            placeholder={t('phonePlaceholder')}
             value={form.telephone}
             onChange={(e) => update('telephone', e.target.value)}
           />
@@ -169,13 +170,13 @@ export function ContactForm() {
       {/* Entreprise */}
       <div className="contact-field">
         <label className="contact-label" htmlFor="entreprise">
-          Entreprise
+          {t('company')}
         </label>
         <input
           id="entreprise"
           className="contact-input"
           type="text"
-          placeholder="Nom de votre entreprise"
+          placeholder={t('companyPlaceholder')}
           value={form.entreprise}
           onChange={(e) => update('entreprise', e.target.value)}
         />
@@ -184,7 +185,7 @@ export function ContactForm() {
       {/* Objet */}
       <div className="contact-field">
         <label className="contact-label" htmlFor="objet">
-          Objet de votre demande <span className="contact-req">*</span>
+          {t('subject')} <span className="contact-req">*</span>
         </label>
         <select
           id="objet"
@@ -192,9 +193,9 @@ export function ContactForm() {
           value={form.objet}
           onChange={(e) => update('objet', e.target.value)}
         >
-          <option value="">— Sélectionnez un objet —</option>
+          <option value="">{t('subjectPlaceholder')}</option>
           {OBJETS.map((o) => (
-            <option key={o} value={o}>{o}</option>
+            <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
           ))}
         </select>
         {errors.objet && <span className="contact-error">{errors.objet}</span>}
@@ -203,12 +204,12 @@ export function ContactForm() {
       {/* Message */}
       <div className="contact-field">
         <label className="contact-label" htmlFor="message">
-          Votre message <span className="contact-req">*</span>
+          {t('message')} <span className="contact-req">*</span>
         </label>
         <textarea
           id="message"
           className={`contact-input contact-textarea ${errors.message ? 'has-error' : ''}`}
-          placeholder="Décrivez votre projet ou votre besoin…"
+          placeholder={t('messagePlaceholder')}
           rows={6}
           value={form.message}
           onChange={(e) => update('message', e.target.value)}
@@ -224,9 +225,8 @@ export function ContactForm() {
           onChange={(e) => update('consent', e.target.checked)}
         />
         <span>
-          J'accepte que mes données soient traitées par Nation Data Center pour
-          répondre à ma demande, conformément à la{' '}
-          <a href="/politique-de-confidentialite">politique de confidentialité</a>.
+          {t('consent1')}{' '}
+          <a href="/politique-de-confidentialite">{t('consentLink')}</a>.
           <span className="contact-req"> *</span>
         </span>
       </label>
@@ -235,7 +235,7 @@ export function ContactForm() {
       {/* Erreur globale */}
       {status === 'error' && (
         <div className="contact-global-error">
-          Une erreur est survenue. Veuillez réessayer ou nous contacter directement par e-mail.
+          {t('globalError')}
         </div>
       )}
 
@@ -245,7 +245,7 @@ export function ContactForm() {
         type="submit"
         disabled={status === 'sending'}
       >
-        {status === 'sending' ? 'Envoi en cours…' : 'Envoyer mon message'}
+        {status === 'sending' ? t('submitting') : t('submit')}
       </button>
     </form>
   );

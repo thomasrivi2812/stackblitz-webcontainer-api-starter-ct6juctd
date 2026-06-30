@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { type Persona } from '@/lib/personas';
 import { AskQuestionButton } from './AskQuestionButton';
 
@@ -28,6 +29,7 @@ function highlight(text: string, words: string[]) {
 }
 
 export function OffresPersonas({ personas }: { personas: Persona[] }) {
+  const t = useTranslations('offres');
   const searchParams = useSearchParams();
   const profil = searchParams.get('profil');
 
@@ -64,7 +66,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
     <div className="op" style={accentVars}>
       <div className="op-switch-wrap">
         <div className="container op-switch-inner">
-          <label className="op-switch-label" htmlFor="op-profil">Vous êtes ?</label>
+          <label className="op-switch-label" htmlFor="op-profil">{t('youAre')}</label>
           <select
             id="op-profil"
             className="op-select"
@@ -86,7 +88,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
             <p className="op-lead">{persona.lead}</p>
             <div className="op-cta-row">
               <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
-              <a className="op-btn-ghost" href="/datacenters">Voir nos sites</a>
+              <a className="op-btn-ghost" href="/datacenters">{t('seeSites')}</a>
             </div>
             <div className="op-proofs">
               {persona.proofs.map((pr, i) => (
@@ -96,7 +98,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
           </div>
 
           <aside className="op-enjeux">
-            <p className="op-enjeux-label">Vos enjeux quotidiens</p>
+            <p className="op-enjeux-label">{t('dailyChallenges')}</p>
             <div className="op-enjeux-list">
               {persona.enjeux.map((e, i) => (
                 <div className="op-enjeu" key={i}>
@@ -115,7 +117,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
       <section className="section op-problems">
         <div className="container">
           <div className="section-head">
-            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>Vos défis</span>
+            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>{t('challenges')}</span>
             <h2 className="fil-rouge">{highlight(persona.problemesTitre, persona.accentWord)}</h2>
           </div>
           <div className="op-grid">
@@ -133,7 +135,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
       <section className="section op-answers">
         <div className="container">
           <div className="section-head">
-            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>Notre réponse</span>
+            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>{t('ourAnswer')}</span>
             <h2 className="fil-rouge">{highlight(persona.reponsesTitre, persona.accentWord)}</h2>
           </div>
           <div className="op-grid">
@@ -162,7 +164,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
       <section className="section op-faq">
         <div className="container op-faq-inner">
           <div className="section-head">
-            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>Questions fréquentes</span>
+            <span className="eyebrow" style={{ color: 'var(--op-accent)' }}>{t('faqEyebrow')}</span>
             <h2 className="fil-rouge">{highlight(persona.faqTitre, persona.accentWord)}</h2>
           </div>
           <div className="op-faq-list">
@@ -182,7 +184,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
             ))}
           </div>
           <div className="op-faq-cta">
-            <p>Vous ne trouvez pas votre réponse ?</p>
+            <p>{t('faqCta')}</p>
             <AskQuestionButton accent="var(--op-accent)" />
           </div>
         </div>
@@ -190,11 +192,11 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
 
       <section className="section op-final">
         <div className="container">
-          <h2 className="fil-rouge">Parlons de votre projet d’hébergement</h2>
-          <p className="op-final-lead">Nos équipes étudient votre besoin et vous proposent une réponse sur mesure.</p>
+          <h2 className="fil-rouge">{t('finalTitle')}</h2>
+          <p className="op-final-lead">{t('finalLead')}</p>
           <div className="op-cta-row">
             <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
-            <a className="op-btn-ghost" href="/datacenters">Découvrir nos data centers</a>
+            <a className="op-btn-ghost" href="/datacenters">{t('discoverDc')}</a>
           </div>
         </div>
       </section>

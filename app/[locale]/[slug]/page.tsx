@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getPage } from '@/lib/wordpress';
+import { getPage, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -9,14 +9,20 @@ export const dynamic = 'force-dynamic';
 // Routes explicites (datacenters, actualites, contact, offres) prioritaires ;
 // slugs inconnus → 404.
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const page = await getPage(params.slug);
+export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
+  const page = await getPage(params.slug, params.locale);
   if (!page) return {};
-  return { title: `${page.title} — Nation Data Center` };
+  return {
+    title: `${page.title} — Nation Data Center`,
+    alternates: {
+      canonical: `/${params.slug}`,
+      languages: { fr: `/${params.slug}`, en: `/en/${params.slug}` },
+    },
+  };
 }
 
-export default async function CustomPage({ params }: { params: { slug: string } }) {
-  const page = await getPage(params.slug);
+export default async function CustomPage({ params }: { params: { locale: WpLocale; slug: string } }) {
+  const page = await getPage(params.slug, params.locale);
   if (!page) notFound();
 
   return (

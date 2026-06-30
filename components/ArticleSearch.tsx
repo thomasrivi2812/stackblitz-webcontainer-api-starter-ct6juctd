@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { stripHtml, formatDateFr } from '@/lib/wordpress';
+import { useTranslations, useLocale } from 'next-intl';
+import { stripHtml } from '@/lib/wordpress';
 import type { WPPost } from '@/lib/wordpress';
 
 function SearchIcon() {
@@ -36,6 +37,13 @@ interface Props {
 }
 
 export function ArticleSearch({ posts, categories }: Props) {
+  const t = useTranslations('actualites');
+  const locale = useLocale();
+  const fmtDate = (iso: string) => {
+    try {
+      return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
+    } catch { return ''; }
+  };
   const [query, setQuery] = useState('');
   const [activeCat, setActiveCat] = useState<string>('all');
 
@@ -70,7 +78,7 @@ export function ArticleSearch({ posts, categories }: Props) {
           <input
             type="text"
             className="actu-search-input"
-            placeholder="Rechercher un article…"
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -78,7 +86,7 @@ export function ArticleSearch({ posts, categories }: Props) {
             <button
               className="actu-search-clear"
               onClick={() => setQuery('')}
-              aria-label="Effacer"
+              aria-label={t('clear')}
             >
               ×
             </button>
@@ -92,7 +100,7 @@ export function ArticleSearch({ posts, categories }: Props) {
           className={`actu-filter-btn ${activeCat === 'all' ? 'active' : ''}`}
           onClick={() => setActiveCat('all')}
         >
-          Tous
+          {t('all')}
         </button>
         {categories.map((cat) => (
           <button
@@ -107,10 +115,10 @@ export function ArticleSearch({ posts, categories }: Props) {
 
       {/* ── Compteur résultats ── */}
       <p className="actu-count">
-        {filtered.length} article{filtered.length !== 1 ? 's' : ''}
+        {filtered.length} {filtered.length !== 1 ? t('articlesMany') : t('articlesOne')}
         {query && (
           <>
-            {' '}pour «&nbsp;<strong>{query}</strong>&nbsp;»
+            {' '}{t('forQuery')} «&nbsp;<strong>{query}</strong>&nbsp;»
           </>
         )}
       </p>
@@ -134,21 +142,21 @@ export function ArticleSearch({ posts, categories }: Props) {
               </div>
               <div className="actu-card-body">
                 <div className="actu-card-meta">
-                  <span className="actu-card-date">{formatDateFr(p.date)}</span>
+                  <span className="actu-card-date">{fmtDate(p.date)}</span>
                   {p.categories.nodes[0] && (
                     <span className="actu-card-cat">{p.categories.nodes[0].name}</span>
                   )}
                 </div>
                 <h3>{p.title}</h3>
                 <p>{stripHtml(p.excerpt)}</p>
-                <span className="actu-card-link">Lire l'article →</span>
+                <span className="actu-card-link">{t('readArticle')}</span>
               </div>
             </a>
           ))}
         </div>
       ) : (
         <div className="actu-empty">
-          <p>Aucun article ne correspond à votre recherche.</p>
+          <p>{t('empty')}</p>
           <button
             className="btn btn-ghost"
             onClick={() => {
@@ -156,7 +164,7 @@ export function ArticleSearch({ posts, categories }: Props) {
               setActiveCat('all');
             }}
           >
-            Réinitialiser les filtres
+            {t('reset')}
           </button>
         </div>
       )}

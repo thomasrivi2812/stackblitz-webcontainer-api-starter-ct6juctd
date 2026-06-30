@@ -1,11 +1,15 @@
 import { ContactForm } from '@/components/ContactForm';
+import type { WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Contact — Nation Data Center',
-  description:
-    'Contactez Nation Data Center pour un devis, une visite de site ou tout renseignement sur nos offres d\'hébergement souverain.',
-};
+export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  return {
+    title: m.contactTitle,
+    description: m.contactDesc,
+    alternates: { canonical: '/contact', languages: { fr: '/contact', en: '/en/contact' } },
+  };
+}
 
 /* ------------------------------- Icônes ------------------------------- */
 function Icon({ name }: { name: string }) {
@@ -60,19 +64,17 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default function ContactPage() {
+export default async function ContactPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+  const t = (await import(`../../../messages/${locale}.json`)).default.contact as Record<string, string>;
+
   return (
     <main>
       {/* ── Hero ── */}
       <section className="contact-hero">
         <div className="container">
-          <span className="eyebrow">Contact</span>
-          <h1 className="fil-rouge">Parlons de votre projet</h1>
-          <p>
-            Besoin d'un devis, d'une visite de site ou d'informations sur nos
-            offres ? Remplissez le formulaire ci-dessous, nos équipes vous
-            répondent sous 24 heures.
-          </p>
+          <span className="eyebrow">{t.eyebrow}</span>
+          <h1 className="fil-rouge">{t.h1}</h1>
+          <p>{t.intro}</p>
         </div>
       </section>
 
@@ -90,35 +92,35 @@ export default function ContactPage() {
               {/* Carte coordonnées */}
               <div className="contact-info-card">
                 <h3>Nation Data Center</h3>
-                <p className="contact-info-sub">Filiale du Groupe Altarea</p>
+                <p className="contact-info-sub">{t.subsidiary}</p>
 
                 <ul className="contact-info-list">
                   <li>
                     <span className="contact-info-icon"><Icon name="mail" /></span>
                     <div>
-                      <strong>E-mail</strong>
+                      <strong>{t.email}</strong>
                       <a href="mailto:contact@nationdatacenter.com">contact@nationdatacenter.com</a>
                     </div>
                   </li>
                   <li>
                     <span className="contact-info-icon"><Icon name="phone" /></span>
                     <div>
-                      <strong>Téléphone</strong>
+                      <strong>{t.phone}</strong>
                       <a href="tel:+33100000000">+33 1 00 00 00 00</a>
                     </div>
                   </li>
                   <li>
                     <span className="contact-info-icon"><Icon name="map" /></span>
                     <div>
-                      <strong>Adresse</strong>
+                      <strong>{t.address}</strong>
                       <span>87 rue de Richelieu<br />75002 Paris, France</span>
                     </div>
                   </li>
                   <li>
                     <span className="contact-info-icon"><Icon name="clock" /></span>
                     <div>
-                      <strong>Horaires</strong>
-                      <span>Lun – Ven : 9h00 – 18h00</span>
+                      <strong>{t.hours}</strong>
+                      <span>{t.hoursValue}</span>
                     </div>
                   </li>
                 </ul>
@@ -132,31 +134,31 @@ export default function ContactPage() {
 
               {/* Carte réassurance */}
               <div className="contact-reassurance">
-                <h4>Pourquoi nous contacter ?</h4>
+                <h4>{t.whyTitle}</h4>
                 <ul>
                   <li>
                     <span className="contact-check">
                       <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                     </span>
-                    Réponse personnalisée sous 24h
+                    {t.why1}
                   </li>
                   <li>
                     <span className="contact-check">
                       <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                     </span>
-                    Devis sur mesure, sans engagement
+                    {t.why2}
                   </li>
                   <li>
                     <span className="contact-check">
                       <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                     </span>
-                    Visite de site possible
+                    {t.why3}
                   </li>
                   <li>
                     <span className="contact-check">
                       <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                     </span>
-                    Accompagnement dédié de A à Z
+                    {t.why4}
                   </li>
                 </ul>
               </div>

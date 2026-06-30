@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import { Jost } from 'next/font/google';
+import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getPersonas, getDatacenters } from '@/lib/wordpress';
-import './globals.css';
+import { routing, type Locale } from '@/i18n/routing';
+import '../globals.css';
 
 const jost = Jost({
   subsets: ['latin'],
@@ -46,19 +49,47 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+// Pré-génère les deux variantes de langue à la compilation (/ et /en).
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({
+  children,
+  params: { locale },
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  // Locale inconnue → 404 (évite de servir un dictionnaire inexistant).
+  if (!routing.locales.includes(locale as Locale)) {
+    notFound();
+  }
+
+  // Dictionnaire d'interface chargé par import direct (pas de getMessages /
+  // setRequestLocale, qui dépendent du contexte de requête mal propagé sous
+  // WebContainer/StackBlitz). On passe locale + messages explicitement au
+  // provider : les composants client (header, sélecteur) les lisent du contexte.
+  const messages = (await import(`../../messages/${locale}.json`)).default;
+
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
-  // Les deux fonctions retombent sur les données d'exemple si WP est absent.
-  const [personas, datacenters] = await Promise.all([getPersonas(), getDatacenters()]);
+  // Les deux fonctions retombent sur les données d'exemple si WP est absent,
+  // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
+  const [personas, datacenters] = await Promise.all([
+    getPersonas(locale as Locale),
+    getDatacenters(locale as Locale),
+  ]);
 
   return (
-    <html lang="fr" className={jost.variable}>
+    <html lang={locale} className={jost.variable}>
       <body>
-        <SiteHeader personas={personas} datacenters={datacenters} />
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <SiteHeader personas={personas} datacenters={datacenters} />
 
-        {children}
+          {children}
 
-        <SiteFooter />
+          <SiteFooter locale={locale as Locale} />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

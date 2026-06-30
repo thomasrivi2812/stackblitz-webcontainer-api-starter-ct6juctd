@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ServiceMedia } from './ServiceMedia';
 import type { Service } from '@/lib/wordpress';
 
@@ -13,6 +14,7 @@ function Arrow({ dir }: { dir: 'prev' | 'next' }) {
 }
 
 export function ServicesCarousel({ services }: { services: Service[] }) {
+  const t = useTranslations('carousel');
   const n = services.length;
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -42,11 +44,11 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
           <ServiceMedia service={s} />
         </div>
         <div className="svc-slide-text">
-          <span className="eyebrow"><span className="eyebrow-dot" />{s.accroche || 'Nos services'}</span>
+          <span className="eyebrow"><span className="eyebrow-dot" />{s.accroche || t('eyebrowFallback')}</span>
           <h3>{s.titre}</h3>
           <p>{s.description}</p>
           <a className="btn-v2 btn-v2-ghost" href={s.lienUrl || '/services'}>
-            {s.lienLabel || 'En savoir plus'}
+            {s.lienLabel || t('linkFallback')}
           </a>
         </div>
       </article>
