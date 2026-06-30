@@ -12,6 +12,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   };
 }
 
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 export default async function OffresPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const personas = await getPersonas(locale);
   return (
