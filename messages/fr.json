@@ -345,20 +345,11 @@
     "eyebrowFallback": "Nos services",
     "linkFallback": "En savoir plus"
   },
-  "credibility": {
-    "eyebrow": "Crédibilité",
-    "title": "Des certifications exigeantes, un groupe solide",
-    "intro": "La conformité de nos infrastructures aux référentiels les plus stricts du marché, portée par un actionnariat de premier plan.",
-    "altareaTitle": "Une marque du Groupe Altarea",
-    "altareaText": "Nation Data Center est une filiale à 100 % du Groupe Altarea, leader de la transformation urbaine bas carbone en France. Un actionnariat solide et engagé au service de vos projets critiques.",
-    "statutVisee": "Visée",
-    "statutConforme": "Conforme",
-    "labelIso27001": "Sécurité de l'information",
-    "labelHds": "Hébergement de données de santé",
-    "labelIso14001": "Management environnemental",
-    "labelIso50001": "Management de l'énergie",
-    "labelEn50600": "Conception Tier III",
-    "labelCoc": "Datacenters européens"
+  "certBanner": {
+    "certTitle": "Découvrir nos certifications",
+    "certSub": "ISO 27001, HDS, Tier III… la conformité de nos infrastructures aux référentiels les plus exigeants.",
+    "altareaTitle": "Découvrir le groupe Altarea",
+    "altareaSub": "(une marque du Groupe Altarea)"
   },
   "brochure": {
     "trigger": "Télécharger notre brochure",

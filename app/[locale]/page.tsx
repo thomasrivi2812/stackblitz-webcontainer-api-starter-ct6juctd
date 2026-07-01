@@ -1,7 +1,7 @@
 import { ServicesCarousel } from '@/components/ServicesCarousel';
 import { DcTileImage } from '@/components/DcTileImage';
 import { KpiBand } from '@/components/KpiBand';
-import { Credibility } from '@/components/Credibility';
+import { CertBanner } from '@/components/CertBanner';
 import { FaqSection } from '@/components/FaqSection';
 import { NetworkMap } from '@/components/NetworkMap';
 import type { Metadata } from 'next';
@@ -318,8 +318,8 @@ export default async function Home({ params: { locale } }: { params: { locale: W
         </div>
       </section>
 
-      {/* CRÉDIBILITÉ + GROUPE ALTAREA */}
-      <Credibility locale={locale} />
+      {/* BANDEAU CERTIFICATIONS + GROUPE ALTAREA */}
+      <CertBanner locale={locale} />
 
       {/* FAQ */}
       <FaqSection locale={locale} />

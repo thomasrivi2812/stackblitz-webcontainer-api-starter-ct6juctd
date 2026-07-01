@@ -345,20 +345,11 @@
     "eyebrowFallback": "Our services",
     "linkFallback": "Learn more"
   },
-  "credibility": {
-    "eyebrow": "Credibility",
-    "title": "Demanding certifications, a solid group",
-    "intro": "Our infrastructure complies with the market's strictest standards, backed by a leading shareholder.",
-    "altareaTitle": "An Altarea Group brand",
-    "altareaText": "Nation Data Center is a wholly-owned subsidiary of Groupe Altarea, France's leader in low-carbon urban transformation. A solid, committed shareholder serving your critical projects.",
-    "statutVisee": "Targeted",
-    "statutConforme": "Compliant",
-    "labelIso27001": "Information security",
-    "labelHds": "Health data hosting",
-    "labelIso14001": "Environmental management",
-    "labelIso50001": "Energy management",
-    "labelEn50600": "Tier III design",
-    "labelCoc": "European data centers"
+  "certBanner": {
+    "certTitle": "Discover our certifications",
+    "certSub": "ISO 27001, HDS, Tier III… our infrastructure compliant with the industry's most demanding standards.",
+    "altareaTitle": "Discover the Altarea Group",
+    "altareaSub": "(an Altarea Group brand)"
   },
   "brochure": {
     "trigger": "Download our brochure",
