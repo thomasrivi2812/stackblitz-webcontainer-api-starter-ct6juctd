@@ -19,6 +19,7 @@ import {
   getDatacenters,
   getRecentPosts,
   getServices,
+  getHome,
   homeServices,
   toMapPoints,
   statutInfo,
@@ -107,12 +108,13 @@ function Icon({ name }: { name: string }) {
 export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
   const t = (await import(`../../messages/${locale}.json`)).default.home as Record<string, string>;
+  const wp = await getHome(locale);
 
   const datacenters = await getDatacenters(locale);
   const points = toMapPoints(datacenters);
   const preview = datacenters.slice(0, 3);
   const posts = await getRecentPosts(locale);
-  const kpis = networkKpis(datacenters);
+  const kpis = wp?.kpis?.length ? wp.kpis : networkKpis(datacenters);
   const services = await getServices(locale);
   const carouselServices = homeServices(services, 5);
   const heroImage = '/hero-datacenter.jpg';
@@ -136,31 +138,31 @@ export default async function Home({ params: { locale } }: { params: { locale: W
         <div className="hero-bg-grid" aria-hidden="true" />
         <div className="container hero-grid">
           <div className="hero-text">
-            <span className="eyebrow"><span className="eyebrow-dot" />{t.heroEyebrow}</span>
+            <span className="eyebrow"><span className="eyebrow-dot" />{wp?.heroEyebrow || t.heroEyebrow}</span>
             <h1 className="hero-title">
-              {t.heroTitle1} <span className="title-accent">{t.heroTitleAccent}</span>.
+              {wp?.heroTitle ?? <>{t.heroTitle1} <span className="title-accent">{t.heroTitleAccent}</span>.</>}
             </h1>
-            <p className="hero-lead">{t.heroLead}</p>
+            <p className="hero-lead">{wp?.heroLead || t.heroLead}</p>
             <div className="cta-row">
-              <a className="btn-v2 btn-v2-primary" href="/datacenters">
-                {t.heroCtaPrimary}
+              <a className="btn-v2 btn-v2-primary" href={wp?.heroCtaPrimaryUrl || "/datacenters"}>
+                {wp?.heroCtaPrimaryLabel || t.heroCtaPrimary}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn-v2 btn-v2-ghost" href="/contact">{t.heroCtaSecondary}</a>
+              <a className="btn-v2 btn-v2-ghost" href={wp?.heroCtaSecondaryUrl || "/contact"}>{wp?.heroCtaSecondaryLabel || t.heroCtaSecondary}</a>
             </div>
           </div>
           <div className="hero-visual">
             <div className="hero-frame">
-              <img className="hero-img" src={heroImage} alt="Data center Nation Data Center" />
+              <img className="hero-img" src={wp?.heroImage?.sourceUrl || heroImage} alt="Data center Nation Data Center" />
               <div className="hero-frame-corner tl" aria-hidden="true" />
               <div className="hero-frame-corner br" aria-hidden="true" />
             </div>
             <div className="hero-caption">
               <span className="hero-cap-dot" aria-hidden="true" />
               <div>
-                <strong>{t.heroCaptionTitle}</strong>
+                <strong>{wp?.heroCaptionTitle || t.heroCaptionTitle}</strong>
                 <span>3 MW · PUE&nbsp;1,2</span>
               </div>
             </div>

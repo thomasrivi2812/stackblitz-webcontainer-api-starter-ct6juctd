@@ -1127,3 +1127,96 @@ export function homeServices(services: Service[], max = 5): Service[] {
   const flagged = services.filter((s) => s.home);
   return (flagged.length ? flagged : services).slice(0, max);
 }
+
+// ===========================================================================
+// CONTENU DE L'ACCUEIL — champs ACF/SCF `homeFields` sur la Page « accueil »
+// (éditable + traduisible via Polylang). Tout est optionnel : chaque champ vide
+// retombe sur le texte codé dans la page (repli). Incrément 1 : Hero + KPIs.
+// ===========================================================================
+export type HomeKpi = { valeur: string; unite: string; label: string };
+export type HomeContent = {
+  heroEyebrow: string | null;
+  heroTitle: string | null;
+  heroLead: string | null;
+  heroCtaPrimaryLabel: string | null;
+  heroCtaPrimaryUrl: string | null;
+  heroCtaSecondaryLabel: string | null;
+  heroCtaSecondaryUrl: string | null;
+  heroImage: { sourceUrl: string; altText: string } | null;
+  heroCaptionTitle: string | null;
+  heroCaptionSub: string | null;
+  kpis: HomeKpi[];
+};
+
+const HOME_QUERY = gql`
+  query HomeContent($language: LanguageCodeFilterEnum) {
+    pages(first: 1, where: { name: "accueil", language: $language }) {
+      nodes {
+        homeFields {
+          heroEyebrow
+          heroTitle
+          heroLead
+          heroCtaPrimaryLabel
+          heroCtaPrimaryUrl
+          heroCtaSecondaryLabel
+          heroCtaSecondaryUrl
+          heroImage { node { sourceUrl altText } }
+          heroCaptionTitle
+          heroCaptionSub
+          kpis { valeur unite label }
+        }
+      }
+    }
+  }
+`;
+
+type WpHomeFields = {
+  heroEyebrow: string | null;
+  heroTitle: string | null;
+  heroLead: string | null;
+  heroCtaPrimaryLabel: string | null;
+  heroCtaPrimaryUrl: string | null;
+  heroCtaSecondaryLabel: string | null;
+  heroCtaSecondaryUrl: string | null;
+  heroImage: { node: { sourceUrl: string; altText: string } | null } | null;
+  heroCaptionTitle: string | null;
+  heroCaptionSub: string | null;
+  kpis: { valeur: string | null; unite: string | null; label: string | null }[] | null;
+} | null;
+
+/**
+ * Contenu éditorial de l'accueil depuis WordPress (page « accueil », champs
+ * `homeFields`). Renvoie null si l'API est absente ou la page introuvable
+ * → l'accueil affiche alors son contenu par défaut (repli).
+ */
+export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
+  if (!endpoint) return null;
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await wpSingle<{ pages: { nodes: { homeFields: WpHomeFields }[] } }>(
+      client, HOME_QUERY, {}, locale, (d) => d.pages?.nodes?.[0]?.homeFields,
+    );
+    const f = data.pages?.nodes?.[0]?.homeFields;
+    if (!f) return null;
+    return {
+      heroEyebrow: f.heroEyebrow || null,
+      heroTitle: f.heroTitle || null,
+      heroLead: f.heroLead || null,
+      heroCtaPrimaryLabel: f.heroCtaPrimaryLabel || null,
+      heroCtaPrimaryUrl: f.heroCtaPrimaryUrl || null,
+      heroCtaSecondaryLabel: f.heroCtaSecondaryLabel || null,
+      heroCtaSecondaryUrl: f.heroCtaSecondaryUrl || null,
+      heroImage: f.heroImage?.node
+        ? { sourceUrl: f.heroImage.node.sourceUrl, altText: f.heroImage.node.altText ?? '' }
+        : null,
+      heroCaptionTitle: f.heroCaptionTitle || null,
+      heroCaptionSub: f.heroCaptionSub || null,
+      kpis: (f.kpis ?? [])
+        .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
+        .filter((k) => k.valeur || k.label),
+    };
+  } catch (error) {
+    logWpError('accueil', error);
+    return null;
+  }
+}
