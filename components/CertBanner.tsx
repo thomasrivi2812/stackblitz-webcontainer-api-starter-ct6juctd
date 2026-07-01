@@ -1,6 +1,8 @@
 // Bandeau « Certifications & Groupe Altarea » : remplace l'ancienne section Crédibilité sur la home.
+// Textes/liens éditables depuis WordPress (champs `homeFields.certBanner*`), avec
+// repli sur les traductions codées (messages/*.json) si le champ WP est vide.
 import { AltareaMark } from '@/components/AltareaLogo';
-import type { WpLocale } from '@/lib/wordpress';
+import type { HomeContent, WpLocale } from '@/lib/wordpress';
 
 function ShieldIcon() {
   return (
@@ -19,26 +21,33 @@ function ArrowIcon() {
   );
 }
 
-export async function CertBanner({ locale = 'fr' }: { locale?: WpLocale }) {
+export async function CertBanner({ locale = 'fr', wp }: { locale?: WpLocale; wp?: HomeContent | null }) {
   const t = (await import(`../messages/${locale}.json`)).default.certBanner as Record<string, string>;
+
+  const certTitle = wp?.certBannerCertTitle || t.certTitle;
+  const certSub = wp?.certBannerCertSub || t.certSub;
+  const certUrl = wp?.certBannerCertUrl || '/certifications';
+  const altareaTitle = wp?.certBannerAltareaTitle || t.altareaTitle;
+  const altareaSub = wp?.certBannerAltareaSub || t.altareaSub;
+  const altareaUrl = wp?.certBannerAltareaUrl || '/groupe';
 
   return (
     <section className="section cert-banner-section" id="certifications-groupe">
       <div className="container">
         <div className="cert-banner-grid">
-          <a className="cert-banner-card" href="/certifications">
+          <a className="cert-banner-card" href={certUrl}>
             <span className="cert-banner-ico"><ShieldIcon /></span>
             <span className="cert-banner-text">
-              <strong>{t.certTitle}</strong>
-              <span>{t.certSub}</span>
+              <strong>{certTitle}</strong>
+              <span>{certSub}</span>
             </span>
             <span className="cert-banner-arrow"><ArrowIcon /></span>
           </a>
-          <a className="cert-banner-card altarea" href="/groupe">
+          <a className="cert-banner-card altarea" href={altareaUrl}>
             <span className="cert-banner-ico"><AltareaMark size={26} /></span>
             <span className="cert-banner-text">
-              <strong>{t.altareaTitle}</strong>
-              <span>{t.altareaSub}</span>
+              <strong>{altareaTitle}</strong>
+              <span>{altareaSub}</span>
             </span>
             <span className="cert-banner-arrow"><ArrowIcon /></span>
           </a>

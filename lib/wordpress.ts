@@ -1146,6 +1146,12 @@ export type HomeContent = {
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
   kpis: HomeKpi[];
+  certBannerCertTitle: string | null;
+  certBannerCertSub: string | null;
+  certBannerCertUrl: string | null;
+  certBannerAltareaTitle: string | null;
+  certBannerAltareaSub: string | null;
+  certBannerAltareaUrl: string | null;
 };
 
 const HOME_QUERY = gql`
@@ -1164,6 +1170,12 @@ const HOME_QUERY = gql`
           heroCaptionTitle
           heroCaptionSub
           kpis { valeur unite label }
+          certBannerCertTitle
+          certBannerCertSub
+          certBannerCertUrl
+          certBannerAltareaTitle
+          certBannerAltareaSub
+          certBannerAltareaUrl
         }
       }
     }
@@ -1182,6 +1194,12 @@ type WpHomeFields = {
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
   kpis: { valeur: string | null; unite: string | null; label: string | null }[] | null;
+  certBannerCertTitle: string | null;
+  certBannerCertSub: string | null;
+  certBannerCertUrl: string | null;
+  certBannerAltareaTitle: string | null;
+  certBannerAltareaSub: string | null;
+  certBannerAltareaUrl: string | null;
 } | null;
 
 /**
@@ -1214,6 +1232,12 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
       kpis: (f.kpis ?? [])
         .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
         .filter((k) => k.valeur || k.label),
+      certBannerCertTitle: f.certBannerCertTitle || null,
+      certBannerCertSub: f.certBannerCertSub || null,
+      certBannerCertUrl: f.certBannerCertUrl || null,
+      certBannerAltareaTitle: f.certBannerAltareaTitle || null,
+      certBannerAltareaSub: f.certBannerAltareaSub || null,
+      certBannerAltareaUrl: f.certBannerAltareaUrl || null,
     };
   } catch (error) {
     logWpError('accueil', error);

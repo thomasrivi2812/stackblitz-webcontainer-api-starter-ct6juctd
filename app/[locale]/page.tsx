@@ -319,7 +319,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
       </section>
 
       {/* BANDEAU CERTIFICATIONS + GROUPE ALTAREA */}
-      <CertBanner locale={locale} />
+      <CertBanner locale={locale} wp={wp} />
 
       {/* FAQ */}
       <FaqSection locale={locale} />
