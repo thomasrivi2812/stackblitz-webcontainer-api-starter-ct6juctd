@@ -124,11 +124,19 @@ export default async function Home({ params: { locale } }: { params: { locale: W
     } catch { return ''; }
   };
 
-  const engagements = [
+  const engagements = wp?.engagements?.length ? wp.engagements : [
     { icon: 'decarbon', titre: t.engDecarbonTitre, desc: t.engDecarbonDesc },
     { icon: 'sobriete', titre: t.engSobrieteTitre, desc: t.engSobrieteDesc },
     { icon: 'chaleur', titre: t.engChaleurTitre, desc: t.engChaleurDesc },
     { icon: 'eau', titre: t.engEauTitre, desc: t.engEauDesc },
+  ];
+
+  // Chiffres de la section « raison d'être ». Le 3e chiffre porte un « % » en exposant
+  // dans le texte codé ; on isole le suffixe pour préserver ce rendu par défaut.
+  const amvFigures = wp?.amvFigures?.length ? wp.amvFigures : [
+    { valeur: '15', label: t.amvFig1 },
+    { valeur: '3', label: t.amvFig2 },
+    { valeur: '16 %', label: t.amvFig3 },
   ];
 
   return (
@@ -171,19 +179,19 @@ export default async function Home({ params: { locale } }: { params: { locale: W
       </section>
 
       {/* BANDEAU KPI RÉSEAU — ANIMÉ */}
-      <KpiBand kpis={kpis} />
+      <KpiBand kpis={kpis} title={wp?.kpiTitle || undefined} />
 
       {/* NOS DATA CENTERS */}
       <section className="section section-alt" id="datacenters">
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />{t.dcEyebrow}</span>
-              <h2 className="section-title">{t.dcTitle}</h2>
-              <p className="section-sub">{t.dcSub}</p>
+              <span className="eyebrow"><span className="eyebrow-dot" />{wp?.dcEyebrow || t.dcEyebrow}</span>
+              <h2 className="section-title">{wp?.dcTitle || t.dcTitle}</h2>
+              <p className="section-sub">{wp?.dcSub || t.dcSub}</p>
             </div>
             <a className="link-arrow" href="/datacenters">
-              {t.dcSeeAll}
+              {wp?.dcSeeAll || t.dcSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -228,17 +236,17 @@ export default async function Home({ params: { locale } }: { params: { locale: W
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />{t.servicesEyebrow}</span>
-              <h2 className="section-title">{t.servicesTitle1}<br />{t.servicesTitle2}</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{wp?.servicesEyebrow || t.servicesEyebrow}</span>
+              <h2 className="section-title">{wp?.servicesTitle1 || t.servicesTitle1}<br />{wp?.servicesTitle2 || t.servicesTitle2}</h2>
             </div>
-            <p className="section-sub right">{t.servicesSub}</p>
+            <p className="section-sub right">{wp?.servicesSub || t.servicesSub}</p>
           </div>
 
           <ServicesCarousel services={carouselServices} />
 
           <div className="services-cta">
             <a className="btn-v2 btn-v2-primary" href="/services">
-              {t.servicesCta}
+              {wp?.servicesCta || t.servicesCta}
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -252,11 +260,11 @@ export default async function Home({ params: { locale } }: { params: { locale: W
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />{t.engEyebrow}</span>
-              <h2 className="section-title">{t.engTitle}</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{wp?.engEyebrow || t.engEyebrow}</span>
+              <h2 className="section-title">{wp?.engTitle || t.engTitle}</h2>
             </div>
             <a className="link-arrow" href="/contact">
-              {t.engSeeAll}
+              {wp?.engSeeAll || t.engSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
@@ -280,38 +288,38 @@ export default async function Home({ params: { locale } }: { params: { locale: W
         <div className="amv-glow" aria-hidden="true" />
         <div className="container amv-grid-v2">
           <header className="amv-header">
-            <span className="eyebrow"><span className="eyebrow-dot" />{t.amvEyebrow}</span>
-            <h2>{t.amvTitle1} <span className="accent">{t.amvTitleAccent}</span><br />{t.amvTitle2}</h2>
+            <span className="eyebrow"><span className="eyebrow-dot" />{wp?.amvEyebrow || t.amvEyebrow}</span>
+            <h2>{wp?.amvTitle1 || t.amvTitle1} <span className="accent">{wp?.amvTitleAccent || t.amvTitleAccent}</span><br />{wp?.amvTitle2 || t.amvTitle2}</h2>
             <p>
-              {t.amvIntro1}{' '}
-              <strong>{t.amvIntroStrong}</strong> {t.amvIntro2}
+              {wp?.amvIntro1 || t.amvIntro1}{' '}
+              <strong>{wp?.amvIntroStrong || t.amvIntroStrong}</strong> {wp?.amvIntro2 || t.amvIntro2}
             </p>
             <div className="amv-figures">
-              <div><strong>15</strong><span>{t.amvFig1}</span></div>
-              <div><strong>3</strong><span>{t.amvFig2}</span></div>
-              <div><strong>16<i>%</i></strong><span>{t.amvFig3}</span></div>
+              {amvFigures.map((fig, i) => (
+                <div key={i}><strong>{fig.valeur}</strong><span>{fig.label}</span></div>
+              ))}
             </div>
           </header>
           <div className="amv-cards">
             <article className="amv-card">
               <span className="amv-card-key">A.</span>
               <div>
-                <h3>{t.ambitionTitle}</h3>
-                <p>{t.ambitionText}</p>
+                <h3>{wp?.ambitionTitle || t.ambitionTitle}</h3>
+                <p>{wp?.ambitionText || t.ambitionText}</p>
               </div>
             </article>
             <article className="amv-card">
               <span className="amv-card-key">M.</span>
               <div>
-                <h3>{t.missionTitle}</h3>
-                <p>{t.missionText}</p>
+                <h3>{wp?.missionTitle || t.missionTitle}</h3>
+                <p>{wp?.missionText || t.missionText}</p>
               </div>
             </article>
             <article className="amv-card">
               <span className="amv-card-key">V.</span>
               <div>
-                <h3>{t.visionTitle}</h3>
-                <p>{t.visionText}</p>
+                <h3>{wp?.visionTitle || t.visionTitle}</h3>
+                <p>{wp?.visionText || t.visionText}</p>
               </div>
             </article>
           </div>
@@ -322,18 +330,18 @@ export default async function Home({ params: { locale } }: { params: { locale: W
       <CertBanner locale={locale} wp={wp} />
 
       {/* FAQ */}
-      <FaqSection locale={locale} />
+      <FaqSection locale={locale} eyebrow={wp?.faqEyebrow || undefined} title={wp?.faqTitle || undefined} />
 
       {/* ACTUALITÉS */}
       <section className="section" id="actualites">
         <div className="container">
           <div className="section-head-v2">
             <div>
-              <span className="eyebrow"><span className="eyebrow-dot" />{t.newsEyebrow}</span>
-              <h2 className="section-title">{t.newsTitle}</h2>
+              <span className="eyebrow"><span className="eyebrow-dot" />{wp?.newsEyebrow || t.newsEyebrow}</span>
+              <h2 className="section-title">{wp?.newsTitle || t.newsTitle}</h2>
             </div>
             <a className="link-arrow" href="/actualites">
-              {t.newsSeeAll}
+              {wp?.newsSeeAll || t.newsSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>

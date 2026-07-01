@@ -1,0 +1,708 @@
+[
+  {
+    "key": "group_ndc_home_fields",
+    "title": "Accueil — Contenu éditorial (NDC)",
+    "fields": [
+      {
+        "key": "field_ndc_home_tab_hero",
+        "label": "Hero",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_hero_eyebrow",
+        "label": "Hero — Sur-titre (eyebrow)",
+        "name": "heroEyebrow",
+        "type": "text",
+        "instructions": "Petit texte au-dessus du titre principal (ex. « Souverain · Responsable · De proximité »).",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroEyebrow"
+      },
+      {
+        "key": "field_ndc_home_hero_title",
+        "label": "Hero — Titre",
+        "name": "heroTitle",
+        "type": "text",
+        "instructions": "Titre principal du hero. Laisser vide pour garder le titre par défaut du site.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroTitle"
+      },
+      {
+        "key": "field_ndc_home_hero_lead",
+        "label": "Hero — Texte d'accroche",
+        "name": "heroLead",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroLead"
+      },
+      {
+        "key": "field_ndc_home_hero_cta_primary_label",
+        "label": "Hero — CTA principal (libellé)",
+        "name": "heroCtaPrimaryLabel",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCtaPrimaryLabel"
+      },
+      {
+        "key": "field_ndc_home_hero_cta_primary_url",
+        "label": "Hero — CTA principal (lien)",
+        "name": "heroCtaPrimaryUrl",
+        "type": "url",
+        "instructions": "Laisser vide pour pointer vers /datacenters.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCtaPrimaryUrl"
+      },
+      {
+        "key": "field_ndc_home_hero_cta_secondary_label",
+        "label": "Hero — CTA secondaire (libellé)",
+        "name": "heroCtaSecondaryLabel",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCtaSecondaryLabel"
+      },
+      {
+        "key": "field_ndc_home_hero_cta_secondary_url",
+        "label": "Hero — CTA secondaire (lien)",
+        "name": "heroCtaSecondaryUrl",
+        "type": "url",
+        "instructions": "Laisser vide pour pointer vers /contact.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCtaSecondaryUrl"
+      },
+      {
+        "key": "field_ndc_home_hero_image",
+        "label": "Hero — Image",
+        "name": "heroImage",
+        "type": "image",
+        "return_format": "array",
+        "preview_size": "medium",
+        "library": "all",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroImage"
+      },
+      {
+        "key": "field_ndc_home_hero_caption_title",
+        "label": "Hero — Légende (titre)",
+        "name": "heroCaptionTitle",
+        "type": "text",
+        "instructions": "Ex. « Rennes — site livré ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCaptionTitle"
+      },
+      {
+        "key": "field_ndc_home_hero_caption_sub",
+        "label": "Hero — Légende (sous-texte)",
+        "name": "heroCaptionSub",
+        "type": "text",
+        "instructions": "Note : non affiché actuellement (le sous-texte hero « 3 MW · PUE 1,2 » est codé dans la page).",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "heroCaptionSub"
+      },
+
+      {
+        "key": "field_ndc_home_tab_kpi",
+        "label": "Bandeau KPI",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_kpi_title",
+        "label": "Bandeau KPI — Titre",
+        "name": "kpiTitle",
+        "type": "text",
+        "instructions": "Intitulé du bandeau (ex. « Le réseau en chiffres »). Laisser vide pour le texte par défaut.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "kpiTitle"
+      },
+      {
+        "key": "field_ndc_home_kpis",
+        "label": "Bandeau KPI — Chiffres clés",
+        "name": "kpis",
+        "type": "repeater",
+        "instructions": "Chiffres affichés dans le bandeau animé sous le hero. Laisser vide pour un calcul automatique à partir des data centers.",
+        "required": 0,
+        "min": 0,
+        "max": 6,
+        "layout": "table",
+        "button_label": "Ajouter un chiffre clé",
+        "show_in_graphql": 1,
+        "graphql_field_name": "kpis",
+        "sub_fields": [
+          {
+            "key": "field_ndc_home_kpi_valeur",
+            "label": "Valeur",
+            "name": "valeur",
+            "type": "text",
+            "instructions": "Ex. « 1,2 », « 15 », « 99,9 ».",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "valeur"
+          },
+          {
+            "key": "field_ndc_home_kpi_unite",
+            "label": "Unité",
+            "name": "unite",
+            "type": "text",
+            "instructions": "Ex. « PUE », « Tier III », « % ».",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "unite"
+          },
+          {
+            "key": "field_ndc_home_kpi_label",
+            "label": "Libellé",
+            "name": "label",
+            "type": "text",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "label"
+          }
+        ]
+      },
+
+      {
+        "key": "field_ndc_home_tab_dc",
+        "label": "Section Réseau NDC",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_dc_eyebrow",
+        "label": "Réseau NDC — Sur-titre",
+        "name": "dcEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Le réseau NDC ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "dcEyebrow"
+      },
+      {
+        "key": "field_ndc_home_dc_title",
+        "label": "Réseau NDC — Titre",
+        "name": "dcTitle",
+        "type": "text",
+        "instructions": "Ex. « Nos data centers. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "dcTitle"
+      },
+      {
+        "key": "field_ndc_home_dc_sub",
+        "label": "Réseau NDC — Sous-texte",
+        "name": "dcSub",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "dcSub"
+      },
+      {
+        "key": "field_ndc_home_dc_seeall",
+        "label": "Réseau NDC — Lien « voir tout »",
+        "name": "dcSeeAll",
+        "type": "text",
+        "instructions": "Ex. « Voir tous les sites ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "dcSeeAll"
+      },
+
+      {
+        "key": "field_ndc_home_tab_services",
+        "label": "Section Services",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_services_eyebrow",
+        "label": "Services — Sur-titre",
+        "name": "servicesEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Nos services ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "servicesEyebrow"
+      },
+      {
+        "key": "field_ndc_home_services_title1",
+        "label": "Services — Titre (ligne 1)",
+        "name": "servicesTitle1",
+        "type": "text",
+        "instructions": "Ex. « Une infrastructure adaptée ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "servicesTitle1"
+      },
+      {
+        "key": "field_ndc_home_services_title2",
+        "label": "Services — Titre (ligne 2)",
+        "name": "servicesTitle2",
+        "type": "text",
+        "instructions": "Ex. « à vos exigences. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "servicesTitle2"
+      },
+      {
+        "key": "field_ndc_home_services_sub",
+        "label": "Services — Sous-texte",
+        "name": "servicesSub",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "servicesSub"
+      },
+      {
+        "key": "field_ndc_home_services_cta",
+        "label": "Services — Bouton",
+        "name": "servicesCta",
+        "type": "text",
+        "instructions": "Ex. « Découvrir tous nos services ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "servicesCta"
+      },
+
+      {
+        "key": "field_ndc_home_tab_eng",
+        "label": "Section Engagements",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_eng_eyebrow",
+        "label": "Engagements — Sur-titre",
+        "name": "engEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Nos engagements ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "engEyebrow"
+      },
+      {
+        "key": "field_ndc_home_eng_title",
+        "label": "Engagements — Titre",
+        "name": "engTitle",
+        "type": "text",
+        "instructions": "Ex. « Pourquoi choisir NDC. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "engTitle"
+      },
+      {
+        "key": "field_ndc_home_eng_seeall",
+        "label": "Engagements — Lien « voir tout »",
+        "name": "engSeeAll",
+        "type": "text",
+        "instructions": "Ex. « Voir tous nos engagements ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "engSeeAll"
+      },
+      {
+        "key": "field_ndc_home_engagements",
+        "label": "Engagements — Cartes",
+        "name": "engagements",
+        "type": "repeater",
+        "instructions": "Cartes d'engagement. Laisser vide pour les 4 cartes par défaut (Décarbonation, Sobriété, Chaleur fatale, Ressource en eau).",
+        "required": 0,
+        "min": 0,
+        "max": 8,
+        "layout": "row",
+        "button_label": "Ajouter une carte",
+        "show_in_graphql": 1,
+        "graphql_field_name": "engagements",
+        "sub_fields": [
+          {
+            "key": "field_ndc_home_eng_icon",
+            "label": "Icône",
+            "name": "icon",
+            "type": "select",
+            "instructions": "Icône affichée dans la carte.",
+            "required": 0,
+            "choices": {
+              "decarbon": "Décarbonation (nuage)",
+              "sobriete": "Sobriété (cible)",
+              "chaleur": "Chaleur (flamme)",
+              "eau": "Eau (goutte)",
+              "shield": "Bouclier",
+              "network": "Réseau",
+              "services": "Services",
+              "building": "Bâtiment"
+            },
+            "default_value": "decarbon",
+            "return_format": "value",
+            "show_in_graphql": 1,
+            "graphql_field_name": "icon"
+          },
+          {
+            "key": "field_ndc_home_eng_titre",
+            "label": "Titre",
+            "name": "titre",
+            "type": "text",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "titre"
+          },
+          {
+            "key": "field_ndc_home_eng_desc",
+            "label": "Description",
+            "name": "desc",
+            "type": "textarea",
+            "rows": 2,
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "desc"
+          }
+        ]
+      },
+
+      {
+        "key": "field_ndc_home_tab_amv",
+        "label": "Raison d'être",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_amv_eyebrow",
+        "label": "Raison d'être — Sur-titre",
+        "name": "amvEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Notre raison d'être ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvEyebrow"
+      },
+      {
+        "key": "field_ndc_home_amv_title1",
+        "label": "Raison d'être — Titre (début)",
+        "name": "amvTitle1",
+        "type": "text",
+        "instructions": "Ex. « Un réseau ». Suivi du mot accentué puis de la fin du titre.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvTitle1"
+      },
+      {
+        "key": "field_ndc_home_amv_title_accent",
+        "label": "Raison d'être — Titre (mot accentué)",
+        "name": "amvTitleAccent",
+        "type": "text",
+        "instructions": "Partie du titre mise en couleur (ex. « sécurisé et durable »).",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvTitleAccent"
+      },
+      {
+        "key": "field_ndc_home_amv_title2",
+        "label": "Raison d'être — Titre (fin)",
+        "name": "amvTitle2",
+        "type": "text",
+        "instructions": "Ex. « sur tout le territoire. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvTitle2"
+      },
+      {
+        "key": "field_ndc_home_amv_intro1",
+        "label": "Raison d'être — Intro (début)",
+        "name": "amvIntro1",
+        "type": "text",
+        "instructions": "Texte avant la partie en gras (ex. « Après Rouen, Rennes 1 et Paris 1, NDC développe »).",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvIntro1"
+      },
+      {
+        "key": "field_ndc_home_amv_intro_strong",
+        "label": "Raison d'être — Intro (partie en gras)",
+        "name": "amvIntroStrong",
+        "type": "text",
+        "instructions": "Ex. « 15 sites à horizon 2030 ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvIntroStrong"
+      },
+      {
+        "key": "field_ndc_home_amv_intro2",
+        "label": "Raison d'être — Intro (fin)",
+        "name": "amvIntro2",
+        "type": "text",
+        "instructions": "Ex. « — souverains, écoresponsables, opérés par nos équipes. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvIntro2"
+      },
+      {
+        "key": "field_ndc_home_amv_figures",
+        "label": "Raison d'être — Chiffres",
+        "name": "amvFigures",
+        "type": "repeater",
+        "instructions": "Les 3 chiffres affichés sous l'intro. Laisser vide pour les valeurs par défaut (15 sites en 2030 · 3 en service · 16 % empreinte numérique FR).",
+        "required": 0,
+        "min": 0,
+        "max": 4,
+        "layout": "table",
+        "button_label": "Ajouter un chiffre",
+        "show_in_graphql": 1,
+        "graphql_field_name": "amvFigures",
+        "sub_fields": [
+          {
+            "key": "field_ndc_home_amv_fig_valeur",
+            "label": "Valeur",
+            "name": "valeur",
+            "type": "text",
+            "instructions": "Ex. « 15 », « 3 », « 16 % ».",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "valeur"
+          },
+          {
+            "key": "field_ndc_home_amv_fig_label",
+            "label": "Libellé",
+            "name": "label",
+            "type": "text",
+            "required": 0,
+            "show_in_graphql": 1,
+            "graphql_field_name": "label"
+          }
+        ]
+      },
+      {
+        "key": "field_ndc_home_ambition_title",
+        "label": "Ambition — Titre",
+        "name": "ambitionTitle",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "ambitionTitle"
+      },
+      {
+        "key": "field_ndc_home_ambition_text",
+        "label": "Ambition — Texte",
+        "name": "ambitionText",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "ambitionText"
+      },
+      {
+        "key": "field_ndc_home_mission_title",
+        "label": "Mission — Titre",
+        "name": "missionTitle",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "missionTitle"
+      },
+      {
+        "key": "field_ndc_home_mission_text",
+        "label": "Mission — Texte",
+        "name": "missionText",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "missionText"
+      },
+      {
+        "key": "field_ndc_home_vision_title",
+        "label": "Vision — Titre",
+        "name": "visionTitle",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "visionTitle"
+      },
+      {
+        "key": "field_ndc_home_vision_text",
+        "label": "Vision — Texte",
+        "name": "visionText",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "visionText"
+      },
+
+      {
+        "key": "field_ndc_home_tab_faq",
+        "label": "FAQ",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_faq_eyebrow",
+        "label": "FAQ — Sur-titre",
+        "name": "faqEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Questions fréquentes ». Les questions/réponses restent gérées via le CPT « FAQ ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "faqEyebrow"
+      },
+      {
+        "key": "field_ndc_home_faq_title",
+        "label": "FAQ — Titre",
+        "name": "faqTitle",
+        "type": "text",
+        "instructions": "Ex. « Tout savoir sur l'hébergement chez NDC ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "faqTitle"
+      },
+
+      {
+        "key": "field_ndc_home_tab_news",
+        "label": "Actualités",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_news_eyebrow",
+        "label": "Actualités — Sur-titre",
+        "name": "newsEyebrow",
+        "type": "text",
+        "instructions": "Ex. « Actualités ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "newsEyebrow"
+      },
+      {
+        "key": "field_ndc_home_news_title",
+        "label": "Actualités — Titre",
+        "name": "newsTitle",
+        "type": "text",
+        "instructions": "Ex. « Ce qui se passe chez NDC. ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "newsTitle"
+      },
+      {
+        "key": "field_ndc_home_news_seeall",
+        "label": "Actualités — Lien « voir tout »",
+        "name": "newsSeeAll",
+        "type": "text",
+        "instructions": "Ex. « Toutes les actualités ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "newsSeeAll"
+      },
+
+      {
+        "key": "field_ndc_home_tab_certbanner",
+        "label": "Bandeau certifications / Altarea",
+        "name": "",
+        "type": "tab",
+        "placement": "top"
+      },
+      {
+        "key": "field_ndc_home_certbanner_cert_title",
+        "label": "Carte certifications — Titre",
+        "name": "certBannerCertTitle",
+        "type": "text",
+        "instructions": "Ex. « Découvrir nos certifications ». Laisser vide pour le texte par défaut.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerCertTitle"
+      },
+      {
+        "key": "field_ndc_home_certbanner_cert_sub",
+        "label": "Carte certifications — Sous-texte",
+        "name": "certBannerCertSub",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerCertSub"
+      },
+      {
+        "key": "field_ndc_home_certbanner_cert_url",
+        "label": "Carte certifications — Lien",
+        "name": "certBannerCertUrl",
+        "type": "url",
+        "instructions": "Laisser vide pour pointer vers /certifications.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerCertUrl"
+      },
+      {
+        "key": "field_ndc_home_certbanner_altarea_title",
+        "label": "Carte Altarea — Titre",
+        "name": "certBannerAltareaTitle",
+        "type": "text",
+        "instructions": "Ex. « Découvrir le groupe Altarea ». Laisser vide pour le texte par défaut.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerAltareaTitle"
+      },
+      {
+        "key": "field_ndc_home_certbanner_altarea_sub",
+        "label": "Carte Altarea — Sous-texte",
+        "name": "certBannerAltareaSub",
+        "type": "textarea",
+        "rows": 2,
+        "instructions": "Ex. « (une marque du Groupe Altarea) ».",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerAltareaSub"
+      },
+      {
+        "key": "field_ndc_home_certbanner_altarea_url",
+        "label": "Carte Altarea — Lien",
+        "name": "certBannerAltareaUrl",
+        "type": "url",
+        "instructions": "Laisser vide pour pointer vers /groupe.",
+        "required": 0,
+        "show_in_graphql": 1,
+        "graphql_field_name": "certBannerAltareaUrl"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Contenu éditorial complet de la page d'accueil (slug « accueil »). Le groupe apparaît sur les Pages ; seule la page « accueil » est lue par le site. Tous les champs sont optionnels : un champ vide retombe sur le texte par défaut (FR/EN).",
+    "show_in_rest": 0,
+    "map_graphql_types_from_location_rules": 0,
+    "graphql_types": [
+      "Page"
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "homeFields"
+  }
+]

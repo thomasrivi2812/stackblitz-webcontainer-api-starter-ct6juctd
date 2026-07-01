@@ -1131,10 +1131,15 @@ export function homeServices(services: Service[], max = 5): Service[] {
 // ===========================================================================
 // CONTENU DE L'ACCUEIL — champs ACF/SCF `homeFields` sur la Page « accueil »
 // (éditable + traduisible via Polylang). Tout est optionnel : chaque champ vide
-// retombe sur le texte codé dans la page (repli). Incrément 1 : Hero + KPIs.
+// retombe sur le texte codé dans la page (repli). Couvre TOUTES les sections :
+// Hero, KPIs, Réseau NDC, Services, Engagements, Raison d'être, FAQ, Actualités,
+// bandeau certifications / groupe Altarea.
 // ===========================================================================
 export type HomeKpi = { valeur: string; unite: string; label: string };
+export type HomeEngagement = { icon: string; titre: string; desc: string };
+export type HomeFigure = { valeur: string; label: string };
 export type HomeContent = {
+  // Hero
   heroEyebrow: string | null;
   heroTitle: string | null;
   heroLead: string | null;
@@ -1145,7 +1150,48 @@ export type HomeContent = {
   heroImage: { sourceUrl: string; altText: string } | null;
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
+  // Bandeau KPI
+  kpiTitle: string | null;
   kpis: HomeKpi[];
+  // Section « Réseau NDC » (data centers)
+  dcEyebrow: string | null;
+  dcTitle: string | null;
+  dcSub: string | null;
+  dcSeeAll: string | null;
+  // Section « Nos services »
+  servicesEyebrow: string | null;
+  servicesTitle1: string | null;
+  servicesTitle2: string | null;
+  servicesSub: string | null;
+  servicesCta: string | null;
+  // Section « Nos engagements »
+  engEyebrow: string | null;
+  engTitle: string | null;
+  engSeeAll: string | null;
+  engagements: HomeEngagement[];
+  // Section « Notre raison d'être » (Ambition / Mission / Vision)
+  amvEyebrow: string | null;
+  amvTitle1: string | null;
+  amvTitleAccent: string | null;
+  amvTitle2: string | null;
+  amvIntro1: string | null;
+  amvIntroStrong: string | null;
+  amvIntro2: string | null;
+  amvFigures: HomeFigure[];
+  ambitionTitle: string | null;
+  ambitionText: string | null;
+  missionTitle: string | null;
+  missionText: string | null;
+  visionTitle: string | null;
+  visionText: string | null;
+  // Section « FAQ »
+  faqEyebrow: string | null;
+  faqTitle: string | null;
+  // Section « Actualités »
+  newsEyebrow: string | null;
+  newsTitle: string | null;
+  newsSeeAll: string | null;
+  // Bandeau certifications / groupe Altarea
   certBannerCertTitle: string | null;
   certBannerCertSub: string | null;
   certBannerCertUrl: string | null;
@@ -1169,7 +1215,40 @@ const HOME_QUERY = gql`
           heroImage { node { sourceUrl altText } }
           heroCaptionTitle
           heroCaptionSub
+          kpiTitle
           kpis { valeur unite label }
+          dcEyebrow
+          dcTitle
+          dcSub
+          dcSeeAll
+          servicesEyebrow
+          servicesTitle1
+          servicesTitle2
+          servicesSub
+          servicesCta
+          engEyebrow
+          engTitle
+          engSeeAll
+          engagements { icon titre desc }
+          amvEyebrow
+          amvTitle1
+          amvTitleAccent
+          amvTitle2
+          amvIntro1
+          amvIntroStrong
+          amvIntro2
+          amvFigures { valeur label }
+          ambitionTitle
+          ambitionText
+          missionTitle
+          missionText
+          visionTitle
+          visionText
+          faqEyebrow
+          faqTitle
+          newsEyebrow
+          newsTitle
+          newsSeeAll
           certBannerCertTitle
           certBannerCertSub
           certBannerCertUrl
@@ -1193,7 +1272,40 @@ type WpHomeFields = {
   heroImage: { node: { sourceUrl: string; altText: string } | null } | null;
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
+  kpiTitle: string | null;
   kpis: { valeur: string | null; unite: string | null; label: string | null }[] | null;
+  dcEyebrow: string | null;
+  dcTitle: string | null;
+  dcSub: string | null;
+  dcSeeAll: string | null;
+  servicesEyebrow: string | null;
+  servicesTitle1: string | null;
+  servicesTitle2: string | null;
+  servicesSub: string | null;
+  servicesCta: string | null;
+  engEyebrow: string | null;
+  engTitle: string | null;
+  engSeeAll: string | null;
+  engagements: { icon: string | null; titre: string | null; desc: string | null }[] | null;
+  amvEyebrow: string | null;
+  amvTitle1: string | null;
+  amvTitleAccent: string | null;
+  amvTitle2: string | null;
+  amvIntro1: string | null;
+  amvIntroStrong: string | null;
+  amvIntro2: string | null;
+  amvFigures: { valeur: string | null; label: string | null }[] | null;
+  ambitionTitle: string | null;
+  ambitionText: string | null;
+  missionTitle: string | null;
+  missionText: string | null;
+  visionTitle: string | null;
+  visionText: string | null;
+  faqEyebrow: string | null;
+  faqTitle: string | null;
+  newsEyebrow: string | null;
+  newsTitle: string | null;
+  newsSeeAll: string | null;
   certBannerCertTitle: string | null;
   certBannerCertSub: string | null;
   certBannerCertUrl: string | null;
@@ -1229,9 +1341,46 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
         : null,
       heroCaptionTitle: f.heroCaptionTitle || null,
       heroCaptionSub: f.heroCaptionSub || null,
+      kpiTitle: f.kpiTitle || null,
       kpis: (f.kpis ?? [])
         .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
         .filter((k) => k.valeur || k.label),
+      dcEyebrow: f.dcEyebrow || null,
+      dcTitle: f.dcTitle || null,
+      dcSub: f.dcSub || null,
+      dcSeeAll: f.dcSeeAll || null,
+      servicesEyebrow: f.servicesEyebrow || null,
+      servicesTitle1: f.servicesTitle1 || null,
+      servicesTitle2: f.servicesTitle2 || null,
+      servicesSub: f.servicesSub || null,
+      servicesCta: f.servicesCta || null,
+      engEyebrow: f.engEyebrow || null,
+      engTitle: f.engTitle || null,
+      engSeeAll: f.engSeeAll || null,
+      engagements: (f.engagements ?? [])
+        .map((e) => ({ icon: e.icon ?? '', titre: e.titre ?? '', desc: e.desc ?? '' }))
+        .filter((e) => e.titre || e.desc),
+      amvEyebrow: f.amvEyebrow || null,
+      amvTitle1: f.amvTitle1 || null,
+      amvTitleAccent: f.amvTitleAccent || null,
+      amvTitle2: f.amvTitle2 || null,
+      amvIntro1: f.amvIntro1 || null,
+      amvIntroStrong: f.amvIntroStrong || null,
+      amvIntro2: f.amvIntro2 || null,
+      amvFigures: (f.amvFigures ?? [])
+        .map((v) => ({ valeur: v.valeur ?? '', label: v.label ?? '' }))
+        .filter((v) => v.valeur || v.label),
+      ambitionTitle: f.ambitionTitle || null,
+      ambitionText: f.ambitionText || null,
+      missionTitle: f.missionTitle || null,
+      missionText: f.missionText || null,
+      visionTitle: f.visionTitle || null,
+      visionText: f.visionText || null,
+      faqEyebrow: f.faqEyebrow || null,
+      faqTitle: f.faqTitle || null,
+      newsEyebrow: f.newsEyebrow || null,
+      newsTitle: f.newsTitle || null,
+      newsSeeAll: f.newsSeeAll || null,
       certBannerCertTitle: f.certBannerCertTitle || null,
       certBannerCertSub: f.certBannerCertSub || null,
       certBannerCertUrl: f.certBannerCertUrl || null,
