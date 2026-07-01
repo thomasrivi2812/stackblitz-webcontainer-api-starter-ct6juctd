@@ -1200,61 +1200,85 @@ export type HomeContent = {
   certBannerAltareaUrl: string | null;
 };
 
+// Sélection commune des champs `homeFields` (réutilisée par la requête classique
+// et par la requête de repli sur les traductions Polylang).
+const HOME_FIELDS_SELECTION = `
+  heroEyebrow
+  heroTitle
+  heroLead
+  heroCtaPrimaryLabel
+  heroCtaPrimaryUrl
+  heroCtaSecondaryLabel
+  heroCtaSecondaryUrl
+  heroImage { node { sourceUrl altText } }
+  heroCaptionTitle
+  heroCaptionSub
+  kpiTitle
+  kpis { valeur unite label }
+  dcEyebrow
+  dcTitle
+  dcSub
+  dcSeeAll
+  servicesEyebrow
+  servicesTitle1
+  servicesTitle2
+  servicesSub
+  servicesCta
+  engEyebrow
+  engTitle
+  engSeeAll
+  engagements { icon titre desc }
+  amvEyebrow
+  amvTitle1
+  amvTitleAccent
+  amvTitle2
+  amvIntro1
+  amvIntroStrong
+  amvIntro2
+  amvFigures { valeur label }
+  ambitionTitle
+  ambitionText
+  missionTitle
+  missionText
+  visionTitle
+  visionText
+  faqEyebrow
+  faqTitle
+  newsEyebrow
+  newsTitle
+  newsSeeAll
+  certBannerCertTitle
+  certBannerCertSub
+  certBannerCertUrl
+  certBannerAltareaTitle
+  certBannerAltareaSub
+  certBannerAltareaUrl
+`;
+
 const HOME_QUERY = gql`
   query HomeContent($language: LanguageCodeFilterEnum) {
     pages(first: 1, where: { name: "accueil", language: $language }) {
       nodes {
-        homeFields {
-          heroEyebrow
-          heroTitle
-          heroLead
-          heroCtaPrimaryLabel
-          heroCtaPrimaryUrl
-          heroCtaSecondaryLabel
-          heroCtaSecondaryUrl
-          heroImage { node { sourceUrl altText } }
-          heroCaptionTitle
-          heroCaptionSub
-          kpiTitle
-          kpis { valeur unite label }
-          dcEyebrow
-          dcTitle
-          dcSub
-          dcSeeAll
-          servicesEyebrow
-          servicesTitle1
-          servicesTitle2
-          servicesSub
-          servicesCta
-          engEyebrow
-          engTitle
-          engSeeAll
-          engagements { icon titre desc }
-          amvEyebrow
-          amvTitle1
-          amvTitleAccent
-          amvTitle2
-          amvIntro1
-          amvIntroStrong
-          amvIntro2
-          amvFigures { valeur label }
-          ambitionTitle
-          ambitionText
-          missionTitle
-          missionText
-          visionTitle
-          visionText
-          faqEyebrow
-          faqTitle
-          newsEyebrow
-          newsTitle
-          newsSeeAll
-          certBannerCertTitle
-          certBannerCertSub
-          certBannerCertUrl
-          certBannerAltareaTitle
-          certBannerAltareaSub
-          certBannerAltareaUrl
+        homeFields { ${HOME_FIELDS_SELECTION} }
+      }
+    }
+  }
+`;
+
+// Repli Polylang : page FR « accueil » + ses traductions (avec leurs homeFields).
+// Sert quand la page traduite porte un slug différent (ex. « accueil-2 ») et n'est
+// donc pas trouvée par name:"accueil". Appelée dans un try/catch isolé : si le
+// schéma WPGraphQL n'expose pas `translations`, on retombe sans casse sur le FR.
+const HOME_TRANSLATIONS_QUERY = gql`
+  query HomeContentTranslations {
+    pages(first: 1, where: { name: "accueil", language: FR }) {
+      nodes {
+        homeFields { ${HOME_FIELDS_SELECTION} }
+        translations {
+          ... on Page {
+            language { code }
+            homeFields { ${HOME_FIELDS_SELECTION} }
+          }
         }
       }
     }
@@ -1314,82 +1338,116 @@ type WpHomeFields = {
   certBannerAltareaUrl: string | null;
 } | null;
 
+/** Convertit les champs WordPress bruts (`homeFields`) en contenu normalisé. */
+function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
+  return {
+    heroEyebrow: f.heroEyebrow || null,
+    heroTitle: f.heroTitle || null,
+    heroLead: f.heroLead || null,
+    heroCtaPrimaryLabel: f.heroCtaPrimaryLabel || null,
+    heroCtaPrimaryUrl: f.heroCtaPrimaryUrl || null,
+    heroCtaSecondaryLabel: f.heroCtaSecondaryLabel || null,
+    heroCtaSecondaryUrl: f.heroCtaSecondaryUrl || null,
+    heroImage: f.heroImage?.node
+      ? { sourceUrl: f.heroImage.node.sourceUrl, altText: f.heroImage.node.altText ?? '' }
+      : null,
+    heroCaptionTitle: f.heroCaptionTitle || null,
+    heroCaptionSub: f.heroCaptionSub || null,
+    kpiTitle: f.kpiTitle || null,
+    kpis: (f.kpis ?? [])
+      .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
+      .filter((k) => k.valeur || k.label),
+    dcEyebrow: f.dcEyebrow || null,
+    dcTitle: f.dcTitle || null,
+    dcSub: f.dcSub || null,
+    dcSeeAll: f.dcSeeAll || null,
+    servicesEyebrow: f.servicesEyebrow || null,
+    servicesTitle1: f.servicesTitle1 || null,
+    servicesTitle2: f.servicesTitle2 || null,
+    servicesSub: f.servicesSub || null,
+    servicesCta: f.servicesCta || null,
+    engEyebrow: f.engEyebrow || null,
+    engTitle: f.engTitle || null,
+    engSeeAll: f.engSeeAll || null,
+    engagements: (f.engagements ?? [])
+      .map((e) => ({ icon: e.icon ?? '', titre: e.titre ?? '', desc: e.desc ?? '' }))
+      .filter((e) => e.titre || e.desc),
+    amvEyebrow: f.amvEyebrow || null,
+    amvTitle1: f.amvTitle1 || null,
+    amvTitleAccent: f.amvTitleAccent || null,
+    amvTitle2: f.amvTitle2 || null,
+    amvIntro1: f.amvIntro1 || null,
+    amvIntroStrong: f.amvIntroStrong || null,
+    amvIntro2: f.amvIntro2 || null,
+    amvFigures: (f.amvFigures ?? [])
+      .map((v) => ({ valeur: v.valeur ?? '', label: v.label ?? '' }))
+      .filter((v) => v.valeur || v.label),
+    ambitionTitle: f.ambitionTitle || null,
+    ambitionText: f.ambitionText || null,
+    missionTitle: f.missionTitle || null,
+    missionText: f.missionText || null,
+    visionTitle: f.visionTitle || null,
+    visionText: f.visionText || null,
+    faqEyebrow: f.faqEyebrow || null,
+    faqTitle: f.faqTitle || null,
+    newsEyebrow: f.newsEyebrow || null,
+    newsTitle: f.newsTitle || null,
+    newsSeeAll: f.newsSeeAll || null,
+    certBannerCertTitle: f.certBannerCertTitle || null,
+    certBannerCertSub: f.certBannerCertSub || null,
+    certBannerCertUrl: f.certBannerCertUrl || null,
+    certBannerAltareaTitle: f.certBannerAltareaTitle || null,
+    certBannerAltareaSub: f.certBannerAltareaSub || null,
+    certBannerAltareaUrl: f.certBannerAltareaUrl || null,
+  };
+}
+
 /**
  * Contenu éditorial de l'accueil depuis WordPress (page « accueil », champs
- * `homeFields`). Renvoie null si l'API est absente ou la page introuvable
- * → l'accueil affiche alors son contenu par défaut (repli).
+ * `homeFields`). Stratégie :
+ *   1) lookup classique par slug + langue (name:"accueil") ;
+ *   2) pour une langue secondaire dont la page traduite a un slug différent
+ *      (ex. « accueil-2 »), repli via le lien de traduction Polylang ;
+ *   3) sinon repli sur le contenu FR, puis sur les textes par défaut du site.
  */
 export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
   if (!endpoint) return null;
+  const client = new GraphQLClient(endpoint);
+
+  // 1) Lookup classique : page de slug « accueil » dans la langue demandée.
   try {
-    const client = new GraphQLClient(endpoint);
-    const data = await wpSingle<{ pages: { nodes: { homeFields: WpHomeFields }[] } }>(
-      client, HOME_QUERY, {}, locale, (d) => d.pages?.nodes?.[0]?.homeFields,
+    const data = await client.request<{ pages: { nodes: { homeFields: WpHomeFields }[] } }>(
+      HOME_QUERY, { language: wpLang(locale) },
     );
     const f = data.pages?.nodes?.[0]?.homeFields;
-    if (!f) return null;
-    return {
-      heroEyebrow: f.heroEyebrow || null,
-      heroTitle: f.heroTitle || null,
-      heroLead: f.heroLead || null,
-      heroCtaPrimaryLabel: f.heroCtaPrimaryLabel || null,
-      heroCtaPrimaryUrl: f.heroCtaPrimaryUrl || null,
-      heroCtaSecondaryLabel: f.heroCtaSecondaryLabel || null,
-      heroCtaSecondaryUrl: f.heroCtaSecondaryUrl || null,
-      heroImage: f.heroImage?.node
-        ? { sourceUrl: f.heroImage.node.sourceUrl, altText: f.heroImage.node.altText ?? '' }
-        : null,
-      heroCaptionTitle: f.heroCaptionTitle || null,
-      heroCaptionSub: f.heroCaptionSub || null,
-      kpiTitle: f.kpiTitle || null,
-      kpis: (f.kpis ?? [])
-        .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
-        .filter((k) => k.valeur || k.label),
-      dcEyebrow: f.dcEyebrow || null,
-      dcTitle: f.dcTitle || null,
-      dcSub: f.dcSub || null,
-      dcSeeAll: f.dcSeeAll || null,
-      servicesEyebrow: f.servicesEyebrow || null,
-      servicesTitle1: f.servicesTitle1 || null,
-      servicesTitle2: f.servicesTitle2 || null,
-      servicesSub: f.servicesSub || null,
-      servicesCta: f.servicesCta || null,
-      engEyebrow: f.engEyebrow || null,
-      engTitle: f.engTitle || null,
-      engSeeAll: f.engSeeAll || null,
-      engagements: (f.engagements ?? [])
-        .map((e) => ({ icon: e.icon ?? '', titre: e.titre ?? '', desc: e.desc ?? '' }))
-        .filter((e) => e.titre || e.desc),
-      amvEyebrow: f.amvEyebrow || null,
-      amvTitle1: f.amvTitle1 || null,
-      amvTitleAccent: f.amvTitleAccent || null,
-      amvTitle2: f.amvTitle2 || null,
-      amvIntro1: f.amvIntro1 || null,
-      amvIntroStrong: f.amvIntroStrong || null,
-      amvIntro2: f.amvIntro2 || null,
-      amvFigures: (f.amvFigures ?? [])
-        .map((v) => ({ valeur: v.valeur ?? '', label: v.label ?? '' }))
-        .filter((v) => v.valeur || v.label),
-      ambitionTitle: f.ambitionTitle || null,
-      ambitionText: f.ambitionText || null,
-      missionTitle: f.missionTitle || null,
-      missionText: f.missionText || null,
-      visionTitle: f.visionTitle || null,
-      visionText: f.visionText || null,
-      faqEyebrow: f.faqEyebrow || null,
-      faqTitle: f.faqTitle || null,
-      newsEyebrow: f.newsEyebrow || null,
-      newsTitle: f.newsTitle || null,
-      newsSeeAll: f.newsSeeAll || null,
-      certBannerCertTitle: f.certBannerCertTitle || null,
-      certBannerCertSub: f.certBannerCertSub || null,
-      certBannerCertUrl: f.certBannerCertUrl || null,
-      certBannerAltareaTitle: f.certBannerAltareaTitle || null,
-      certBannerAltareaSub: f.certBannerAltareaSub || null,
-      certBannerAltareaUrl: f.certBannerAltareaUrl || null,
-    };
+    if (f) return mapHome(f);
   } catch (error) {
     logWpError('accueil', error);
-    return null;
   }
+
+  // FR : la page principale ; pas de repli traduction possible.
+  if (locale === 'fr') return null;
+
+  // 2) Langue secondaire introuvable par slug (slug traduit différent, ex.
+  //    « accueil-2 ») → on récupère la page FR et sa traduction via Polylang.
+  try {
+    const data = await client.request<{
+      pages: { nodes: {
+        homeFields: WpHomeFields;
+        translations: ({ language: { code: string | null } | null; homeFields: WpHomeFields } | null)[] | null;
+      }[] };
+    }>(HOME_TRANSLATIONS_QUERY, {});
+    const node = data.pages?.nodes?.[0];
+    const want = wpLang(locale);
+    const tr = node?.translations?.find(
+      (t) => (t?.language?.code ?? '').toUpperCase() === want,
+    );
+    if (tr?.homeFields) return mapHome(tr.homeFields);
+    // 3) Repli final : contenu FR de la page principale.
+    if (node?.homeFields) return mapHome(node.homeFields);
+  } catch (error) {
+    logWpError('accueil (traductions Polylang)', error);
+  }
+
+  return null;
 }
