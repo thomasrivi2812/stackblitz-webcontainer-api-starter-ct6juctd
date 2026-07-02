@@ -5,7 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { getPersonas, getDatacenters, getHeaderNav } from '@/lib/wordpress';
+import { getPersonas, getDatacenters } from '@/lib/wordpress';
 import { routing, type Locale } from '@/i18n/routing';
 import '../globals.css';
 
@@ -75,19 +75,16 @@ export default async function LocaleLayout({
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,
   // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
-  const [personas, datacenters, headerNav] = await Promise.all([
+  const [personas, datacenters] = await Promise.all([
     getPersonas(locale as Locale),
     getDatacenters(locale as Locale),
-    // Menu « header » éditable dans WP (Apparence → Menus) : choix des pages
-    // et de leur ordre. null = pas de menu configuré → nav par défaut du site.
-    getHeaderNav(locale as Locale),
   ]);
 
   return (
     <html lang={locale} className={jost.variable}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <SiteHeader personas={personas} datacenters={datacenters} nav={headerNav} />
+          <SiteHeader personas={personas} datacenters={datacenters} />
 
           {children}
 

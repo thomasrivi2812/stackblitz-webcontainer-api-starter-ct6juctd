@@ -3657,34 +3657,34 @@ html {
   border-left: 1px solid var(--line);
 }
 
-/* Boutons Portail Client / Contact : format allongé. Hauteur modérée (40px)
-   et padding horizontal généreux + largeur mini, pour un rendu long et
-   élégant plutôt que haut et étroit. */
+/* Boutons Portail Client / Contact : format allongé compact. Hauteur modérée
+   (38px) et padding horizontal + largeur mini, pour un rendu long et élégant
+   plutôt que haut et étroit. */
 .nav-cta,
 .nav-portal {
-  min-height: 40px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  min-height: 38px;
+  padding-top: 9px;
+  padding-bottom: 9px;
   font-size: 14.5px;
   justify-content: center;
 }
-.nav-cta { padding-left: 38px; padding-right: 38px; min-width: 142px; }
-.nav-portal { padding-left: 34px; padding-right: 34px; min-width: 180px; }
+.nav-cta { padding-left: 30px; padding-right: 30px; min-width: 126px; }
+.nav-portal { padding-left: 26px; padding-right: 26px; min-width: 162px; }
 
 /* ── Laptops standard (≈1024–1280px) : on resserre la nav mais les boutons
       gardent leur format allongé. ── */
 @media (max-width: 1280px) {
   .nav { gap: 18px; font-size: 14.5px; }
   .nav-actions { gap: 10px; margin-left: 6px; padding-left: 16px; }
-  .nav-cta { padding-left: 32px; padding-right: 32px; min-width: 126px; font-size: 14px; }
-  .nav-portal { padding-left: 28px; padding-right: 28px; min-width: 162px; font-size: 14px; }
+  .nav-cta { padding-left: 26px; padding-right: 26px; min-width: 112px; font-size: 14px; }
+  .nav-portal { padding-left: 22px; padding-right: 22px; min-width: 146px; font-size: 14px; }
 }
 
 /* ── Petits laptops / grandes tablettes (juste avant le passage au burger) ── */
 @media (max-width: 1080px) {
   .nav { gap: 11px; font-size: 14px; }
   .nav-actions { gap: 8px; padding-left: 12px; }
-  .nav-cta { padding-left: 24px; padding-right: 24px; min-width: 110px; }
-  .nav-portal { padding-left: 20px; padding-right: 20px; min-width: 142px; gap: 5px; }
+  .nav-cta { padding-left: 20px; padding-right: 20px; min-width: 100px; }
+  .nav-portal { padding-left: 16px; padding-right: 16px; min-width: 130px; gap: 5px; }
   .site-header .inner { gap: 16px; }
 }
