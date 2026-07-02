@@ -3657,24 +3657,36 @@ html {
   border-left: 1px solid var(--line);
 }
 
-/* Boutons Portail Client / Contact nettement élargis (padding horizontal). */
-.nav-cta { padding: 10px 36px; }
-.nav-portal { padding: 10px 34px; }
+/* Boutons Portail Client / Contact plus généreux : plus larges ET plus hauts,
+   avec une hauteur mini pour un rendu bien plein (fini l'effet « étroit »). */
+.nav-cta,
+.nav-portal {
+  min-height: 44px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  font-size: 15px;
+}
+.nav-cta { padding-left: 34px; padding-right: 34px; }
+.nav-portal { padding-left: 32px; padding-right: 32px; }
 
 /* ── Laptops standard (≈1024–1280px) : on resserre la nav mais les boutons
-      restent bien plus larges qu'à l'origine. ── */
+      restent bien remplis. ── */
 @media (max-width: 1280px) {
   .nav { gap: 18px; font-size: 14.5px; }
   .nav-actions { gap: 10px; margin-left: 6px; padding-left: 16px; }
-  .nav-cta { padding: 9px 28px; font-size: 14px; }
-  .nav-portal { padding: 9px 26px; font-size: 14px; }
+  .nav-cta,
+  .nav-portal { min-height: 42px; padding-top: 11px; padding-bottom: 11px; font-size: 14.5px; }
+  .nav-cta { padding-left: 28px; padding-right: 28px; }
+  .nav-portal { padding-left: 26px; padding-right: 26px; }
 }
 
 /* ── Petits laptops / grandes tablettes (juste avant le passage au burger) ── */
 @media (max-width: 1080px) {
   .nav { gap: 12px; font-size: 14px; }
   .nav-actions { gap: 8px; padding-left: 12px; }
-  .nav-cta { padding: 8px 20px; }
-  .nav-portal { padding: 8px 18px; gap: 5px; }
+  .nav-cta,
+  .nav-portal { min-height: 40px; padding-top: 10px; padding-bottom: 10px; font-size: 14px; }
+  .nav-cta { padding-left: 20px; padding-right: 20px; }
+  .nav-portal { padding-left: 18px; padding-right: 18px; gap: 5px; }
   .site-header .inner { gap: 16px; }
 }
