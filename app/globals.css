@@ -3657,19 +3657,23 @@ html {
   border-left: 1px solid var(--line);
 }
 
+/* Boutons Portail Client / Contact élargis (plus de padding horizontal). */
+.nav-cta { padding: 9px 26px; }
+.nav-portal { padding: 9px 24px; }
+
 /* ── Laptops standard (≈1024–1280px) : on resserre sans casser la lisibilité ── */
 @media (max-width: 1280px) {
   .nav { gap: 20px; font-size: 14.5px; }
   .nav-actions { gap: 10px; margin-left: 6px; padding-left: 16px; }
-  .nav-cta { padding: 8px 14px; font-size: 14px; }
-  .nav-portal { padding: 8px 13px; font-size: 14px; }
+  .nav-cta { padding: 8px 20px; font-size: 14px; }
+  .nav-portal { padding: 8px 18px; font-size: 14px; }
 }
 
 /* ── Petits laptops / grandes tablettes (juste avant le passage au burger) ── */
 @media (max-width: 1080px) {
   .nav { gap: 14px; font-size: 14px; }
   .nav-actions { gap: 8px; padding-left: 12px; }
-  .nav-cta { padding: 8px 13px; }
-  .nav-portal { padding: 8px 11px; gap: 5px; }
+  .nav-cta { padding: 8px 16px; }
+  .nav-portal { padding: 8px 14px; gap: 5px; }
   .site-header .inner { gap: 16px; }
 }
