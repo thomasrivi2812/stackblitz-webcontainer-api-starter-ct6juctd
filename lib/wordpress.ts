@@ -1470,3 +1470,91 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
 
   return null;
 }
+
+// ===========================================================================
+// MENU HEADER — navigation principale éditable dans WP (Apparence → Menus)
+// ---------------------------------------------------------------------------
+// Le snippet PHP enregistre l'emplacement « header ». L'admin choisit les
+// pages et leur ordre ; le front reconstruit la nav. Les boutons Contact /
+// Portail Client / FR-EN restent fixes (hors menu). Deux chemins gardent leur
+// menu déroulant enrichi côté front : /datacenters (réseau) et /offres.
+// Un élément de menu avec des sous-éléments devient un déroulant simple.
+// Retour `null` = aucun menu configuré → le header garde sa nav par défaut.
+// ===========================================================================
+export type NavMenuItem = {
+  label: string;
+  href: string;
+  children: { label: string; href: string }[];
+};
+
+const HEADER_MENU_QUERY = gql`
+  query HeaderMenu($location: MenuLocationEnum!) {
+    menuItems(where: { location: $location, parentDatabaseId: 0 }, first: 30) {
+      nodes {
+        label
+        url
+        path
+        childItems(first: 30) {
+          nodes { label url path }
+        }
+      }
+    }
+  }
+`;
+
+type WpMenuItemNode = {
+  label: string | null;
+  url: string | null;
+  path: string | null;
+  childItems?: { nodes: WpMenuItemNode[] } | null;
+};
+
+/** Normalise l'URL d'un élément de menu vers un chemin utilisable par le front. */
+function navHref(n: WpMenuItemNode): string {
+  let href = n.path || n.url || '#';
+  // URL absolue pointant vers le site lui-même → on ne garde que le chemin.
+  if (/^https?:\/\//i.test(href)) {
+    try {
+      const u = new URL(href);
+      const wpHost = endpoint ? new URL(endpoint).host : '';
+      if (u.host === wpHost || u.host.includes('nationdc')) href = u.pathname + u.search;
+    } catch { /* URL invalide : laissée telle quelle */ }
+  }
+  if (href.startsWith('/')) {
+    href = href.replace(/^\/en(\/|$)/, '/'); // préfixe langue : géré par next-intl
+    if (href.length > 1) href = href.replace(/\/+$/, '');
+  }
+  return href || '#';
+}
+
+function toNavItem(n: WpMenuItemNode): NavMenuItem {
+  return {
+    label: decodeEntities(n.label) || '',
+    href: navHref(n),
+    children: (n.childItems?.nodes ?? [])
+      .map((c) => ({ label: decodeEntities(c.label) || '', href: navHref(c) }))
+      .filter((c) => c.label),
+  };
+}
+
+export async function getHeaderNav(locale: WpLocale = 'fr'): Promise<NavMenuItem[] | null> {
+  if (!endpoint) return null;
+  try {
+    const client = new GraphQLClient(endpoint);
+    const run = (location: string) =>
+      client.request<{ menuItems: { nodes: WpMenuItemNode[] } }>(HEADER_MENU_QUERY, { location });
+    let nodes: WpMenuItemNode[] = [];
+    if (locale === 'en') {
+      // Polylang décline l'emplacement par langue (« header___en » → HEADER___EN).
+      try {
+        nodes = (await run('HEADER___EN')).menuItems?.nodes ?? [];
+      } catch { /* variante EN absente → repli sur le menu FR */ }
+    }
+    if (nodes.length === 0) nodes = (await run('HEADER')).menuItems?.nodes ?? [];
+    if (nodes.length === 0) return null; // pas de menu assigné → nav par défaut
+    return nodes.map(toNavItem).filter((i) => i.label);
+  } catch (error) {
+    logWpError('menu header', error);
+    return null;
+  }
+}

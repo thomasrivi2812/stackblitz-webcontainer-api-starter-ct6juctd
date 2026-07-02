@@ -6,11 +6,13 @@ import { Link } from '@/i18n/routing';
 import { Logo } from '@/components/Logo';
 import { LangSwitcher } from '@/components/LangSwitcher';
 import type { Persona } from '@/lib/personas';
-import type { Datacenter } from '@/lib/wordpress';
+import type { Datacenter, NavMenuItem } from '@/lib/wordpress';
 
 type Props = {
   personas?: Persona[];
   datacenters?: Datacenter[];
+  /** Menu WP (Apparence → Menus, emplacement « header »). null/vide = nav par défaut. */
+  nav?: NavMenuItem[] | null;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -32,7 +34,9 @@ function Chevron({ className }: { className?: string }) {
   );
 }
 
-export function SiteHeader({ personas = [], datacenters = [] }: Props) {
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
+export function SiteHeader({ personas = [], datacenters = [], nav = null }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
@@ -63,6 +67,36 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
     ville: dc.datacenterFields?.ville ?? null,
   }));
 
+  // Navigation : menu WP si configuré, sinon nav par défaut (identique à
+  // l'historique du site). Les boutons Contact / Portail / FR-EN restent fixes.
+  const items: NavMenuItem[] =
+    nav && nav.length > 0
+      ? nav
+      : [
+          { label: t('reseau'), href: '/datacenters', children: [] },
+          { label: t('offres'), href: '/offres', children: [] },
+          { label: t('certifications'), href: '/certifications', children: [] },
+          { label: t('services'), href: '/services', children: [] },
+          {
+            label: t('apropos'),
+            href: '#',
+            children: [
+              { label: t('equipes'), href: '/equipes' },
+              { label: t('groupe'), href: '/groupe' },
+            ],
+          },
+          { label: t('actualites'), href: '/actualites', children: [] },
+        ];
+
+  // /datacenters et /offres gardent leur menu déroulant enrichi (données WP) ;
+  // tout élément de menu avec des sous-éléments devient un déroulant simple.
+  const kindOf = (item: NavMenuItem) => {
+    if (item.href === '/datacenters' && reseauChildren.length > 0) return 'reseau' as const;
+    if (item.href === '/offres' && offresChildren.length > 0) return 'offres' as const;
+    if (item.children.length > 0) return 'dropdown' as const;
+    return 'link' as const;
+  };
+
   return (
     <header className="site-header">
       <div className="container inner">
@@ -72,85 +106,76 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
 
         {/* ---------- Nav desktop ---------- */}
         <nav className="nav">
-          {/* Notre réseau */}
-          <div
-            className="nav-item"
-            onMouseEnter={() => setDesktopOpen('reseau')}
-            onMouseLeave={() => setDesktopOpen(null)}
-          >
-            <Link href="/datacenters" className="nav-link">
-              {t('reseau')}
-              <Chevron className="nav-chev" />
-            </Link>
-            {reseauChildren.length > 0 && (
-              <div className={`nav-dd wide${desktopOpen === 'reseau' ? ' open' : ''}`}>
-                <Link href="/datacenters" className="nav-dd-all">
-                  {t('reseauAll')}
-                  <span aria-hidden="true">→</span>
-                </Link>
-                <div className="nav-dd-grid">
-                  {reseauChildren.map((c) => (
-                    <Link key={c.href} href={c.href} className="nav-dd-item">
-                      <span className="nav-dd-name">{c.label}</span>
-                      {c.ville && <span className="sub">{c.ville}</span>}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {items.map((item, i) => {
+            const id = `nav-${i}`;
+            const kind = kindOf(item);
 
-          {/* Nos offres */}
-          <div
-            className="nav-item"
-            onMouseEnter={() => setDesktopOpen('offres')}
-            onMouseLeave={() => setDesktopOpen(null)}
-          >
-            <Link href="/offres" className="nav-link">
-              {t('offres')}
-              <Chevron className="nav-chev" />
-            </Link>
-            {offresChildren.length > 0 && (
-              <div className={`nav-dd${desktopOpen === 'offres' ? ' open' : ''}`}>
-                <Link href="/offres" className="nav-dd-all">
-                  {t('offresAll')}
-                  <span aria-hidden="true">→</span>
+            if (kind === 'link') {
+              return isExternal(item.href) ? (
+                <a key={id} href={item.href} className="nav-link" target="_blank" rel="noopener noreferrer">
+                  {item.label}
+                </a>
+              ) : (
+                <Link key={id} href={item.href} className="nav-link">
+                  {item.label}
                 </Link>
-                {offresChildren.map((c) => (
-                  <Link key={c.href} href={c.href} className="nav-dd-item">
-                    <span className="nav-dd-name">{c.label}</span>
+              );
+            }
+
+            return (
+              <div
+                key={id}
+                className="nav-item"
+                onMouseEnter={() => setDesktopOpen(id)}
+                onMouseLeave={() => setDesktopOpen(null)}
+              >
+                {item.href && item.href !== '#' ? (
+                  <Link href={item.href} className="nav-link">
+                    {item.label}
+                    <Chevron className="nav-chev" />
                   </Link>
-                ))}
+                ) : (
+                  <button type="button" className="nav-link nav-link-btn" aria-expanded={desktopOpen === id}>
+                    {item.label}
+                    <Chevron className="nav-chev" />
+                  </button>
+                )}
+
+                {kind === 'reseau' ? (
+                  <div className={`nav-dd wide${desktopOpen === id ? ' open' : ''}`}>
+                    <Link href="/datacenters" className="nav-dd-all">
+                      {t('reseauAll')}
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                    <div className="nav-dd-grid">
+                      {reseauChildren.map((c) => (
+                        <Link key={c.href} href={c.href} className="nav-dd-item">
+                          <span className="nav-dd-name">{c.label}</span>
+                          {c.ville && <span className="sub">{c.ville}</span>}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`nav-dd${desktopOpen === id ? ' open' : ''}`}>
+                    {kind === 'offres' && (
+                      <Link href="/offres" className="nav-dd-all">
+                        {t('offresAll')}
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                    )}
+                    {(kind === 'offres' ? offresChildren : item.children).map((c) => (
+                      <Link key={c.href} href={c.href} className="nav-dd-item">
+                        <span className="nav-dd-name">{c.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })}
 
-          <Link href="/certifications" className="nav-link">{t('certifications')}</Link>
-          <Link href="/services" className="nav-link">{t('services')}</Link>
-
-          {/* À propos de nous (dropdown : équipes + groupe) */}
-          <div
-            className="nav-item"
-            onMouseEnter={() => setDesktopOpen('apropos')}
-            onMouseLeave={() => setDesktopOpen(null)}
-          >
-            <button type="button" className="nav-link nav-link-btn" aria-expanded={desktopOpen === 'apropos'}>
-              {t('apropos')}
-              <Chevron className="nav-chev" />
-            </button>
-            <div className={`nav-dd${desktopOpen === 'apropos' ? ' open' : ''}`}>
-              <Link href="/equipes" className="nav-dd-item">
-                <span className="nav-dd-name">{t('equipes')}</span>
-              </Link>
-              <Link href="/groupe" className="nav-dd-item">
-                <span className="nav-dd-name">{t('groupe')}</span>
-              </Link>
-            </div>
-          </div>
-
-          <Link href="/actualites" className="nav-link">{t('actualites')}</Link>
-
-          {/* Actions : Portail + Contact mis en valeur */}
+          {/* Actions : Portail + Contact mis en valeur (fixes, hors menu WP) */}
           <div className="nav-actions">
             <a
               className="nav-portal"
@@ -183,74 +208,69 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
 
         {/* ---------- Nav mobile ---------- */}
         <nav className={open ? 'mobile-nav open' : 'mobile-nav'}>
-          {/* Notre réseau (accordéon) */}
-          <div className="mnav-group">
-            <button
-              type="button"
-              className={`mnav-trigger${mobileSub === 'reseau' ? ' open' : ''}`}
-              aria-expanded={mobileSub === 'reseau'}
-              onClick={() => setMobileSub((v) => (v === 'reseau' ? null : 'reseau'))}
-            >
-              {t('reseau')}
-              <Chevron className="chev" />
-            </button>
-            <div className={`mnav-sub${mobileSub === 'reseau' ? ' open' : ''}`}>
-              <Link href="/datacenters" className="all" onClick={close}>
-                {t('reseauAll')}
-              </Link>
-              {reseauChildren.map((c) => (
-                <Link key={c.href} href={c.href} onClick={close}>
-                  {c.label}
-                  {c.ville ? ` — ${c.ville}` : ''}
+          {items.map((item, i) => {
+            const id = `nav-${i}`;
+            const kind = kindOf(item);
+
+            if (kind === 'link') {
+              return isExternal(item.href) ? (
+                <a key={id} href={item.href} onClick={close} target="_blank" rel="noopener noreferrer">
+                  {item.label}
+                </a>
+              ) : (
+                <Link key={id} href={item.href} onClick={close}>
+                  {item.label}
                 </Link>
-              ))}
-            </div>
-          </div>
+              );
+            }
 
-          {/* Nos offres (accordéon) */}
-          <div className="mnav-group">
-            <button
-              type="button"
-              className={`mnav-trigger${mobileSub === 'offres' ? ' open' : ''}`}
-              aria-expanded={mobileSub === 'offres'}
-              onClick={() => setMobileSub((v) => (v === 'offres' ? null : 'offres'))}
-            >
-              {t('offres')}
-              <Chevron className="chev" />
-            </button>
-            <div className={`mnav-sub${mobileSub === 'offres' ? ' open' : ''}`}>
-              <Link href="/offres" className="all" onClick={close}>
-                {t('offresAll')}
-              </Link>
-              {offresChildren.map((c) => (
-                <Link key={c.href} href={c.href} onClick={close}>
-                  {c.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <Link href="/certifications" onClick={close}>{t('certifications')}</Link>
-          <Link href="/services" onClick={close}>{t('services')}</Link>
-
-          {/* À propos de nous (accordéon) */}
-          <div className="mnav-group">
-            <button
-              type="button"
-              className={`mnav-trigger${mobileSub === 'apropos' ? ' open' : ''}`}
-              aria-expanded={mobileSub === 'apropos'}
-              onClick={() => setMobileSub((v) => (v === 'apropos' ? null : 'apropos'))}
-            >
-              {t('apropos')}
-              <Chevron className="chev" />
-            </button>
-            <div className={`mnav-sub${mobileSub === 'apropos' ? ' open' : ''}`}>
-              <Link href="/equipes" onClick={close}>{t('equipes')}</Link>
-              <Link href="/groupe" onClick={close}>{t('groupe')}</Link>
-            </div>
-          </div>
-
-          <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
+            return (
+              <div className="mnav-group" key={id}>
+                <button
+                  type="button"
+                  className={`mnav-trigger${mobileSub === id ? ' open' : ''}`}
+                  aria-expanded={mobileSub === id}
+                  onClick={() => setMobileSub((v) => (v === id ? null : id))}
+                >
+                  {item.label}
+                  <Chevron className="chev" />
+                </button>
+                <div className={`mnav-sub${mobileSub === id ? ' open' : ''}`}>
+                  {kind === 'reseau' && (
+                    <>
+                      <Link href="/datacenters" className="all" onClick={close}>
+                        {t('reseauAll')}
+                      </Link>
+                      {reseauChildren.map((c) => (
+                        <Link key={c.href} href={c.href} onClick={close}>
+                          {c.label}
+                          {c.ville ? ` — ${c.ville}` : ''}
+                        </Link>
+                      ))}
+                    </>
+                  )}
+                  {kind === 'offres' && (
+                    <>
+                      <Link href="/offres" className="all" onClick={close}>
+                        {t('offresAll')}
+                      </Link>
+                      {offresChildren.map((c) => (
+                        <Link key={c.href} href={c.href} onClick={close}>
+                          {c.label}
+                        </Link>
+                      ))}
+                    </>
+                  )}
+                  {kind === 'dropdown' &&
+                    item.children.map((c) => (
+                      <Link key={c.href} href={c.href} onClick={close}>
+                        {c.label}
+                      </Link>
+                    ))}
+                </div>
+              </div>
+            );
+          })}
 
           <div className="mnav-actions">
             <Link href="/contact" className="nav-cta" onClick={close}>{t('contact')}</Link>
