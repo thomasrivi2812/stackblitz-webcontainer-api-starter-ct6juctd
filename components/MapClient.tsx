@@ -12,8 +12,8 @@ const STATUT_COLOR: Record<string, string> = {
 };
 
 const STATUT_LABEL: Record<string, string> = {
-  livre: 'Livré',
-  construction: 'En construction',
+  livre: 'Opérationnel',
+  construction: 'En cours',
   avenir: 'À venir',
 };
 

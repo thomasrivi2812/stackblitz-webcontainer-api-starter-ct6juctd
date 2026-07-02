@@ -172,7 +172,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <span className="hero-cap-dot" aria-hidden="true" />
               <div>
                 <strong>{wp?.heroCaptionTitle || t.heroCaptionTitle}</strong>
-                <span>3 MW · PUE&nbsp;1,2</span>
+                <span>{wp?.heroCaptionSub || t.heroCaptionSub}</span>
               </div>
             </div>
           </div>

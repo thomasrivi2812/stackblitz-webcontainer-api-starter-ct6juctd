@@ -459,8 +459,8 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
 
 // --- Helpers ---------------------------------------------------------------
 const STATUT_LABELS: Record<string, string> = {
-  livre: 'Livré',
-  construction: 'En construction',
+  livre: 'Opérationnel',
+  construction: 'En cours',
   avenir: 'À venir',
 };
 
@@ -822,7 +822,10 @@ export function certifCategorieLabel(key: string): string {
   return CERTIF_CATEGORIE_LABELS[key] ?? 'Certification';
 }
 export function certifStatutInfo(statut: string): { key: string; label: string } {
-  return { key: statut || 'vise', label: CERTIF_STATUT_LABELS[statut] ?? 'Visé' };
+  // Rétro-compat : d'anciennes données WP stockaient le statut « obtenu ».
+  // On le normalise en « conforme » pour qu'il s'affiche « Conforme ».
+  const key = statut === 'obtenu' ? 'conforme' : statut || 'vise';
+  return { key, label: CERTIF_STATUT_LABELS[key] ?? 'Visé' };
 }
 
 // Macro-groupes d'affichage de la page Certifications, dans l'ordre voulu.

@@ -49,7 +49,7 @@ export function Services() {
               <p>{s.desc}</p>
               <div className="svc-benefit">
                 <span className="svc-benefit-bar" />
-                <span><em>Bénéfice client</em>{s.benefice}</span>
+                <span><em>Bénéfice</em>{s.benefice}</span>
               </div>
             </article>
           ))}
