@@ -127,11 +127,46 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
 
           <Link href="/certifications" className="nav-link">{t('certifications')}</Link>
           <Link href="/services" className="nav-link">{t('services')}</Link>
-          <Link href="/equipes" className="nav-link">{t('equipes')}</Link>
-          <Link href="/groupe" className="nav-link">{t('groupe')}</Link>
+
+          {/* À propos de nous (dropdown : équipes + groupe) */}
+          <div
+            className="nav-item"
+            onMouseEnter={() => setDesktopOpen('apropos')}
+            onMouseLeave={() => setDesktopOpen(null)}
+          >
+            <button type="button" className="nav-link nav-link-btn" aria-expanded={desktopOpen === 'apropos'}>
+              {t('apropos')}
+              <Chevron className="nav-chev" />
+            </button>
+            <div className={`nav-dd${desktopOpen === 'apropos' ? ' open' : ''}`}>
+              <Link href="/equipes" className="nav-dd-item">
+                <span className="nav-dd-name">{t('equipes')}</span>
+              </Link>
+              <Link href="/groupe" className="nav-dd-item">
+                <span className="nav-dd-name">{t('groupe')}</span>
+              </Link>
+            </div>
+          </div>
+
           <Link href="/actualites" className="nav-link">{t('actualites')}</Link>
-          <Link href="/contact" className="nav-link">{t('contact')}</Link>
-          <LangSwitcher />
+
+          {/* Actions : Portail + Contact mis en valeur */}
+          <div className="nav-actions">
+            <a
+              className="nav-portal"
+              href={process.env.NEXT_PUBLIC_PORTAL_URL || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              {t('portail')}
+            </a>
+            <Link href="/contact" className="nav-cta">{t('contact')}</Link>
+            <LangSwitcher />
+          </div>
         </nav>
 
         {/* ---------- Burger ---------- */}
@@ -197,10 +232,42 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
 
           <Link href="/certifications" onClick={close}>{t('certifications')}</Link>
           <Link href="/services" onClick={close}>{t('services')}</Link>
-          <Link href="/equipes" onClick={close}>{t('equipes')}</Link>
-          <Link href="/groupe" onClick={close}>{t('groupe')}</Link>
+
+          {/* À propos de nous (accordéon) */}
+          <div className="mnav-group">
+            <button
+              type="button"
+              className={`mnav-trigger${mobileSub === 'apropos' ? ' open' : ''}`}
+              aria-expanded={mobileSub === 'apropos'}
+              onClick={() => setMobileSub((v) => (v === 'apropos' ? null : 'apropos'))}
+            >
+              {t('apropos')}
+              <Chevron className="chev" />
+            </button>
+            <div className={`mnav-sub${mobileSub === 'apropos' ? ' open' : ''}`}>
+              <Link href="/equipes" onClick={close}>{t('equipes')}</Link>
+              <Link href="/groupe" onClick={close}>{t('groupe')}</Link>
+            </div>
+          </div>
+
           <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
-          <Link href="/contact" onClick={close}>{t('contact')}</Link>
+
+          <div className="mnav-actions">
+            <Link href="/contact" className="nav-cta" onClick={close}>{t('contact')}</Link>
+            <a
+              className="nav-portal"
+              href={process.env.NEXT_PUBLIC_PORTAL_URL || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={close}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              {t('portail')}
+            </a>
+          </div>
           <LangSwitcher />
         </nav>
 

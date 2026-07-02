@@ -3402,6 +3402,56 @@ html {
   display: inline-block;
 }
 
+/* --- Déclencheur dropdown en <button> (À propos) : même rendu que les liens --- */
+.nav .nav-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.nav .nav-link-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--turquoise);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+.nav-item:hover .nav-link-btn::after { width: 100%; left: 0; }
+
+/* --- Actions header : Portail + Contact mis en valeur --- */
+.nav-actions { display: flex; align-items: center; gap: 14px; margin-left: 6px; }
+
+.nav-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px;
+  background: var(--marine); color: #fff;
+  border: 1.5px solid var(--marine);
+  font-size: 14.5px; font-weight: 600; white-space: nowrap;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { background: var(--marine-800); border-color: var(--marine-800); color: #fff; transform: translateY(-1px); }
+
+.nav-portal {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: 8px;
+  border: 1.5px solid var(--turquoise-700); color: var(--turquoise-700);
+  font-size: 14.5px; font-weight: 600; white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.nav-portal::after { display: none !important; }
+.nav-portal:hover { background: var(--turquoise-700); color: #fff; transform: translateY(-1px); }
+.nav-portal svg { flex-shrink: 0; }
+
+/* Cluster d'actions dans le tiroir mobile */
+.mnav-actions { display: flex; flex-direction: column; gap: 12px; margin: 18px 0 6px; }
+.mnav-actions .nav-cta,
+.mnav-actions .nav-portal { justify-content: center; padding: 13px 18px; font-size: 15px; }
+
 /* --- Mobile (accordéon dans le tiroir) --- */
 .mnav-group { border-bottom: 1px solid var(--line); }
 .mnav-group:first-of-type { border-top: 1px solid var(--line); }

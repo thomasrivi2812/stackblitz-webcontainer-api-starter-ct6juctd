@@ -2,6 +2,7 @@ import { ServicesCarousel } from '@/components/ServicesCarousel';
 import { DcTileImage } from '@/components/DcTileImage';
 import { KpiBand } from '@/components/KpiBand';
 import { CertBanner } from '@/components/CertBanner';
+import { BrochureButton } from '@/components/BrochureButton';
 import { FaqSection } from '@/components/FaqSection';
 import { NetworkMap } from '@/components/NetworkMap';
 import type { Metadata } from 'next';
@@ -251,6 +252,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </a>
+            <BrochureButton className="btn-v2 btn-v2-ghost" />
           </div>
         </div>
       </section>
@@ -263,12 +265,6 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <span className="eyebrow"><span className="eyebrow-dot" />{wp?.engEyebrow || t.engEyebrow}</span>
               <h2 className="section-title">{wp?.engTitle || t.engTitle}</h2>
             </div>
-            <a className="link-arrow" href="/contact">
-              {wp?.engSeeAll || t.engSeeAll}
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </a>
           </div>
           <div className="eng-grid-v2">
             {engagements.map((e, i) => (
