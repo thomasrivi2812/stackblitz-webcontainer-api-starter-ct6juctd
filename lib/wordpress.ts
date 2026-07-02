@@ -1259,6 +1259,7 @@ const HOME_QUERY = gql`
   query HomeContent($language: LanguageCodeFilterEnum) {
     pages(first: 1, where: { name: "accueil", language: $language }) {
       nodes {
+        language { code }
         homeFields { ${HOME_FIELDS_SELECTION} }
       }
     }
@@ -1310,7 +1311,7 @@ type WpHomeFields = {
   engEyebrow: string | null;
   engTitle: string | null;
   engSeeAll: string | null;
-  engagements: { icon: string | null; titre: string | null; desc: string | null }[] | null;
+  engagements: { icon: string | string[] | null; titre: string | null; desc: string | null }[] | null;
   amvEyebrow: string | null;
   amvTitle1: string | null;
   amvTitleAccent: string | null;
@@ -1370,7 +1371,13 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     engTitle: f.engTitle || null,
     engSeeAll: f.engSeeAll || null,
     engagements: (f.engagements ?? [])
-      .map((e) => ({ icon: e.icon ?? '', titre: e.titre ?? '', desc: e.desc ?? '' }))
+      // ACF/SCF select via WPGraphQL peut renvoyer l'icône en tableau (["decarbon"])
+      // ou en chaîne : on normalise toujours vers une chaîne.
+      .map((e) => ({
+        icon: Array.isArray(e.icon) ? (e.icon[0] ?? '') : (e.icon ?? ''),
+        titre: e.titre ?? '',
+        desc: e.desc ?? '',
+      }))
       .filter((e) => e.titre || e.desc),
     amvEyebrow: f.amvEyebrow || null,
     amvTitle1: f.amvTitle1 || null,
@@ -1415,12 +1422,21 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
   const client = new GraphQLClient(endpoint);
 
   // 1) Lookup classique : page de slug « accueil » dans la langue demandée.
+  //    On n'accepte la page QUE si sa langue correspond vraiment à la locale :
+  //    WPGraphQL/Polylang peut renvoyer la page FR pour une requête EN quand le
+  //    slug traduit diffère (ex. « accueil-2 ») → on la rejette pour passer au
+  //    repli traduction (étape 2), qui ramène le bon contenu traduit.
   try {
-    const data = await client.request<{ pages: { nodes: { homeFields: WpHomeFields }[] } }>(
+    const data = await client.request<{ pages: { nodes: { language: { code: string | null } | null; homeFields: WpHomeFields }[] } }>(
       HOME_QUERY, { language: wpLang(locale) },
     );
-    const f = data.pages?.nodes?.[0]?.homeFields;
-    if (f) return mapHome(f);
+    const node = data.pages?.nodes?.[0];
+    const code = (node?.language?.code ?? '').toUpperCase();
+    // Accepte si la langue correspond, OU si le schéma n'expose pas `language`
+    // (code vide) → on ne casse pas le comportement pour un schéma sans Polylang.
+    if (node?.homeFields && (code === wpLang(locale) || code === '')) {
+      return mapHome(node.homeFields);
+    }
   } catch (error) {
     logWpError('accueil', error);
   }
