@@ -2,7 +2,7 @@ import type { Datacenter } from './wordpress';
 import type { Post } from './wordpress';
 import type { WPPost, WPCategory } from './wordpress';
 import type { Faq } from './wordpress';
-import type { Certification, Membre, Groupe, Service } from './wordpress';
+import type { Certification, Membre, Service } from './wordpress';
 
 // Données d'exemple enrichies : utilisées tant que WORDPRESS_GRAPHQL_ENDPOINT n'est pas défini.
 export const sampleDatacenters: Datacenter[] = [
@@ -418,34 +418,6 @@ export const sampleMembres: Membre[] = [
     photo: null,
   },
 ];
-
-// --- Groupe Altarea (contenu éditorial de référence) ------------------------
-export const sampleGroupe: Groupe = {
-  introTitre: 'Nation Data Center, une filiale du Groupe Altarea',
-  introTexte:
-    'Nation Data Center est une filiale à 100 % du Groupe Altarea, leader français de la transformation urbaine bas carbone. Cet adossement à un acteur industriel de premier plan donne à NDC la solidité financière, l’expertise foncière et l’ancrage territorial nécessaires pour bâtir un réseau de data centers souverains et écoresponsables sur l’ensemble du territoire national.',
-  chiffres: [
-    { valeur: '3', unite: 'Md€', label: 'de chiffre d’affaires' },
-    { valeur: '1 700', unite: '', label: 'collaborateurs' },
-    { valeur: '1994', unite: '', label: 'année de création' },
-    { valeur: '100', unite: '%', label: 'capital français' },
-  ],
-  valeurs: [
-    { titre: 'Ancrage territorial', texte: 'Une présence nationale et une connaissance fine des territoires pour implanter nos sites au plus près des besoins.' },
-    { titre: 'Bas carbone', texte: 'La transformation urbaine décarbonée au cœur de l’ADN du groupe, prolongée par des data centers écoresponsables.' },
-    { titre: 'Solidité financière', texte: 'Un actionnariat industriel solide et engagé sur le long terme, au service de projets critiques.' },
-    { titre: 'Souveraineté', texte: 'Un capital 100 % français qui garantit l’indépendance juridique et technologique de nos infrastructures.' },
-  ],
-  articulationTitre: 'NDC ↔ Altarea : une cohérence souveraine',
-  articulationTexte:
-    'Là où Altarea transforme la ville de manière durable, Nation Data Center prolonge cette ambition dans le numérique : des infrastructures critiques conçues, financées et opérées en France, pour rendre aux organisations la maîtrise de leurs données. La même exigence environnementale, le même engagement bas carbone, la même souveraineté.',
-  timeline: [
-    { annee: '1994', evenement: 'Création du Groupe Altarea.' },
-    { annee: '2020', evenement: 'Renforcement de la stratégie bas carbone et de transformation urbaine.' },
-    { annee: '2024', evenement: 'Lancement de Nation Data Center, opérateur de data centers souverains.' },
-    { annee: '2030', evenement: 'Objectif d’un réseau de 15 sites Tier III écoresponsables en France.' },
-  ],
-};
 
 // --- Services (CPT `service`) ----------------------------------------------
 // Ordre = ordre d'affichage (menu_order). Les 5 premiers (home: true) alimentent

@@ -1,4 +1,4 @@
-import { getMembres, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
+import { getMembres, getEquipesHead, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
@@ -33,7 +33,9 @@ function LinkedInIcon() {
 export default async function EquipesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.team as Record<string, string>;
   const pole = (k: string) => t[`pole${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.poleFallback;
-  const membres = await getMembres(locale);
+  // En-tête éditable dans WP (page « equipes ») ; membres gérés dans le CPT
+  // « Membres » (nom, poste, pôle, bio, LinkedIn, photo, ordre manuel).
+  const [membres, head] = await Promise.all([getMembres(locale), getEquipesHead(locale)]);
 
   // Groupement par pôle, dans l'ordre défini (pôles inconnus en fin de liste).
   const groupes = POLE_ORDER
@@ -46,9 +48,9 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
     <main>
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
-          <span className="eyebrow">{t.eyebrow}</span>
-          <h1 className="fil-rouge">{t.h1}</h1>
-          <p>{t.intro}</p>
+          <span className="eyebrow">{head?.eyebrow || t.eyebrow}</span>
+          <h1 className="fil-rouge">{head?.titre || t.h1}</h1>
+          <p>{head?.intro || t.intro}</p>
         </div>
       </section>
 

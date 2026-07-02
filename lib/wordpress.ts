@@ -963,76 +963,6 @@ export const POLE_LABELS: Record<string, string> = {
 export const POLE_ORDER = ['direction', 'technique', 'exploitation', 'commercial', 'support'];
 
 // ===========================================================================
-// GROUPE ALTAREA — champs ACF sur la Page de slug « groupe » ← NOUVEAU
-// ===========================================================================
-export type GroupeChiffre = { valeur: string; unite: string; label: string };
-export type GroupeValeur = { titre: string; texte: string };
-export type GroupeJalon = { annee: string; evenement: string };
-export type Groupe = {
-  introTitre: string;
-  introTexte: string;
-  chiffres: GroupeChiffre[];
-  valeurs: GroupeValeur[];
-  articulationTitre: string;
-  articulationTexte: string;
-  timeline: GroupeJalon[];
-};
-
-const GROUPE_QUERY = gql`
-  query GroupePage($language: LanguageCodeFilterEnum) {
-    pages(first: 1, where: { name: "groupe", language: $language }) {
-      nodes {
-        groupeFields {
-          introTitre
-          introTexte
-          chiffres { valeur unite label }
-          valeurs { titre texte }
-          articulationTitre
-          articulationTexte
-          timeline { annee evenement }
-        }
-      }
-    }
-  }
-`;
-
-type WpGroupeFields = {
-  introTitre: string | null;
-  introTexte: string | null;
-  chiffres: { valeur: string | null; unite: string | null; label: string | null }[] | null;
-  valeurs: { titre: string | null; texte: string | null }[] | null;
-  articulationTitre: string | null;
-  articulationTexte: string | null;
-  timeline: { annee: string | null; evenement: string | null }[] | null;
-};
-
-export async function getGroupe(locale: WpLocale = 'fr'): Promise<Groupe> {
-  const { sampleGroupe } = await import('./sample-data');
-  if (!endpoint) return sampleGroupe;
-  try {
-    const client = new GraphQLClient(endpoint);
-    const data = await wpSingle<{ pages: { nodes: { groupeFields: WpGroupeFields | null }[] } }>(
-      client, GROUPE_QUERY, {}, locale, (d) => d.pages?.nodes?.[0]?.groupeFields,
-    );
-    const f = data.pages?.nodes?.[0]?.groupeFields;
-    // Page « groupe » absente ou champs vides → contenu de référence.
-    if (!f || (!f.introTexte && !(f.chiffres?.length))) return sampleGroupe;
-    return {
-      introTitre: f.introTitre || sampleGroupe.introTitre,
-      introTexte: f.introTexte || sampleGroupe.introTexte,
-      chiffres: (f.chiffres ?? []).map((c) => ({ valeur: c.valeur ?? '', unite: c.unite ?? '', label: c.label ?? '' })),
-      valeurs: (f.valeurs ?? []).map((v) => ({ titre: v.titre ?? '', texte: v.texte ?? '' })),
-      articulationTitre: f.articulationTitre || sampleGroupe.articulationTitre,
-      articulationTexte: f.articulationTexte || sampleGroupe.articulationTexte,
-      timeline: (f.timeline ?? []).map((t) => ({ annee: t.annee ?? '', evenement: t.evenement ?? '' })),
-    };
-  } catch (error) {
-    logWpError('groupe', error);
-    return sampleGroupe;
-  }
-}
-
-// ===========================================================================
 // SERVICES — CPT `service` (titre = nom du service) ← NOUVEAU
 // Branché WPGraphQL : champs ACF/SCF dans le groupe `serviceFields`.
 // Retombe sur les données d'exemple si WP est absent ou le CPT vide.
@@ -1469,4 +1399,230 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
   }
 
   return null;
+}
+
+// ===========================================================================
+// PAGES ÉDITORIALES — Groupe Altarea & Notre équipe (100 % éditables dans WP)
+// ---------------------------------------------------------------------------
+// Même modèle que la home (`homeFields`) : un groupe ACF attaché à la page
+// (slug « groupe » / « equipes »), lu en GraphQL, avec repli sur les
+// traductions Polylang (slug traduit différent) puis sur les textes par
+// défaut du site (messages/*.json) champ par champ.
+// ===========================================================================
+
+/**
+ * Récupère le groupe de champs ACF `graphqlField` de la page de slug `slug`,
+ * pour la langue demandée. Repli 1 : traductions Polylang de la page FR.
+ * Repli 2 : champs FR. Retour null si WP absent / page absente / erreur.
+ */
+async function getPageFields<F>(
+  slug: string,
+  graphqlField: string,
+  selection: string,
+  locale: WpLocale,
+): Promise<F | null> {
+  if (!endpoint) return null;
+  const client = new GraphQLClient(endpoint);
+  type PageNode = Record<string, unknown> & {
+    translations?: ({ language: { code: string | null } | null } & Record<string, unknown>)[] | null;
+  };
+
+  // 1) Page dans la langue demandée (fonctionne si le slug traduit est identique).
+  try {
+    const QUERY = gql`
+      query PageFields($language: LanguageCodeFilterEnum) {
+        pages(first: 1, where: { name: "${slug}", language: $language }) {
+          nodes { ${graphqlField} { ${selection} } }
+        }
+      }
+    `;
+    const data = await client.request<{ pages: { nodes: PageNode[] } }>(QUERY, { language: wpLang(locale) });
+    const f = data.pages?.nodes?.[0]?.[graphqlField] as F | null | undefined;
+    if (f) return f;
+  } catch (error) {
+    logWpError(`page ${slug}`, error);
+    return null;
+  }
+  if (locale === 'fr') return null;
+
+  // 2) Repli Polylang : page FR + ses traductions (slug traduit ≠ slug FR).
+  try {
+    const TR_QUERY = gql`
+      query PageFieldsTranslations {
+        pages(first: 1, where: { name: "${slug}", language: FR }) {
+          nodes {
+            ${graphqlField} { ${selection} }
+            translations {
+              ... on Page {
+                language { code }
+                ${graphqlField} { ${selection} }
+              }
+            }
+          }
+        }
+      }
+    `;
+    const data = await client.request<{ pages: { nodes: PageNode[] } }>(TR_QUERY, {});
+    const node = data.pages?.nodes?.[0];
+    const want = wpLang(locale);
+    const tr = node?.translations?.find((t) => (t?.language?.code ?? '').toUpperCase() === want);
+    if (tr?.[graphqlField]) return tr[graphqlField] as F;
+    if (node?.[graphqlField]) return node[graphqlField] as F;
+  } catch (error) {
+    logWpError(`page ${slug} (traductions Polylang)`, error);
+  }
+  return null;
+}
+
+// --- Page Groupe Altarea -----------------------------------------------------
+export type GroupeMetier = { titre: string; desc: string };
+export type GroupeContent = {
+  heroEyebrow: string | null;
+  heroTitle: string | null;
+  heroLead: string | null;
+  heroCta1Label: string | null;
+  heroCta1Url: string | null;
+  heroCta2Label: string | null;
+  heroCta2Url: string | null;
+  heroImage: { sourceUrl: string; altText: string } | null;
+  heroCaptionTitle: string | null;
+  heroCaptionSub: string | null;
+  kpiTitle: string | null;
+  kpiMeta: string | null;
+  chiffres: HomeKpi[];
+  metiersEyebrow: string | null;
+  metiersTitle: string | null;
+  metiersLead: string | null;
+  metiers: GroupeMetier[];
+  engEyebrow: string | null;
+  engTitle: string | null;
+  engLead: string | null;
+  engStatValue: string | null;
+  engStatLabel: string | null;
+  engagements: GroupeMetier[];
+  finalTitle: string | null;
+  finalLead: string | null;
+  finalCtaLabel: string | null;
+  finalCtaUrl: string | null;
+};
+
+const GROUPE_FIELDS_SELECTION = `
+  heroEyebrow
+  heroTitle
+  heroLead
+  heroCta1Label
+  heroCta1Url
+  heroCta2Label
+  heroCta2Url
+  heroImage { node { sourceUrl altText } }
+  heroCaptionTitle
+  heroCaptionSub
+  kpiTitle
+  kpiMeta
+  chiffres { valeur unite label }
+  metiersEyebrow
+  metiersTitle
+  metiersLead
+  metiers { titre desc }
+  engEyebrow
+  engTitle
+  engLead
+  engStatValue
+  engStatLabel
+  engagements { titre desc }
+  finalTitle
+  finalLead
+  finalCtaLabel
+  finalCtaUrl
+`;
+
+type WpGroupeFields = {
+  heroEyebrow: string | null;
+  heroTitle: string | null;
+  heroLead: string | null;
+  heroCta1Label: string | null;
+  heroCta1Url: string | null;
+  heroCta2Label: string | null;
+  heroCta2Url: string | null;
+  heroImage: { node: { sourceUrl: string; altText: string } | null } | null;
+  heroCaptionTitle: string | null;
+  heroCaptionSub: string | null;
+  kpiTitle: string | null;
+  kpiMeta: string | null;
+  chiffres: { valeur: string | null; unite: string | null; label: string | null }[] | null;
+  metiersEyebrow: string | null;
+  metiersTitle: string | null;
+  metiersLead: string | null;
+  metiers: { titre: string | null; desc: string | null }[] | null;
+  engEyebrow: string | null;
+  engTitle: string | null;
+  engLead: string | null;
+  engStatValue: string | null;
+  engStatLabel: string | null;
+  engagements: { titre: string | null; desc: string | null }[] | null;
+  finalTitle: string | null;
+  finalLead: string | null;
+  finalCtaLabel: string | null;
+  finalCtaUrl: string | null;
+};
+
+export async function getGroupe(locale: WpLocale = 'fr'): Promise<GroupeContent | null> {
+  const f = await getPageFields<WpGroupeFields>('groupe', 'groupeFields', GROUPE_FIELDS_SELECTION, locale);
+  if (!f) return null;
+  const cards = (list: { titre: string | null; desc: string | null }[] | null) =>
+    (list ?? [])
+      .map((m) => ({ titre: m.titre ?? '', desc: m.desc ?? '' }))
+      .filter((m) => m.titre || m.desc);
+  return {
+    heroEyebrow: f.heroEyebrow || null,
+    heroTitle: f.heroTitle || null,
+    heroLead: f.heroLead || null,
+    heroCta1Label: f.heroCta1Label || null,
+    heroCta1Url: f.heroCta1Url || null,
+    heroCta2Label: f.heroCta2Label || null,
+    heroCta2Url: f.heroCta2Url || null,
+    heroImage: f.heroImage?.node
+      ? { sourceUrl: f.heroImage.node.sourceUrl, altText: f.heroImage.node.altText ?? '' }
+      : null,
+    heroCaptionTitle: f.heroCaptionTitle || null,
+    heroCaptionSub: f.heroCaptionSub || null,
+    kpiTitle: f.kpiTitle || null,
+    kpiMeta: f.kpiMeta || null,
+    chiffres: (f.chiffres ?? [])
+      .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))
+      .filter((k) => k.valeur || k.label),
+    metiersEyebrow: f.metiersEyebrow || null,
+    metiersTitle: f.metiersTitle || null,
+    metiersLead: f.metiersLead || null,
+    metiers: cards(f.metiers),
+    engEyebrow: f.engEyebrow || null,
+    engTitle: f.engTitle || null,
+    engLead: f.engLead || null,
+    engStatValue: f.engStatValue || null,
+    engStatLabel: f.engStatLabel || null,
+    engagements: cards(f.engagements),
+    finalTitle: f.finalTitle || null,
+    finalLead: f.finalLead || null,
+    finalCtaLabel: f.finalCtaLabel || null,
+    finalCtaUrl: f.finalCtaUrl || null,
+  };
+}
+
+// --- Page Notre équipe (en-tête) ---------------------------------------------
+export type EquipesHead = {
+  eyebrow: string | null;
+  titre: string | null;
+  intro: string | null;
+};
+
+export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHead | null> {
+  const f = await getPageFields<{ eyebrow: string | null; titre: string | null; intro: string | null }>(
+    'equipes', 'equipesFields', 'eyebrow titre intro', locale,
+  );
+  if (!f) return null;
+  return {
+    eyebrow: f.eyebrow || null,
+    titre: f.titre || null,
+    intro: f.intro || null,
+  };
 }
