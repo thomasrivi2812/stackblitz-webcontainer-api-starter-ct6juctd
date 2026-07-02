@@ -3626,3 +3626,50 @@ html {
   .svc-row { grid-template-columns: 1fr; gap: 24px; }
   .svc-row.reverse .svc-row-media { order: 0; }
 }
+
+/* =====================================================================
+   HEADER — Correctif & amélioration
+   Problème : entre 901px et ~1280px, la nav desktop (6 liens + 2 chevrons
+   + Portail + Contact + FR/EN) demande ~1190px alors que le conteneur est
+   plafonné à 1160px et que le gap/font restent fixes jusqu'au burger (900px).
+   Résultat : header tassé / débordant sur les laptops 13-15".
+   Correctifs :
+     1. La nav ne déborde plus (nowrap + réduction progressive du gap/typo).
+     2. Le cluster d'actions (Portail/Contact/Langue) est visuellement séparé
+        des liens de navigation par un léger filet.
+     3. Le logo garde toujours de l'air face à la nav.
+   ===================================================================== */
+
+/* Le conteneur du header respire un peu plus large que le reste du site,
+   ce qui évite le débordement au pixel près sur les écrans ~1200px. */
+.site-header .inner { gap: 24px; }
+.site-header .container { max-width: 1240px; }
+
+/* Empêche tout retour à la ligne des liens et de leurs chevrons. */
+.nav { flex-wrap: nowrap; min-width: 0; }
+.nav .nav-link,
+.nav > a { white-space: nowrap; }
+
+/* Sépare clairement la navigation des actions (Portail / Contact / Langue). */
+.nav-actions {
+  margin-left: 8px;
+  padding-left: 22px;
+  border-left: 1px solid var(--line);
+}
+
+/* ── Laptops standard (≈1024–1280px) : on resserre sans casser la lisibilité ── */
+@media (max-width: 1280px) {
+  .nav { gap: 20px; font-size: 14.5px; }
+  .nav-actions { gap: 10px; margin-left: 6px; padding-left: 16px; }
+  .nav-cta { padding: 8px 14px; font-size: 14px; }
+  .nav-portal { padding: 8px 13px; font-size: 14px; }
+}
+
+/* ── Petits laptops / grandes tablettes (juste avant le passage au burger) ── */
+@media (max-width: 1080px) {
+  .nav { gap: 14px; font-size: 14px; }
+  .nav-actions { gap: 8px; padding-left: 12px; }
+  .nav-cta { padding: 8px 13px; }
+  .nav-portal { padding: 8px 11px; gap: 5px; }
+  .site-header .inner { gap: 16px; }
+}
