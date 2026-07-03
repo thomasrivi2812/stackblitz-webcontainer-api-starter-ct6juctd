@@ -33,11 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/* Pré-génération des slugs connus (ISR) */
-export async function generateStaticParams() {
-  const posts = await getAllPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
+// Contenu éditable dans WP + résolution/redirection de traduction Polylang
+// (slug différent par langue) : rendu à la demande, jamais figé au build.
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 /* ------------------------------- Icônes ------------------------------- */
 function Icon({ name }: { name: string }) {

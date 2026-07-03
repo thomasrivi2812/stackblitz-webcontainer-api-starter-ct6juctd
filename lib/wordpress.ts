@@ -252,25 +252,8 @@ const POST_BY_SLUG_QUERY = gql`
         tags { nodes { name slug } }
         author { node { name } }
         articleFields { document { url titre } auteur }
-      }
-    }
-  }
-`;
-
-// Résolution de traduction Polylang : le slug d'un article DIFFÈRE par langue
-// (ex. FR « data-center-tier-3-… » / EN « tier-3-data-centre-… »). Quand le
-// slug demandé n'existe pas dans la langue voulue, on retrouve le post porteur
-// du slug (toutes langues confondues) puis sa traduction. La page article
-// redirige ensuite vers le bon slug (post.slug ≠ slug demandé).
-const POST_TRANSLATION_QUERY = gql`
-  query PostTranslation($slug: String!) {
-    posts(first: 1, where: { name: $slug, language: ALL }) {
-      nodes {
-        slug
-        translations {
-          slug
-          language { code }
-        }
+        # Liens de traduction Polylang (chaque langue a son propre slug).
+        translations { slug language { code } }
       }
     }
   }
@@ -405,6 +388,7 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
     type PostNode = WPPost & {
       articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null;
       language?: { code: string | null } | null;
+      translations?: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null;
     };
     const mapPost = (post: PostNode): WPPost => ({
       ...post,
@@ -414,53 +398,42 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
       document: cleanDocument(post.articleFields?.document),
       author: post.articleFields?.auteur ? { node: { name: post.articleFields.auteur } } : post.author,
     });
-    // Le post renvoyé est-il bien dans la langue demandée ? Indispensable :
-    // un slug peut appartenir au post de l'AUTRE langue (traduction créée par
-    // duplication → le slug reste dérivé du titre d'origine) et, selon la
-    // config, le filtre `language` peut ne pas être appliqué au lookup par
-    // slug. Sans cette vérification, une URL FR peut servir l'article EN.
-    const want = wpLang(locale);
-    const isLang = (p: PostNode) => !p.language?.code || p.language.code.toUpperCase() === want;
 
-    // 1) Slug tel quel dans la langue demandée.
-    const primary = await client.request<{ posts: { nodes: PostNode[] } }>(
-      POST_BY_SLUG_QUERY, { slug, language: want },
+    const want = wpLang(locale);                 // 'FR' | 'EN'
+    const other: WpLangCode = want === 'FR' ? 'EN' : 'FR';
+    const isLang = (p: PostNode) => (p.language?.code ?? want).toUpperCase() === want;
+    const fetchBySlug = async (s: string, lang: WpLangCode): Promise<PostNode | null> => {
+      const r = await client.request<{ posts: { nodes: PostNode[] } }>(
+        POST_BY_SLUG_QUERY, { slug: s, language: lang },
+      );
+      return r.posts.nodes[0] ?? null;
+    };
+
+    // 1) Le post portant ce slug, dans la langue demandée. Sous Polylang chaque
+    //    langue a SON slug. Si on obtient bien un post dans la bonne langue → OK.
+    let carrier = await fetchBySlug(slug, want);
+    if (carrier && isLang(carrier)) return mapPost(carrier);
+
+    // 2) Le slug appartient à l'autre langue (ou le filtre `language` a été
+    //    ignoré et a renvoyé le post de l'autre langue). On récupère ce post
+    //    porteur du slug pour lire ses liens de traduction Polylang.
+    if (!carrier) carrier = await fetchBySlug(slug, other);
+    if (!carrier) return null; // slug totalement inconnu → 404
+
+    // 3) On suit le lien de traduction vers la langue demandée, puis on relit
+    //    l'article par SON slug. La page article redirige ensuite vers ce slug
+    //    (post.slug ≠ slug demandé) pour une URL propre.
+    const tr = carrier.translations?.find(
+      (t) => (t?.language?.code ?? '').toUpperCase() === want,
     );
-    if (primary.posts.nodes[0] && isLang(primary.posts.nodes[0])) return mapPost(primary.posts.nodes[0]);
-
-    // 2) Le slug appartient à l'autre langue (Polylang : un slug par langue).
-    //    On retrouve le post porteur du slug puis sa traduction dans la langue
-    //    voulue, relue par son propre slug. La page redirigera vers ce slug.
-    try {
-      const tr = await client.request<{
-        posts: { nodes: { slug: string; translations: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null }[] };
-      }>(POST_TRANSLATION_QUERY, { slug });
-      const match = tr.posts.nodes[0]?.translations?.find(
-        (t) => (t?.language?.code ?? '').toUpperCase() === want,
-      );
-      if (match?.slug) {
-        const translated = await client.request<{ posts: { nodes: PostNode[] } }>(
-          POST_BY_SLUG_QUERY, { slug: match.slug, language: want },
-        );
-        if (translated.posts.nodes[0]) return mapPost(translated.posts.nodes[0]);
-      }
-    } catch (error) {
-      // Schéma sans `translations`/`ALL` (version de wp-graphql-polylang) :
-      // on retombe sur le repli FR ci-dessous, comme avant.
-      logWpError('article (traduction Polylang)', error);
+    if (tr?.slug) {
+      const translated = await fetchBySlug(tr.slug, want);
+      if (translated) return mapPost(translated);
     }
 
-    // 3) Repli : contenu FR (article pas encore traduit dans la langue cible).
-    if (locale !== 'fr') {
-      const fallback = await client.request<{ posts: { nodes: PostNode[] } }>(
-        POST_BY_SLUG_QUERY, { slug, language: 'FR' },
-      );
-      if (fallback.posts.nodes[0]) return mapPost(fallback.posts.nodes[0]);
-    }
-    // 4) Dernier repli : le post porteur du slug, quelle que soit sa langue
-    //    (mieux qu'une 404 quand aucune traduction n'existe).
-    if (primary.posts.nodes[0]) return mapPost(primary.posts.nodes[0]);
-    return null;
+    // 4) Pas de traduction dans la langue demandée : on affiche le post trouvé
+    //    (repli sur l'autre langue plutôt qu'une 404).
+    return mapPost(carrier);
   } catch (error) {
     logWpError('article', error);
     const { sampleAllPosts } = await import('./sample-data');
