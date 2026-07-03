@@ -216,7 +216,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                       {dc.datacenterFields.puissance && (
                         <li><span>{t.specPuissance}</span><strong>{dc.datacenterFields.puissance}</strong></li>
                       )}
-                      <li><span>{t.specStatut}</span><strong>{label}</strong></li>
+                      {/* Statut retiré : déjà affiché en badge sur l'image (évite la répétition). */}
                       {dc.datacenterFields.region && (
                         <li><span>{t.specRegion}</span><strong>{dc.datacenterFields.region}</strong></li>
                       )}

@@ -1831,7 +1831,9 @@ html {
 }
 .dc-tile-specs {
   list-style: none;
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  /* colonnes égales générées selon le nombre d'items (2 ou 3) — évite une
+     colonne vide depuis le retrait du statut. */
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
   border-top: 1px solid var(--line);
   padding-top: 16px; margin: 0;
 }
