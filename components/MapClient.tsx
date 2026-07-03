@@ -1,6 +1,7 @@
 'use client';
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useTranslations } from 'next-intl';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapPoint } from '@/lib/wordpress';
@@ -11,10 +12,11 @@ const STATUT_COLOR: Record<string, string> = {
   avenir: '#2dafe6',
 };
 
-const STATUT_LABEL: Record<string, string> = {
-  livre: 'Opérationnel',
-  construction: 'En cours',
-  avenir: 'À venir',
+// Clés i18n des libellés de statut (traduits FR/EN via messages/*.json → « map »).
+const STATUT_KEY: Record<string, string> = {
+  livre: 'statutLivre',
+  construction: 'statutConstruction',
+  avenir: 'statutAvenir',
 };
 
 // Marqueur sur mesure (pas d'image externe → pas de souci de chemin avec le bundler).
@@ -40,6 +42,7 @@ export function MapClient({
   center?: [number, number];
   zoom?: number;
 }) {
+  const t = useTranslations('map');
   return (
     <MapContainer
       center={center}
@@ -59,11 +62,11 @@ export function MapClient({
             {p.ville && <span style={{ color: '#5d6b85' }}>{p.ville}</span>}
             <br />
             <span style={{ color: STATUT_COLOR[p.statut] ?? '#1b3360', fontWeight: 600, fontSize: 13 }}>
-              {STATUT_LABEL[p.statut] ?? ''}
+              {STATUT_KEY[p.statut] ? t(STATUT_KEY[p.statut]) : ''}
             </span>
             <br />
             <a href={`/datacenters/${p.slug}`} style={{ color: '#1c8cbd', fontWeight: 600 }}>
-              Voir le site →
+              {t('voir')}
             </a>
           </Popup>
         </Marker>

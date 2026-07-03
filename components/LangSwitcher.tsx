@@ -65,9 +65,11 @@ export function LangSwitcher() {
 
       <style>{`
         .ndc-lang{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line,#e2e8f1);border-radius:8px;background:var(--surface-alt,#f6f9fc)}
-        .ndc-lang-opt{border:none;background:transparent;cursor:pointer;font:inherit;font-size:13px;font-weight:600;color:var(--muted,#5d6b85);padding:5px 10px;border-radius:6px;transition:background .15s ease,color .15s ease}
+        /* Cible tactile ≥ 36px de haut (WCAG 2.5.8 « Target Size (Minimum) ») */
+        .ndc-lang-opt{display:inline-flex;align-items:center;justify-content:center;min-height:34px;min-width:38px;border:none;background:transparent;cursor:pointer;font:inherit;font-size:13px;font-weight:600;color:var(--muted,#5d6b85);padding:6px 12px;border-radius:6px;transition:background .15s ease,color .15s ease}
         .ndc-lang-opt:hover{color:var(--heading,#1b3360)}
         .ndc-lang-opt.is-active{background:var(--surface,#fff);color:var(--heading,#1b3360);box-shadow:0 1px 3px rgba(20,40,73,.12)}
+        .ndc-lang-opt:focus-visible{outline:2px solid var(--marine,#1b3360);outline-offset:2px}
       `}</style>
     </div>
   );

@@ -93,7 +93,8 @@
     "newsSeeAll": "Toutes les actualités",
     "newsCatReseau": "Réseau",
     "newsCatActu": "Actualité",
-    "newsRead": "Lire l'article"
+    "newsRead": "Lire l'article",
+    "heroImageAlt": "Intérieur d’un data center Nation Data Center"
   },
   "services": {
     "eyebrow": "Nos services",
@@ -391,5 +392,22 @@
     "contactDesc": "Contactez Nation Data Center pour un devis, une visite de site ou tout renseignement sur nos offres d'hébergement souverain.",
     "actualitesTitle": "Actualités — Nation Data Center",
     "actualitesDesc": "Retrouvez toutes les actualités de Nation Data Center : nouveaux sites, innovations, engagements RSE et événements."
+  },
+  "states": {
+    "loading": "Chargement…",
+    "errorTitle": "Une erreur est survenue",
+    "errorText": "Impossible d’afficher cette page pour le moment. Veuillez réessayer.",
+    "errorRetry": "Réessayer",
+    "errorHome": "Retour à l’accueil",
+    "notFoundTitle": "Page introuvable",
+    "notFoundText": "La page que vous cherchez n’existe pas ou a été déplacée.",
+    "notFoundHome": "Retour à l’accueil"
+  },
+  "map": {
+    "loading": "Chargement de la carte…",
+    "voir": "Voir le site →",
+    "statutLivre": "Opérationnel",
+    "statutConstruction": "En cours",
+    "statutAvenir": "À venir"
   }
 }

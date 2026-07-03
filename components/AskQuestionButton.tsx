@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 // Bouton « Poser votre question » → modale (email + question).
 // L'email/question sont captés côté client ; l'envoi vers le CRM se fera via une route serveur.
@@ -14,6 +15,7 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
   const [question, setQuestion] = useState('');
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -61,8 +63,8 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
       </button>
 
       {open && (
-        <div className="aq-overlay" role="dialog" aria-modal="true" onClick={close}>
-          <div className="aq-card" style={{ ['--aq-accent' as string]: accent } as React.CSSProperties} onClick={(e) => e.stopPropagation()}>
+        <div className="aq-overlay" role="dialog" aria-modal="true" aria-labelledby="aq-title" onClick={close}>
+          <div className="aq-card" ref={cardRef} style={{ ['--aq-accent' as string]: accent } as React.CSSProperties} onClick={(e) => e.stopPropagation()}>
             <button className="aq-close" aria-label={t('close')} onClick={close}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
@@ -70,7 +72,7 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
             {!done ? (
               <>
                 <span className="aq-eyebrow"><span className="aq-eyebrow-dot" aria-hidden="true" />{t('eyebrow')}</span>
-                <h3 className="aq-title">{t('title')}</h3>
+                <h3 className="aq-title" id="aq-title">{t('title')}</h3>
                 <p className="aq-text">{t('text')}</p>
 
                 <label className="aq-label" htmlFor="aq-email">{t('emailLabel')}</label>

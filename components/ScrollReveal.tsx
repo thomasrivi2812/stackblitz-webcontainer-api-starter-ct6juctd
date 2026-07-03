@@ -26,6 +26,14 @@ export function ScrollReveal({
     const el = ref.current;
     if (!el) return;
 
+    // Respect de « prefers-reduced-motion » : on affiche le contenu tout de
+    // suite, sans translation ni fondu (accessibilité — vestibulaire/épilepsie).
+    if (typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

@@ -5,7 +5,7 @@ import type { MapPoint } from '@/lib/wordpress';
 
 const MapClient = dynamic(() => import('./MapClient').then((m) => m.MapClient), {
   ssr: false,
-  loading: () => <div className="map-loading">Chargement de la carte…</div>,
+  loading: () => <div className="map-loading" aria-hidden="true" />,
 });
 
 // Carte centrée sur un seul site (fiche data center), zoomée sur la ville.

@@ -34,6 +34,16 @@ export function AnimatedKpi({ valeur, unite, label, duration = 1800, index }: Pr
     const el = ref.current;
     if (!el) return;
 
+    // « prefers-reduced-motion » : on affiche directement la valeur finale,
+    // sans compteur animé ni fondu (accessibilité).
+    if (typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      hasAnimated.current = true;
+      setVisible(true);
+      setDisplay(valeur);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {

@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 
 // Bouton « Télécharger la brochure » → vraie popup modale (centrée, fond assombri).
 // Les styles sont ENCAPSULÉS dans le composant pour ne pas dépendre de globals.css.
@@ -25,6 +26,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: P
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const cardRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -71,8 +73,8 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: P
       </button>
 
       {open && (
-        <div className="ndcm-overlay" role="dialog" aria-modal="true" onClick={close}>
-          <div className="ndcm-card" onClick={(e) => e.stopPropagation()}>
+        <div className="ndcm-overlay" role="dialog" aria-modal="true" aria-labelledby="ndcm-title" onClick={close}>
+          <div className="ndcm-card" ref={cardRef} onClick={(e) => e.stopPropagation()}>
             <button className="ndcm-close" aria-label={t('close')} onClick={close}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
@@ -80,7 +82,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: P
             {!done ? (
               <>
                 <span className="ndcm-eyebrow"><span className="ndcm-eyebrow-dot" aria-hidden="true" />{t('eyebrow')}</span>
-                <h3 className="ndcm-title">{t('title')}</h3>
+                <h3 className="ndcm-title" id="ndcm-title">{t('title')}</h3>
                 <p className="ndcm-text">{t('text')}</p>
 
                 <label className="ndcm-label" htmlFor="ndcm-email">{t('emailLabel')}</label>

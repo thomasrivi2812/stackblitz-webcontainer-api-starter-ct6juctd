@@ -93,7 +93,8 @@
     "newsSeeAll": "All news",
     "newsCatReseau": "Network",
     "newsCatActu": "News",
-    "newsRead": "Read the article"
+    "newsRead": "Read the article",
+    "heroImageAlt": "Inside a Nation Data Center data centre"
   },
   "services": {
     "eyebrow": "Our services",
@@ -391,5 +392,22 @@
     "contactDesc": "Contact Nation Data Center for a quote, a site visit or any information about our sovereign hosting offerings.",
     "actualitesTitle": "News — Nation Data Center",
     "actualitesDesc": "All the latest from Nation Data Center: new sites, innovations, CSR commitments and events."
+  },
+  "states": {
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorText": "We couldn’t display this page right now. Please try again.",
+    "errorRetry": "Try again",
+    "errorHome": "Back to home",
+    "notFoundTitle": "Page not found",
+    "notFoundText": "The page you are looking for doesn’t exist or has been moved.",
+    "notFoundHome": "Back to home"
+  },
+  "map": {
+    "loading": "Loading map…",
+    "voir": "View site →",
+    "statutLivre": "Operational",
+    "statutConstruction": "In progress",
+    "statutAvenir": "Upcoming"
   }
 }

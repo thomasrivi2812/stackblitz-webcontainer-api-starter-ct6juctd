@@ -175,7 +175,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <Image
                 className="hero-img"
                 src={wp?.heroImage?.sourceUrl || heroImage}
-                alt="Data center Nation Data Center"
+                alt={wp?.heroImage?.altText || t.heroImageAlt}
                 width={1200}
                 height={800}
                 priority
