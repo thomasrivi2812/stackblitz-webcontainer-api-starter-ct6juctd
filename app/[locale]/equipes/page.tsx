@@ -42,7 +42,7 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
     .map((pole) => ({ pole, items: membres.filter((m) => m.pole === pole) }))
     .filter((g) => g.items.length > 0);
   const autres = membres.filter((m) => !POLE_ORDER.includes(m.pole));
-  if (autres.length > 0) groupes.push({ pole: 'support', items: autres });
+  if (autres.length > 0) groupes.push({ pole: 'transverse', items: autres });
 
   return (
     <main>

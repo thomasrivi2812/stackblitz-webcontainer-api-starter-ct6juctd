@@ -219,11 +219,13 @@
     "intro": "Une équipe pluridisciplinaire — ingénierie, exploitation, sécurité et accompagnement — au service de vos infrastructures critiques.",
     "linkedinAria": "LinkedIn de {name}",
     "poleFallback": "Équipe",
-    "poleDirection": "Direction",
-    "poleTechnique": "Technique & Ingénierie",
-    "poleCommercial": "Commercial & Marketing",
-    "poleExploitation": "Exploitation & Sécurité",
-    "poleSupport": "Support & Fonctions transverses"
+    "poleDirectionTechnique": "Direction Technique",
+    "poleDirectionGenerale": "Direction Générale",
+    "poleOperations": "Opérations",
+    "poleCommerce": "Commerce",
+    "poleExploitation": "Exploitation",
+    "poleDeveloppement": "Développement",
+    "poleTransverse": "Transverse"
   },
   "certifications": {
     "eyebrow": "Conformité & confiance",

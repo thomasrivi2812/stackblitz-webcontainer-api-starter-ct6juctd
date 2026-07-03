@@ -219,11 +219,13 @@
     "intro": "A multidisciplinary team — engineering, operations, security and support — serving your critical infrastructure.",
     "linkedinAria": "LinkedIn of {name}",
     "poleFallback": "Team",
-    "poleDirection": "Management",
-    "poleTechnique": "Engineering & Technical",
-    "poleCommercial": "Sales & Marketing",
-    "poleExploitation": "Operations & Security",
-    "poleSupport": "Support & Cross-functional"
+    "poleDirectionTechnique": "Technical Management",
+    "poleDirectionGenerale": "Executive Management",
+    "poleOperations": "Operations",
+    "poleCommerce": "Sales",
+    "poleExploitation": "Facility Operations",
+    "poleDeveloppement": "Development",
+    "poleTransverse": "Cross-functional"
   },
   "certifications": {
     "eyebrow": "Compliance & trust",

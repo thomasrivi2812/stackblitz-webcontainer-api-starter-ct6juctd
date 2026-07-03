@@ -252,7 +252,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </a>
-            <BrochureButton className="btn-v2 btn-v2-ghost" />
+            <BrochureButton className="btn-v2 btn-v2-ghost" pdfUrl={wp?.brochureUrl} />
           </div>
         </div>
       </section>

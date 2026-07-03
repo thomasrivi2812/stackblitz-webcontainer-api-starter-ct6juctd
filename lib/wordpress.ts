@@ -886,11 +886,32 @@ export function groupCertifications(certifs: Certification[]): CertifGroup[] {
 export type Membre = {
   nom: string;            // = titre du post
   poste: string;
-  pole: string;           // direction | technique | commercial | exploitation | support
+  pole: string;           // directionTechnique | directionGenerale | operations | commerce | exploitation | developpement | transverse
   bio: string;
   linkedin: string | null;
   photo: { sourceUrl: string; altText: string } | null;
 };
+
+// Rétro-compat : anciennes clés de pôle encore présentes dans les données WP.
+const POLE_LEGACY: Record<string, string> = {
+  direction: 'directionGenerale',
+  technique: 'directionTechnique',
+  commercial: 'commerce',
+  support: 'transverse',
+};
+
+/**
+ * Normalise le pôle renvoyé par WPGraphQL : le select ACF peut revenir en
+ * TABLEAU (["direction"]) selon la config — c'était la cause du bug où tous
+ * les membres tombaient dans « Support ». On aplatit, puis on traduit les
+ * anciennes clés vers les nouvelles.
+ */
+function normalizePole(v: unknown): string {
+  const raw = Array.isArray(v) ? String(v[0] ?? '') : v == null ? '' : String(v);
+  const key = raw.trim();
+  if (!key) return 'transverse';
+  return POLE_LEGACY[key] ?? key;
+}
 
 const MEMBRES_QUERY = gql`
   query Membres($language: LanguageCodeFilterEnum) {
@@ -938,7 +959,7 @@ export async function getMembres(locale: WpLocale = 'fr'): Promise<Membre[]> {
     return nodes.map((n) => ({
       nom: decodeEntities(n.title) || 'Membre',
       poste: n.membreFields?.poste ?? '',
-      pole: n.membreFields?.pole ?? 'support',
+      pole: normalizePole(n.membreFields?.pole),
       bio: n.membreFields?.bio ?? '',
       linkedin: n.membreFields?.linkedin ?? null,
       photo: n.featuredImage?.node
@@ -953,14 +974,24 @@ export async function getMembres(locale: WpLocale = 'fr'): Promise<Membre[]> {
 }
 
 export const POLE_LABELS: Record<string, string> = {
-  direction: 'Direction',
-  technique: 'Technique & Ingénierie',
-  commercial: 'Commercial & Marketing',
-  exploitation: 'Exploitation & Sécurité',
-  support: 'Support & Fonctions transverses',
+  directionTechnique: 'Direction Technique',
+  directionGenerale: 'Direction Générale',
+  operations: 'Opérations',
+  commerce: 'Commerce',
+  exploitation: 'Exploitation',
+  developpement: 'Développement',
+  transverse: 'Transverse',
 };
 // Ordre d'affichage des pôles sur la page Équipes.
-export const POLE_ORDER = ['direction', 'technique', 'exploitation', 'commercial', 'support'];
+export const POLE_ORDER = [
+  'directionTechnique',
+  'directionGenerale',
+  'operations',
+  'commerce',
+  'exploitation',
+  'developpement',
+  'transverse',
+];
 
 // ===========================================================================
 // SERVICES — CPT `service` (titre = nom du service) ← NOUVEAU
@@ -992,6 +1023,7 @@ const SERVICES_QUERY = gql`
           description
           benefice
           icone
+          image { node { sourceUrl altText } }
           lienLabel
           lienUrl
           home
@@ -1010,6 +1042,7 @@ type WpServiceNode = {
     description: string | null;
     benefice: string | null;
     icone: string | null;
+    image: { node: { sourceUrl: string; altText: string } | null } | null;
     lienLabel: string | null;
     lienUrl: string | null;
     home: boolean | null;
@@ -1041,9 +1074,13 @@ export async function getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
       description: asText(n.serviceFields?.description),
       benefice: asText(n.serviceFields?.benefice),
       icone: asText(n.serviceFields?.icone) || 'default',
-      image: n.featuredImage?.node
-        ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
-        : null,
+      // Illustration : champ ACF « image » du service en priorité, sinon
+      // l'image mise en avant WordPress, sinon null (placeholder icône).
+      image: n.serviceFields?.image?.node
+        ? { sourceUrl: n.serviceFields.image.node.sourceUrl, altText: n.serviceFields.image.node.altText ?? '' }
+        : n.featuredImage?.node
+          ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
+          : null,
       lienLabel: asText(n.serviceFields?.lienLabel) || 'En savoir plus',
       lienUrl: asText(n.serviceFields?.lienUrl) || '/contact',
       home: Boolean(n.serviceFields?.home),
@@ -1131,6 +1168,8 @@ export type HomeContent = {
   certBannerAltareaTitle: string | null;
   certBannerAltareaSub: string | null;
   certBannerAltareaUrl: string | null;
+  // Brochure téléchargeable (modale « Télécharger la brochure »)
+  brochureUrl: string | null;
 };
 
 // Sélection commune des champs `homeFields` (réutilisée par la requête classique
@@ -1186,6 +1225,7 @@ const HOME_FIELDS_SELECTION = `
   certBannerAltareaTitle
   certBannerAltareaSub
   certBannerAltareaUrl
+  brochure { node { mediaItemUrl } }
 `;
 
 const HOME_QUERY = gql`
@@ -1270,6 +1310,7 @@ type WpHomeFields = {
   certBannerAltareaTitle: string | null;
   certBannerAltareaSub: string | null;
   certBannerAltareaUrl: string | null;
+  brochure: { node: { mediaItemUrl: string | null } | null } | null;
 } | null;
 
 /** Convertit les champs WordPress bruts (`homeFields`) en contenu normalisé. */
@@ -1339,6 +1380,7 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     certBannerAltareaTitle: f.certBannerAltareaTitle || null,
     certBannerAltareaSub: f.certBannerAltareaSub || null,
     certBannerAltareaUrl: f.certBannerAltareaUrl || null,
+    brochureUrl: f.brochure?.node?.mediaItemUrl || null,
   };
 }
 

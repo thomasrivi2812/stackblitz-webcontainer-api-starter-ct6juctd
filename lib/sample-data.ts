@@ -388,7 +388,7 @@ export const sampleMembres: Membre[] = [
   {
     nom: 'Direction Générale',
     poste: 'Direction générale',
-    pole: 'direction',
+    pole: 'directionGenerale',
     bio: 'Pilote la stratégie de Nation Data Center et le déploiement du réseau souverain à horizon 2030.',
     linkedin: null,
     photo: null,
@@ -396,7 +396,7 @@ export const sampleMembres: Membre[] = [
   {
     nom: 'Direction Technique',
     poste: 'Directeur·rice technique',
-    pole: 'technique',
+    pole: 'directionTechnique',
     bio: 'Conçoit des infrastructures Tier III écoresponsables : électricité, refroidissement, connectivité.',
     linkedin: null,
     photo: null,
@@ -412,7 +412,7 @@ export const sampleMembres: Membre[] = [
   {
     nom: 'Direction Commerciale',
     poste: 'Directeur·rice commercial·e',
-    pole: 'commercial',
+    pole: 'commerce',
     bio: 'Accompagne les organisations dans leurs projets d’hébergement souverain et de colocation.',
     linkedin: null,
     photo: null,

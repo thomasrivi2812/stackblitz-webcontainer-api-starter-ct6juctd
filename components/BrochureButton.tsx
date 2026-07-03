@@ -8,10 +8,18 @@ import { sendLead } from '@/lib/send-lead';
 // Les styles sont ENCAPSULÉS dans le composant pour ne pas dépendre de globals.css.
 // L'email est capté côté client ; l'envoi vers Monday/Brevo se fera via une route serveur.
 
-const PDF_URL = '/brochure-ndc.pdf';
+// Document par défaut (public/) si aucun fichier n'est défini dans WordPress.
+const DEFAULT_PDF_URL = '/brochure-ndc.pdf';
 
-export function BrochureButton({ className = 'btn btn-ghost' }: { className?: string }) {
+type Props = {
+  className?: string;
+  /** URL du document défini dans WP (champ « Brochure » de l'accueil). */
+  pdfUrl?: string | null;
+};
+
+export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: Props) {
   const t = useTranslations('brochure');
+  const PDF_URL = pdfUrl || DEFAULT_PDF_URL;
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
