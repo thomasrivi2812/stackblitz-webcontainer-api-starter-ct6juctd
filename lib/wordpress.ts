@@ -1106,7 +1106,6 @@ const SERVICES_QUERY = gql`
           description
           benefice
           icone
-          image { node { sourceUrl altText } }
           lienLabel
           lienUrl
           home
@@ -1125,7 +1124,6 @@ type WpServiceNode = {
     description: string | null;
     benefice: string | null;
     icone: string | null;
-    image: { node: { sourceUrl: string; altText: string } | null } | null;
     lienLabel: string | null;
     lienUrl: string | null;
     home: boolean | null;
@@ -1157,13 +1155,13 @@ export async function getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
       description: asText(n.serviceFields?.description),
       benefice: asText(n.serviceFields?.benefice),
       icone: asText(n.serviceFields?.icone) || 'default',
-      // Illustration : champ ACF « image » du service en priorité, sinon
-      // l'image mise en avant WordPress, sinon null (placeholder icône).
-      image: n.serviceFields?.image?.node
-        ? { sourceUrl: n.serviceFields.image.node.sourceUrl, altText: n.serviceFields.image.node.altText ?? '' }
-        : n.featuredImage?.node
-          ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
-          : null,
+      // Illustration = image mise en avant WordPress (panneau « Image mise en
+      // avant » du service). Toujours dispo dans le schéma → aucune dépendance
+      // à un champ ACF (sinon la requête casse et on retombe sur l'exemple).
+      // Sinon null → placeholder icône.
+      image: n.featuredImage?.node
+        ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
+        : null,
       lienLabel: asText(n.serviceFields?.lienLabel) || 'En savoir plus',
       lienUrl: asText(n.serviceFields?.lienUrl) || '/contact',
       home: Boolean(n.serviceFields?.home),
