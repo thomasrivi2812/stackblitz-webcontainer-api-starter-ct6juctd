@@ -2,12 +2,15 @@ import { notFound } from 'next/navigation';
 import { getPage, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
 
 // Page « simple » : on lit une Page native de WordPress (Titre + contenu + image
 // à la une) et on la rend avec le design NDC, comme un article.
 // Routes explicites (datacenters, actualites, contact, offres) prioritaires ;
 // slugs inconnus → 404.
+
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
   const page = await getPage(params.slug, params.locale);

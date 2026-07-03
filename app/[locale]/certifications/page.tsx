@@ -3,6 +3,10 @@ import { getCertifications, groupCertifications, certifCategorieLabel, certifSta
 const camel = (k: string) => k.split('-').map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)).join('');
 import type { Metadata } from 'next';
 
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
+
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
@@ -12,8 +16,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   };
 }
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 function ShieldIcon() {
   return (

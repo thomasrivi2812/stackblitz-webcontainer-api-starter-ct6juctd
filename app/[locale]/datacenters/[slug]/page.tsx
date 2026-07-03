@@ -5,8 +5,10 @@ import { DcPhoto } from '@/components/DcPhoto';
 import { KpiBand } from '@/components/KpiBand';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
+
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
   const dc = await getDatacenter(params.slug, params.locale);

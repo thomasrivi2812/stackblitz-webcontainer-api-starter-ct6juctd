@@ -5,7 +5,13 @@ import { CertBanner } from '@/components/CertBanner';
 import { BrochureButton } from '@/components/BrochureButton';
 import { FaqSection } from '@/components/FaqSection';
 import { NetworkMap } from '@/components/NetworkMap';
+import { Link } from '@/i18n/routing';
+import Image from 'next/image';
 import type { Metadata } from 'next';
+
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../messages/${locale}.json`)).default.meta as Record<string, string>;
@@ -29,8 +35,6 @@ import {
   type WpLocale,
 } from '@/lib/wordpress';
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 /* ------------------------------- Icônes ------------------------------- */
 function Icon({ name }: { name: string }) {
@@ -109,14 +113,16 @@ function Icon({ name }: { name: string }) {
 export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
   const t = (await import(`../../messages/${locale}.json`)).default.home as Record<string, string>;
-  const wp = await getHome(locale);
-
-  const datacenters = await getDatacenters(locale);
+  // Fetchs indépendants lancés en parallèle (au lieu d'un waterfall séquentiel).
+  const [wp, datacenters, posts, services] = await Promise.all([
+    getHome(locale),
+    getDatacenters(locale),
+    getRecentPosts(locale),
+    getServices(locale),
+  ]);
   const points = toMapPoints(datacenters);
   const preview = datacenters.slice(0, 3);
-  const posts = await getRecentPosts(locale);
   const kpis = wp?.kpis?.length ? wp.kpis : networkKpis(datacenters);
-  const services = await getServices(locale);
   const carouselServices = homeServices(services, 5);
   const heroImage = '/hero-datacenter.jpg';
   const fmtDate = (iso: string) => {
@@ -164,7 +170,15 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           </div>
           <div className="hero-visual">
             <div className="hero-frame">
-              <img className="hero-img" src={wp?.heroImage?.sourceUrl || heroImage} alt="Data center Nation Data Center" />
+              <Image
+                className="hero-img"
+                src={wp?.heroImage?.sourceUrl || heroImage}
+                alt="Data center Nation Data Center"
+                width={1200}
+                height={800}
+                priority
+                sizes="(max-width: 900px) 100vw, 50vw"
+              />
               <div className="hero-frame-corner tl" aria-hidden="true" />
               <div className="hero-frame-corner br" aria-hidden="true" />
             </div>
@@ -191,12 +205,12 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <h2 className="section-title">{wp?.dcTitle || t.dcTitle}</h2>
               <p className="section-sub">{wp?.dcSub || t.dcSub}</p>
             </div>
-            <a className="link-arrow" href="/datacenters">
+            <Link className="link-arrow" href="/datacenters">
               {wp?.dcSeeAll || t.dcSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
           <div className="dc-grid-v2">
             {preview.map((dc) => {
@@ -246,12 +260,12 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           <ServicesCarousel services={carouselServices} />
 
           <div className="services-cta">
-            <a className="btn-v2 btn-v2-primary" href="/services">
+            <Link className="btn-v2 btn-v2-primary" href="/services">
               {wp?.servicesCta || t.servicesCta}
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
             <BrochureButton className="btn-v2 btn-v2-ghost" pdfUrl={wp?.brochureUrl} />
           </div>
         </div>
@@ -343,12 +357,12 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <span className="eyebrow"><span className="eyebrow-dot" />{wp?.newsEyebrow || t.newsEyebrow}</span>
               <h2 className="section-title">{wp?.newsTitle || t.newsTitle}</h2>
             </div>
-            <a className="link-arrow" href="/actualites">
+            <Link className="link-arrow" href="/actualites">
               {wp?.newsSeeAll || t.newsSeeAll}
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
-            </a>
+            </Link>
           </div>
 
           {posts.length > 0 && (

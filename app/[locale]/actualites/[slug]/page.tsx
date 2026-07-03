@@ -19,6 +19,10 @@ const fmtDate = (iso: string, locale: WpLocale) => {
 };
 
 /* Metadata dynamique */
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug, params.locale);
   const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
@@ -35,8 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // Contenu éditable dans WP + résolution/redirection de traduction Polylang
 // (slug différent par langue) : rendu à la demande, jamais figé au build.
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 /* ------------------------------- Icônes ------------------------------- */
 function Icon({ name }: { name: string }) {

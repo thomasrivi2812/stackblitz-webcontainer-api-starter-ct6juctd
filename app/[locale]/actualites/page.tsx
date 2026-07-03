@@ -2,6 +2,10 @@ import { getAllPosts, getCategories, type WpLocale } from '@/lib/wordpress';
 import { ArticleSearch } from '@/components/ArticleSearch';
 import type { Metadata } from 'next';
 
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
+
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
@@ -11,7 +15,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   };
 }
 
-export const dynamic = 'force-dynamic';
 
 export default async function ActualitesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.actualites as Record<string, string>;

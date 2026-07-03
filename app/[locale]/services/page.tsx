@@ -2,6 +2,10 @@ import { getServices, type WpLocale } from '@/lib/wordpress';
 import { ServiceMedia } from '@/components/ServiceMedia';
 import type { Metadata } from 'next';
 
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
+
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
@@ -11,8 +15,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   };
 }
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 export default async function ServicesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.services as Record<string, string>;

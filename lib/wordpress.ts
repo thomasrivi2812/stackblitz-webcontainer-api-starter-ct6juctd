@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { GraphQLClient, gql } from 'graphql-request';
 import { sampleDatacenters } from './sample-data';
 import { PERSONAS, type Persona } from './personas';
@@ -296,7 +297,7 @@ const PAGE_BY_SLUG_QUERY = gql`
 `;
 
 // --- Accès aux données : Datacenters ---------------------------------------
-export async function getDatacenters(locale: WpLocale = 'fr'): Promise<Datacenter[]> {
+async function _getDatacenters(locale: WpLocale = 'fr'): Promise<Datacenter[]> {
   if (!endpoint) return sampleDatacenters;
   try {
     const client = new GraphQLClient(endpoint);
@@ -315,7 +316,7 @@ export async function getDatacenters(locale: WpLocale = 'fr'): Promise<Datacente
   }
 }
 
-export async function getDatacenter(slug: string, locale: WpLocale = 'fr'): Promise<Datacenter | null> {
+async function _getDatacenter(slug: string, locale: WpLocale = 'fr'): Promise<Datacenter | null> {
   if (!endpoint) {
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
   }
@@ -377,7 +378,7 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
 }
 
 // --- Accès aux données : Articles (page Actualités) ------------------------
-export async function getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
+async function _getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
   if (!endpoint) {
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts;
@@ -412,7 +413,7 @@ export async function getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
   }
 }
 
-export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Promise<WPPost | null> {
+async function _getPostBySlug(slug: string, locale: WpLocale = 'fr'): Promise<WPPost | null> {
   if (!endpoint) {
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts.find((p) => p.slug === slug) ?? null;
@@ -787,7 +788,7 @@ function mapWpPersona(node: WpPersonaNode): Persona {
   };
 }
 
-export async function getPersonas(locale: WpLocale = 'fr'): Promise<Persona[]> {
+async function _getPersonas(locale: WpLocale = 'fr'): Promise<Persona[]> {
   if (!endpoint) return PERSONAS;
   try {
     // POST via GraphQLClient, comme toutes les autres requêtes du fichier.
@@ -1130,7 +1131,7 @@ type WpServiceNode = {
   } | null;
 };
 
-export async function getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
+async function _getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
   if (!endpoint) {
     const { sampleServices } = await import('./sample-data');
     return sampleServices;
@@ -1479,7 +1480,7 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
  *      (ex. « accueil-2 »), repli via le lien de traduction Polylang ;
  *   3) sinon repli sur le contenu FR, puis sur les textes par défaut du site.
  */
-export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
+async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
   if (!endpoint) return null;
   const client = new GraphQLClient(endpoint);
 
@@ -1552,7 +1553,7 @@ const SITE_BRANDING_QUERY = gql`
   }
 `;
 
-export async function getSiteBranding(): Promise<SiteBranding> {
+async function _getSiteBranding(): Promise<SiteBranding> {
   if (!endpoint) return { logo: null, logoWhite: null };
   try {
     const client = new GraphQLClient(endpoint);
@@ -1798,3 +1799,15 @@ export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHe
     intro: f.intro || null,
   };
 }
+
+
+// Déduplication par rendu (React.cache) : layout + page + generateMetadata
+// partagent le même résultat dans une même requête, au lieu de refetcher WP.
+export const getDatacenters = cache(_getDatacenters);
+export const getDatacenter = cache(_getDatacenter);
+export const getPersonas = cache(_getPersonas);
+export const getSiteBranding = cache(_getSiteBranding);
+export const getPostBySlug = cache(_getPostBySlug);
+export const getAllPosts = cache(_getAllPosts);
+export const getHome = cache(_getHome);
+export const getServices = cache(_getServices);

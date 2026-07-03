@@ -6,6 +6,10 @@ import type { Metadata } from 'next';
 // Violet de la marque Altarea (accents de la page Groupe).
 const ALTAREA = '#6A2C91';
 
+// ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
+// (revalidation instantanee possible via /api/revalidate au save_post WP).
+export const revalidate = 300;
+
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
@@ -16,8 +20,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 }
 
 // Contenu éditable dans WP (page « groupe ») → pas de cache statique.
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 export default async function GroupePage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.groupe as Record<string, string>;
