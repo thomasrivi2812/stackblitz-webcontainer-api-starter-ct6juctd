@@ -1,5 +1,5 @@
 import { getDatacenter, getDatacenters, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
 import { KpiBand } from '@/components/KpiBand';
@@ -40,6 +40,13 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
   const t = (await import(`../../../../messages/${params.locale}.json`)).default.datacenters as Record<string, string>;
   const dc = await getDatacenter(params.slug, params.locale);
   if (!dc) notFound();
+
+  // Slug résolu ≠ slug demandé : l'URL portait le slug d'une autre langue
+  // (switch FR/EN — chaque traduction Polylang a son slug). On redirige vers
+  // l'URL canonique de la traduction.
+  if (dc.slug && dc.slug !== params.slug) {
+    redirect(params.locale === 'fr' ? `/datacenters/${dc.slug}` : `/${params.locale}/datacenters/${dc.slug}`);
+  }
 
   const f = dc.datacenterFields;
   const { key } = statutInfo(f.statut);

@@ -153,6 +153,7 @@ const DATACENTERS_QUERY = gql`
       nodes {
         title
         slug
+        language { code }
         featuredImage { node { sourceUrl altText } }
         datacenterFields {
           ville
@@ -177,6 +178,8 @@ const DATACENTER_BY_SLUG_QUERY = gql`
       nodes {
         title
         slug
+        language { code }
+        translations { slug language { code } }
         featuredImage { node { sourceUrl altText } }
         datacenterFields {
           ville
@@ -297,10 +300,15 @@ export async function getDatacenters(locale: WpLocale = 'fr'): Promise<Datacente
   if (!endpoint) return sampleDatacenters;
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await wpList<{ datacenters: { nodes: Datacenter[] } }>(
+    const data = await wpList<{ datacenters: { nodes: (Datacenter & { language?: { code: string | null } | null })[] } }>(
       client, DATACENTERS_QUERY, locale, (d) => d.datacenters.nodes,
     );
-    return data.datacenters.nodes;
+    // Filtre défensif par langue (si le filtre WHERE n'est pas appliqué, la
+    // liste mélangerait FR et EN). Si le filtrage vide tout, on garde la liste.
+    const want = wpLang(locale);
+    const nodes = data.datacenters.nodes;
+    const inLang = nodes.filter((d) => !d.language?.code || d.language.code.toUpperCase() === want);
+    return inLang.length > 0 ? inLang : nodes;
   } catch (error) {
     logWpError('datacenters', error);
     return sampleDatacenters;
@@ -313,10 +321,36 @@ export async function getDatacenter(slug: string, locale: WpLocale = 'fr'): Prom
   }
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await wpSingle<{ datacenters: { nodes: Datacenter[] } }>(
-      client, DATACENTER_BY_SLUG_QUERY, { slug }, locale, (d) => d.datacenters.nodes[0],
+    // Même logique que les articles : sous Polylang chaque langue a SON slug.
+    // On suit le lien de traduction pour ne jamais servir la fiche de l'autre
+    // langue sous une URL FR/EN, et la page redirige vers le bon slug.
+    type DcNode = Datacenter & {
+      language?: { code: string | null } | null;
+      translations?: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null;
+    };
+    const want = wpLang(locale);
+    const other: WpLangCode = want === 'FR' ? 'EN' : 'FR';
+    const isLang = (d: DcNode) => (d.language?.code ?? want).toUpperCase() === want;
+    const fetchBySlug = async (s: string, lang: WpLangCode): Promise<DcNode | null> => {
+      const r = await client.request<{ datacenters: { nodes: DcNode[] } }>(
+        DATACENTER_BY_SLUG_QUERY, { slug: s, language: lang },
+      );
+      return r.datacenters.nodes[0] ?? null;
+    };
+
+    let carrier = await fetchBySlug(slug, want);
+    if (carrier && isLang(carrier)) return carrier;
+    if (!carrier) carrier = await fetchBySlug(slug, other);
+    if (!carrier) return null;
+
+    const tr = carrier.translations?.find(
+      (t) => (t?.language?.code ?? '').toUpperCase() === want,
     );
-    return data.datacenters.nodes[0] ?? null;
+    if (tr?.slug) {
+      const translated = await fetchBySlug(tr.slug, want);
+      if (translated) return translated;
+    }
+    return carrier; // pas de traduction dans la langue demandée → repli
   } catch (error) {
     logWpError('datacenter', error);
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
