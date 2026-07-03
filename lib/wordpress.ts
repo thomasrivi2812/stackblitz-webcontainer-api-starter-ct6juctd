@@ -222,6 +222,7 @@ const ALL_POSTS_QUERY = gql`
         date
         excerpt
         content
+        language { code }
         featuredImage {
           node { sourceUrl altText }
         }
@@ -243,6 +244,7 @@ const POST_BY_SLUG_QUERY = gql`
         date
         excerpt
         content
+        language { code }
         featuredImage {
           node { sourceUrl altText }
         }
@@ -366,9 +368,19 @@ export async function getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
   try {
     const client = new GraphQLClient(endpoint);
     const data = await wpList<{
-      posts: { nodes: (WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null })[] };
+      posts: { nodes: (WPPost & {
+        articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null;
+        language?: { code: string | null } | null;
+      })[] };
     }>(client, ALL_POSTS_QUERY, locale, (d) => d.posts.nodes);
-    return data.posts.nodes.map((n) => ({
+    // Filtre défensif par langue : selon la config, le filtre `language` du
+    // WHERE peut ne pas être appliqué → le listing mélangerait FR et EN.
+    // Si le filtrage vide la liste (repli FR de wpList déjà appliqué), on la
+    // garde telle quelle.
+    const want = wpLang(locale);
+    const inLang = data.posts.nodes.filter((n) => !n.language?.code || n.language.code.toUpperCase() === want);
+    const nodes = inLang.length > 0 ? inLang : data.posts.nodes;
+    return nodes.map((n) => ({
       ...n,
       title: decodeEntities(n.title),
       categories: { nodes: decodeTaxonomy(n.categories?.nodes) },
@@ -390,7 +402,10 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
   }
   try {
     const client = new GraphQLClient(endpoint);
-    type PostNode = WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null };
+    type PostNode = WPPost & {
+      articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null;
+      language?: { code: string | null } | null;
+    };
     const mapPost = (post: PostNode): WPPost => ({
       ...post,
       title: decodeEntities(post.title),
@@ -399,12 +414,19 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
       document: cleanDocument(post.articleFields?.document),
       author: post.articleFields?.auteur ? { node: { name: post.articleFields.auteur } } : post.author,
     });
+    // Le post renvoyé est-il bien dans la langue demandée ? Indispensable :
+    // un slug peut appartenir au post de l'AUTRE langue (traduction créée par
+    // duplication → le slug reste dérivé du titre d'origine) et, selon la
+    // config, le filtre `language` peut ne pas être appliqué au lookup par
+    // slug. Sans cette vérification, une URL FR peut servir l'article EN.
+    const want = wpLang(locale);
+    const isLang = (p: PostNode) => !p.language?.code || p.language.code.toUpperCase() === want;
 
     // 1) Slug tel quel dans la langue demandée.
     const primary = await client.request<{ posts: { nodes: PostNode[] } }>(
-      POST_BY_SLUG_QUERY, { slug, language: wpLang(locale) },
+      POST_BY_SLUG_QUERY, { slug, language: want },
     );
-    if (primary.posts.nodes[0]) return mapPost(primary.posts.nodes[0]);
+    if (primary.posts.nodes[0] && isLang(primary.posts.nodes[0])) return mapPost(primary.posts.nodes[0]);
 
     // 2) Le slug appartient à l'autre langue (Polylang : un slug par langue).
     //    On retrouve le post porteur du slug puis sa traduction dans la langue
@@ -413,7 +435,6 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
       const tr = await client.request<{
         posts: { nodes: { slug: string; translations: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null }[] };
       }>(POST_TRANSLATION_QUERY, { slug });
-      const want = wpLang(locale);
       const match = tr.posts.nodes[0]?.translations?.find(
         (t) => (t?.language?.code ?? '').toUpperCase() === want,
       );
@@ -436,6 +457,9 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
       );
       if (fallback.posts.nodes[0]) return mapPost(fallback.posts.nodes[0]);
     }
+    // 4) Dernier repli : le post porteur du slug, quelle que soit sa langue
+    //    (mieux qu'une 404 quand aucune traduction n'existe).
+    if (primary.posts.nodes[0]) return mapPost(primary.posts.nodes[0]);
     return null;
   } catch (error) {
     logWpError('article', error);
