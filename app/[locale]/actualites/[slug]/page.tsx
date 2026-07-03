@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import {
   getPostBySlug,
   getAllPosts,
@@ -98,6 +98,13 @@ export default async function ArticlePage({ params }: Props) {
   const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
   const post = await getPostBySlug(params.slug, params.locale);
   if (!post) notFound();
+
+  // Slug résolu ≠ slug demandé : l'URL portait le slug d'une autre langue
+  // (switch FR/EN sur un article — chaque traduction Polylang a son slug).
+  // On redirige vers l'URL canonique de la traduction.
+  if (post.slug && post.slug !== params.slug) {
+    redirect(params.locale === 'fr' ? `/actualites/${post.slug}` : `/${params.locale}/actualites/${post.slug}`);
+  }
 
   /* Articles récents pour la sidebar « À lire aussi » */
   const allPosts = await getAllPosts(params.locale);

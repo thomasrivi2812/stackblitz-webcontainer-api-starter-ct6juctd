@@ -255,6 +255,25 @@ const POST_BY_SLUG_QUERY = gql`
   }
 `;
 
+// Résolution de traduction Polylang : le slug d'un article DIFFÈRE par langue
+// (ex. FR « data-center-tier-3-… » / EN « tier-3-data-centre-… »). Quand le
+// slug demandé n'existe pas dans la langue voulue, on retrouve le post porteur
+// du slug (toutes langues confondues) puis sa traduction. La page article
+// redirige ensuite vers le bon slug (post.slug ≠ slug demandé).
+const POST_TRANSLATION_QUERY = gql`
+  query PostTranslation($slug: String!) {
+    posts(first: 1, where: { name: $slug, language: ALL }) {
+      nodes {
+        slug
+        translations {
+          slug
+          language { code }
+        }
+      }
+    }
+  }
+`;
+
 const CATEGORIES_QUERY = gql`
   query AllCategories($language: LanguageCodeFilterEnum) {
     categories(first: 50, where: { language: $language }) {
@@ -372,19 +391,52 @@ export async function getPostBySlug(slug: string, locale: WpLocale = 'fr'): Prom
   try {
     const client = new GraphQLClient(endpoint);
     type PostNode = WPPost & { articleFields?: { document: { url: string; titre: string } | null; auteur?: string | null } | null };
-    const data = await wpSingle<{ posts: { nodes: PostNode[] } }>(
-      client, POST_BY_SLUG_QUERY, { slug }, locale, (d) => d.posts.nodes[0],
-    );
-    const post = data.posts.nodes[0];
-    if (!post) return null;
-    return {
+    const mapPost = (post: PostNode): WPPost => ({
       ...post,
       title: decodeEntities(post.title),
       categories: { nodes: decodeTaxonomy(post.categories?.nodes) },
       tags: { nodes: decodeTaxonomy(post.tags?.nodes) },
       document: cleanDocument(post.articleFields?.document),
       author: post.articleFields?.auteur ? { node: { name: post.articleFields.auteur } } : post.author,
-    };
+    });
+
+    // 1) Slug tel quel dans la langue demandée.
+    const primary = await client.request<{ posts: { nodes: PostNode[] } }>(
+      POST_BY_SLUG_QUERY, { slug, language: wpLang(locale) },
+    );
+    if (primary.posts.nodes[0]) return mapPost(primary.posts.nodes[0]);
+
+    // 2) Le slug appartient à l'autre langue (Polylang : un slug par langue).
+    //    On retrouve le post porteur du slug puis sa traduction dans la langue
+    //    voulue, relue par son propre slug. La page redirigera vers ce slug.
+    try {
+      const tr = await client.request<{
+        posts: { nodes: { slug: string; translations: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null }[] };
+      }>(POST_TRANSLATION_QUERY, { slug });
+      const want = wpLang(locale);
+      const match = tr.posts.nodes[0]?.translations?.find(
+        (t) => (t?.language?.code ?? '').toUpperCase() === want,
+      );
+      if (match?.slug) {
+        const translated = await client.request<{ posts: { nodes: PostNode[] } }>(
+          POST_BY_SLUG_QUERY, { slug: match.slug, language: want },
+        );
+        if (translated.posts.nodes[0]) return mapPost(translated.posts.nodes[0]);
+      }
+    } catch (error) {
+      // Schéma sans `translations`/`ALL` (version de wp-graphql-polylang) :
+      // on retombe sur le repli FR ci-dessous, comme avant.
+      logWpError('article (traduction Polylang)', error);
+    }
+
+    // 3) Repli : contenu FR (article pas encore traduit dans la langue cible).
+    if (locale !== 'fr') {
+      const fallback = await client.request<{ posts: { nodes: PostNode[] } }>(
+        POST_BY_SLUG_QUERY, { slug, language: 'FR' },
+      );
+      if (fallback.posts.nodes[0]) return mapPost(fallback.posts.nodes[0]);
+    }
+    return null;
   } catch (error) {
     logWpError('article', error);
     const { sampleAllPosts } = await import('./sample-data');
