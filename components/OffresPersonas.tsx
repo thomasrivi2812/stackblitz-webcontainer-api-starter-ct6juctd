@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { type Persona } from '@/lib/personas';
 import { AskQuestionButton } from './AskQuestionButton';
+import { OffreIcon } from './OffreIcon';
 
 // Colore le terme du profil (ex. « DSI », « secteur public ») là où il apparaît dans un titre.
 // On teste les termes du plus long au plus court pour colorer l'expression la plus complète.
@@ -53,6 +54,13 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
   function changePersona(id: string) {
     setActive(id);
     setOpenFaq(null);
+    // Refléter le persona courant dans l'URL (?profil=id) sans rechargement,
+    // pour que le changement de langue reste sur ce persona.
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('profil', id);
+      window.history.replaceState(null, '', url.toString());
+    }
   }
 
   if (!persona) return null;
@@ -102,7 +110,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
             <div className="op-enjeux-list">
               {persona.enjeux.map((e, i) => (
                 <div className="op-enjeu" key={i}>
-                  <span className="op-enjeu-icon">{e.icon}</span>
+                  <span className="op-enjeu-icon"><OffreIcon name={e.icon} /></span>
                   <div>
                     <strong>{e.titre}</strong>
                     <span>{e.texte}</span>
@@ -123,7 +131,7 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
           <div className="op-grid">
             {persona.problemes.map((p, i) => (
               <article className="op-card" key={i}>
-                <span className="op-card-icon">{p.icon}</span>
+                <span className="op-card-icon"><OffreIcon name={p.icon} /></span>
                 <h3>{p.titre}</h3>
                 <p>{p.texte}</p>
               </article>

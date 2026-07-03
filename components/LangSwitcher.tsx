@@ -24,10 +24,18 @@ export function LangSwitcher() {
     // (NEXT_LOCALE=en) → redirection immédiate vers /en/... : l'interface
     // semblait ne pas changer de langue tant qu'on ne rechargeait pas.
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`;
+    // On conserve la query string courante (ex. ?profil=dsi sur /offres) pour
+    // rester sur le même état après le changement de langue. On lit
+    // window.location.search (autoritaire, capte aussi les maj via
+    // history.replaceState) plutôt que useSearchParams.
+    const query: Record<string, string> = {};
+    if (typeof window !== 'undefined') {
+      new URLSearchParams(window.location.search).forEach((v, k) => { query[k] = v; });
+    }
     // On repasse les params dynamiques (ex. [slug]) pour reconstruire l'URL.
     router.replace(
       // @ts-expect-error -- params dynamiques typés de façon générique
-      { pathname, params },
+      { pathname, params, query },
       { locale },
     );
   };
