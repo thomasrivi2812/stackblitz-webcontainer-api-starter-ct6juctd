@@ -266,15 +266,22 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               <h2 className="section-title">{wp?.engTitle || t.engTitle}</h2>
             </div>
           </div>
-          <div className="eng-grid-v2">
-            {engagements.map((e, i) => (
-              <article className="eng-card-v2" key={e.titre}>
-                <span className="eng-num">{String(i + 1).padStart(2, '0')}</span>
-                <span className="eng-ico"><Icon name={e.icon} /></span>
-                <h3>{e.titre}</h3>
-                <p>{e.desc}</p>
-              </article>
-            ))}
+          <div className={wp?.engImage ? 'eng-layout has-image' : ''}>
+            <div className="eng-grid-v2">
+              {engagements.map((e, i) => (
+                <article className="eng-card-v2" key={e.titre}>
+                  <span className="eng-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="eng-ico"><Icon name={e.icon} /></span>
+                  <h3>{e.titre}</h3>
+                  <p>{e.desc}</p>
+                </article>
+              ))}
+            </div>
+            {wp?.engImage && (
+              <div className="eng-illustration">
+                <img src={wp.engImage.sourceUrl} alt={wp.engImage.altText || (wp?.engTitle || t.engTitle)} />
+              </div>
+            )}
           </div>
         </div>
       </section>

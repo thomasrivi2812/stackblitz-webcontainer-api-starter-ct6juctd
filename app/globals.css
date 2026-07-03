@@ -1956,6 +1956,20 @@ html {
 .eng-grid-v2 {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
 }
+/* Variante avec image d'illustration à côté des cartes (champ WP engImage). */
+.eng-layout.has-image {
+  display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: stretch;
+}
+.eng-layout.has-image .eng-grid-v2 { grid-template-columns: repeat(2, 1fr); }
+.eng-illustration {
+  border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line);
+  min-height: 280px; box-shadow: 0 24px 60px -34px rgba(20,40,73,0.35);
+}
+.eng-illustration img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 980px) {
+  .eng-layout.has-image { grid-template-columns: 1fr; }
+  .eng-illustration { min-height: 220px; order: -1; }
+}
 .eng-card-v2 {
   background: var(--surface);
   border: 1px solid var(--line);

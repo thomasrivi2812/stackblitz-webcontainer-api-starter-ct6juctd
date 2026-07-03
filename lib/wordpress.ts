@@ -1220,6 +1220,7 @@ export type HomeContent = {
   engTitle: string | null;
   engSeeAll: string | null;
   engagements: HomeEngagement[];
+  engImage: { sourceUrl: string; altText: string } | null; // illustration à côté des cartes
   // Section « Notre raison d'être » (Ambition / Mission / Vision)
   amvEyebrow: string | null;
   amvTitle1: string | null;
@@ -1281,6 +1282,7 @@ const HOME_FIELDS_SELECTION = `
   engTitle
   engSeeAll
   engagements { icon titre desc }
+  engImage { node { sourceUrl altText } }
   amvEyebrow
   amvTitle1
   amvTitleAccent
@@ -1366,6 +1368,7 @@ type WpHomeFields = {
   engTitle: string | null;
   engSeeAll: string | null;
   engagements: { icon: string | string[] | null; titre: string | null; desc: string | null }[] | null;
+  engImage: { node: { sourceUrl: string; altText: string } | null } | null;
   amvEyebrow: string | null;
   amvTitle1: string | null;
   amvTitleAccent: string | null;
@@ -1434,6 +1437,9 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
         desc: e.desc ?? '',
       }))
       .filter((e) => e.titre || e.desc),
+    engImage: f.engImage?.node
+      ? { sourceUrl: f.engImage.node.sourceUrl, altText: f.engImage.node.altText ?? '' }
+      : null,
     amvEyebrow: f.amvEyebrow || null,
     amvTitle1: f.amvTitle1 || null,
     amvTitleAccent: f.amvTitleAccent || null,
