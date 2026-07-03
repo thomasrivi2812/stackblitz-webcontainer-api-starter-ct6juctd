@@ -18,6 +18,12 @@ export function LangSwitcher() {
 
   const switchTo = (locale: Locale) => {
     if (locale === active) return;
+    // IMPORTANT : on fixe le cookie de langue AVANT de naviguer. Sans ça,
+    // revenir vers le FR (URL sans préfixe avec localePrefix "as-needed")
+    // fait re-détecter la langue par le middleware via l'ancien cookie
+    // (NEXT_LOCALE=en) → redirection immédiate vers /en/... : l'interface
+    // semblait ne pas changer de langue tant qu'on ne rechargeait pas.
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Lax`;
     // On repasse les params dynamiques (ex. [slug]) pour reconstruire l'URL.
     router.replace(
       // @ts-expect-error -- params dynamiques typés de façon générique

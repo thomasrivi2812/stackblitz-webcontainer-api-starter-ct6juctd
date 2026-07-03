@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { stripHtml } from '@/lib/wordpress';
 import type { WPPost } from '@/lib/wordpress';
 
@@ -127,7 +128,7 @@ export function ArticleSearch({ posts, categories }: Props) {
       {filtered.length > 0 ? (
         <div className="actu-grid">
           {filtered.map((p) => (
-            <a className="actu-card" key={p.slug} href={`/actualites/${p.slug}`}>
+            <Link className="actu-card" key={p.slug} href={`/actualites/${p.slug}`}>
               <div className="actu-card-media">
                 {p.featuredImage?.node?.sourceUrl ? (
                   <img
@@ -151,7 +152,7 @@ export function ArticleSearch({ posts, categories }: Props) {
                 <p>{stripHtml(p.excerpt)}</p>
                 <span className="actu-card-link">{t('readArticle')}</span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       ) : (
