@@ -1,4 +1,5 @@
 import { getDatacenters, statutInfo, type WpLocale } from '@/lib/wordpress';
+import { DcTileImage } from '@/components/DcTileImage';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
@@ -25,19 +26,12 @@ function PinIcon() {
 export default async function DatacentersPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.datacenters as Record<string, string>;
   const datacenters = await getDatacenters(locale);
-  const isLive = Boolean(process.env.WORDPRESS_GRAPHQL_ENDPOINT);
 
   const statutLabel = (k: string) =>
     t[`statut${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.statutInconnu;
 
   return (
     <main>
-      <div className={`data-banner ${isLive ? 'live' : 'sample'}`}>
-        <div className="container">
-          {isLive ? t.bannerLive : t.bannerSample}
-        </div>
-      </div>
-
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
           <span className="eyebrow">{t.eyebrow}</span>
@@ -53,20 +47,25 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
               const { key } = statutInfo(dc.datacenterFields.statut);
               return (
                 <a className="dc-card" key={dc.slug} href={`/datacenters/${dc.slug}`}>
-                  <span className={`badge ${key}`}>
-                    <span className="dot" />
-                    {statutLabel(key)}
-                  </span>
-                  {dc.datacenterFields.ville && (
-                    <div className="city">
-                      <PinIcon />
-                      {dc.datacenterFields.ville}
-                    </div>
-                  )}
-                  <h3>{dc.title}</h3>
-                  {dc.datacenterFields.accroche && (
-                    <p className="accroche">{dc.datacenterFields.accroche}</p>
-                  )}
+                  <div className="dc-card-media">
+                    <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
+                    <span className={`badge ${key}`}>
+                      <span className="dot" />
+                      {statutLabel(key)}
+                    </span>
+                  </div>
+                  <div className="dc-card-body">
+                    {dc.datacenterFields.ville && (
+                      <div className="city">
+                        <PinIcon />
+                        {dc.datacenterFields.ville}
+                      </div>
+                    )}
+                    <h3>{dc.title}</h3>
+                    {dc.datacenterFields.accroche && (
+                      <p className="accroche">{dc.datacenterFields.accroche}</p>
+                    )}
+                  </div>
                 </a>
               );
             })}
