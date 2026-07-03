@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0B1F3A"/>
-  <path d="M18 46V18h5l18 19V18h5v28h-5L23 27v19h-5z" fill="#fff"/>
-  <rect x="18" y="49" width="28" height="3" rx="1.5" fill="#E2001A"/>
+  <rect width="64" height="64" rx="14" fill="#182c52"/>
+  <g fill="#ffffff" font-family="'Jost','Segoe UI',Arial,Helvetica,sans-serif" font-weight="700" font-size="20" text-anchor="middle">
+    <text x="15" y="39.5">N</text>
+    <text x="32" y="39.5">D</text>
+    <text x="49" y="39.5">C</text>
+  </g>
+  <rect x="22.4" y="23" width="1.7" height="18" rx="0.85" fill="#E2001A"/>
+  <rect x="39.9" y="23" width="1.7" height="18" rx="0.85" fill="#E2001A"/>
 </svg>

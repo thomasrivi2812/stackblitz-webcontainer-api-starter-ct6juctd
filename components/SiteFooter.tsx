@@ -1,5 +1,6 @@
 import { getDatacenters, type WpLocale } from '@/lib/wordpress';
 import { Logo } from './Logo';
+import { AltareaLogo } from './AltareaLogo';
 
 // Préfixe les liens internes selon la langue (FR à la racine, EN sous /en).
 // On évite ici les helpers de next-intl côté serveur (Link / getLocale), qui
@@ -9,7 +10,7 @@ function lhref(locale: WpLocale, path: string): string {
   return path === '/' ? '/en' : `/en${path}`;
 }
 
-export async function SiteFooter({ locale }: { locale: WpLocale }) {
+export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale; logoUrl?: string | null }) {
   // Dictionnaire chargé par import direct (aucune API à portée de requête).
   const t = (await import(`../messages/${locale}.json`)).default.footer as Record<string, string>;
   const datacenters = await getDatacenters(locale);
@@ -20,9 +21,12 @@ export async function SiteFooter({ locale }: { locale: WpLocale }) {
         <div className="footer-grid">
           {/* Marque + endossement */}
           <div className="footer-brand">
-            <Logo white />
+            <Logo white src={logoUrl} />
             <p>{t.tagline}</p>
-            <span className="footer-altarea">{t.altarea}</span>
+            <div className="footer-altarea">
+              <span className="footer-altarea-label">{t.altarea}</span>
+              <AltareaLogo height={42} className="footer-altarea-logo" />
+            </div>
           </div>
 
           {/* Data centers */}

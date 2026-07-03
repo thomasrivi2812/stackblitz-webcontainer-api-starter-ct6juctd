@@ -5,7 +5,7 @@ import { NextIntlClientProvider } from 'next-intl';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { getPersonas, getDatacenters } from '@/lib/wordpress';
+import { getPersonas, getDatacenters, getSiteBranding } from '@/lib/wordpress';
 import { routing, type Locale } from '@/i18n/routing';
 import '../globals.css';
 
@@ -75,20 +75,23 @@ export default async function LocaleLayout({
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,
   // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
-  const [personas, datacenters] = await Promise.all([
+  const [personas, datacenters, branding] = await Promise.all([
     getPersonas(locale as Locale),
     getDatacenters(locale as Locale),
+    // Logo du site (header + footer), éditable dans WP. Repli sur la marque
+    // N|D|C dessinée si aucun logo n'est défini.
+    getSiteBranding(),
   ]);
 
   return (
     <html lang={locale} className={jost.variable}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <SiteHeader personas={personas} datacenters={datacenters} />
+          <SiteHeader personas={personas} datacenters={datacenters} logoUrl={branding.logo} />
 
           {children}
 
-          <SiteFooter locale={locale as Locale} />
+          <SiteFooter locale={locale as Locale} logoUrl={branding.logoWhite || branding.logo} />
         </NextIntlClientProvider>
       </body>
     </html>

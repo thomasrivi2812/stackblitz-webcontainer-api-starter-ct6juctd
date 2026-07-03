@@ -1,43 +1,47 @@
-// Marque Altarea recréée en SVG (le « A » + le mot-symbole), couleur via currentColor.
-// Pour utiliser le vrai logo officiel : dépose-le dans public/altarea-logo.svg et
-// remplace <AltareaMark/> par <img src="/altarea-logo.svg" .../>.
+// Logo Altarea OFFICIEL (vecteurs extraits du .ai fourni), recoloré via
+// currentColor grâce à un masque CSS : la forme reste strictement identique,
+// seule la couleur change (violet #6A2C91 sur fond clair, blanc sur fond
+// sombre). Fichiers : public/altarea-mark.svg (le « A ») et
+// public/altarea-lockup.svg (« A » + wordmark ALTAREA).
 
+const MARK_RATIO = 194.6 / 206.0;   // largeur / hauteur du « A » seul
+const LOCKUP_RATIO = 285.7 / 285.7; // lockup (quasi carré)
+
+function maskStyle(url: string): React.CSSProperties {
+  return {
+    display: 'inline-block',
+    backgroundColor: 'currentColor',
+    WebkitMaskImage: `url(${url})`,
+    maskImage: `url(${url})`,
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+    WebkitMaskPosition: 'center',
+    maskPosition: 'center',
+    WebkitMaskSize: 'contain',
+    maskSize: 'contain',
+  };
+}
+
+// Le « A » seul (encart certifs, sur-titres…).
 export function AltareaMark({ size = 40, className }: { size?: number; className?: string }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 120 120"
-      fill="currentColor"
-      className={className}
+    <span
       role="img"
       aria-label="Altarea"
-    >
-      {/* jambe gauche */}
-      <path d="M50 16 L61 16 L34 104 L20 104 Z" />
-      {/* jambe droite (plus large) */}
-      <path d="M66 16 L80 16 L101 104 L84 104 Z" />
-    </svg>
+      className={className}
+      style={{ ...maskStyle('/altarea-mark.svg'), width: size * MARK_RATIO, height: size, color: 'currentColor' }}
+    />
   );
 }
 
+// Le lockup complet « A + ALTAREA » (bas de page Groupe, footer…).
 export function AltareaLogo({ height = 34, className }: { height?: number; className?: string }) {
   return (
     <span
+      role="img"
+      aria-label="Altarea"
       className={className}
-      style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: height * 0.1, color: 'currentColor' }}
-    >
-      <AltareaMark size={height} />
-      <span
-        style={{
-          fontWeight: 700,
-          letterSpacing: '0.18em',
-          fontSize: height * 0.34,
-          lineHeight: 1,
-        }}
-      >
-        ALTAREA
-      </span>
-    </span>
+      style={{ ...maskStyle('/altarea-lockup.svg'), width: height * LOCKUP_RATIO, height, color: 'currentColor' }}
+    />
   );
 }

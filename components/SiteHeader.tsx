@@ -11,6 +11,8 @@ import type { Datacenter } from '@/lib/wordpress';
 type Props = {
   personas?: Persona[];
   datacenters?: Datacenter[];
+  /** Logo du site défini dans WP (sinon marque N|D|C dessinée). */
+  logoUrl?: string | null;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -32,7 +34,7 @@ function Chevron({ className }: { className?: string }) {
   );
 }
 
-export function SiteHeader({ personas = [], datacenters = [] }: Props) {
+export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
@@ -67,7 +69,7 @@ export function SiteHeader({ personas = [], datacenters = [] }: Props) {
     <header className="site-header">
       <div className="container inner">
         <Link href="/" onClick={close}>
-          <Logo />
+          <Logo src={logoUrl} />
         </Link>
 
         {/* ---------- Nav desktop ---------- */}

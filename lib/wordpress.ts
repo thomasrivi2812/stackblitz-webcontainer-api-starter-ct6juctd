@@ -1493,6 +1493,49 @@ export async function getHome(locale: WpLocale = 'fr'): Promise<HomeContent | nu
 }
 
 // ===========================================================================
+// BRANDING GLOBAL — logo du site (header + footer), éditable dans WP.
+// Champs `siteLogo` / `siteLogoWhite` (images) du groupe homeFields de la page
+// « accueil ». Requête volontairement légère (appelée sur chaque page via le
+// layout). Retour { logo, logoWhite } avec null quand non défini → repli sur
+// la marque N|D|C dessinée.
+// ===========================================================================
+export type SiteBranding = { logo: string | null; logoWhite: string | null };
+
+const SITE_BRANDING_QUERY = gql`
+  query SiteBranding {
+    pages(first: 1, where: { name: "accueil", language: FR }) {
+      nodes {
+        homeFields {
+          siteLogo { node { sourceUrl } }
+          siteLogoWhite { node { sourceUrl } }
+        }
+      }
+    }
+  }
+`;
+
+export async function getSiteBranding(): Promise<SiteBranding> {
+  if (!endpoint) return { logo: null, logoWhite: null };
+  try {
+    const client = new GraphQLClient(endpoint);
+    const data = await client.request<{
+      pages: { nodes: { homeFields: {
+        siteLogo: { node: { sourceUrl: string | null } | null } | null;
+        siteLogoWhite: { node: { sourceUrl: string | null } | null } | null;
+      } | null }[] };
+    }>(SITE_BRANDING_QUERY, {});
+    const f = data.pages?.nodes?.[0]?.homeFields;
+    return {
+      logo: f?.siteLogo?.node?.sourceUrl || null,
+      logoWhite: f?.siteLogoWhite?.node?.sourceUrl || null,
+    };
+  } catch (error) {
+    logWpError('branding (logo du site)', error);
+    return { logo: null, logoWhite: null };
+  }
+}
+
+// ===========================================================================
 // PAGES ÉDITORIALES — Groupe Altarea & Notre équipe (100 % éditables dans WP)
 // ---------------------------------------------------------------------------
 // Même modèle que la home (`homeFields`) : un groupe ACF attaché à la page
