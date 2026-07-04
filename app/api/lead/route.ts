@@ -57,6 +57,26 @@ function clientIp(request: Request): string {
   return request.headers.get('x-real-ip') || 'unknown';
 }
 
+/**
+ * Vérifie que la requête provient bien du site lui-même (anti-CSRF / anti-spam
+ * cross-site). On compare l'hôte de l'en-tête Origin (ou Referer en repli) à
+ * l'hôte de la requête. Un POST déclenché depuis un autre domaine porte un
+ * Origin différent → rejeté. Les requêtes same-origin du navigateur envoient
+ * toujours Origin sur un POST ; en son absence totale (ex. curl), on laisse
+ * passer car les autres défenses (honeypot, validation, secret WP) couvrent.
+ */
+function sameOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin') || request.headers.get('referer');
+  if (!origin) return true; // pas d'Origin (client non-navigateur) : couvert par les autres gardes
+  const host = request.headers.get('host');
+  if (!host) return true;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
 /** Déduit l'URL de l'endpoint WordPress à partir de la config existante. */
 function getWordpressLeadEndpoint(): string | null {
   const explicit = process.env.WORDPRESS_REST_LEAD_ENDPOINT;
@@ -69,6 +89,11 @@ function getWordpressLeadEndpoint(): string | null {
 }
 
 export async function POST(request: Request) {
+  // 0) Anti-CSRF : la requête doit venir de notre propre domaine.
+  if (!sameOrigin(request)) {
+    return NextResponse.json({ ok: false, error: 'Origine non autorisée.' }, { status: 403 });
+  }
+
   // 1) Rate limiting par IP
   const ip = clientIp(request);
   if (rateLimited(ip)) {

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getPage, type WpLocale } from '@/lib/wordpress';
+import { sanitizeWpHtml } from '@/lib/sanitize';
 import type { Metadata } from 'next';
 
 
@@ -50,7 +51,7 @@ export default async function CustomPage({ params }: { params: { locale: WpLocal
           {page.content && (
             <div
               className="page-richtext"
-              dangerouslySetInnerHTML={{ __html: page.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(page.content) }}
             />
           )}
         </div>

@@ -6,6 +6,7 @@ import {
   type WpLocale,
 } from '@/lib/wordpress';
 import { ArticleDownloadButton } from '@/components/ArticleDownloadButton';
+import { sanitizeWpHtml } from '@/lib/sanitize';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -169,7 +170,7 @@ export default async function ArticlePage({ params }: Props) {
             {/* Contenu principal */}
             <article
               className="article-content"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(post.content) }}
             />
 
             {/* Sidebar */}
