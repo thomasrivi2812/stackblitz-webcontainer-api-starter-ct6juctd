@@ -2,6 +2,7 @@ import { getServices, type WpLocale } from '@/lib/wordpress';
 import { ServiceMedia } from '@/components/ServiceMedia';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -14,7 +15,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.servicesTitle,
     description: m.servicesDesc,
-    alternates: { canonical: '/services', languages: { fr: '/services', en: '/en/services' } },
+    alternates: alternatesFor(locale, '/services'),
   };
 }
 

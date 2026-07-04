@@ -10,6 +10,11 @@ export const routing = defineRouting({
   locales: ['fr', 'en'],
   defaultLocale: 'fr',
   localePrefix: 'as-needed',
+  // Pas de redirection automatique par Accept-Language/cookie : « / » sert
+  // TOUJOURS le FR (Google déconseille les redirections auto par langue —
+  // les crawlers voyaient des 307 imprévisibles). Le changement de langue
+  // passe par le sélecteur FR/EN, qui navigue explicitement vers /en.
+  localeDetection: false,
 });
 
 export type Locale = (typeof routing.locales)[number];

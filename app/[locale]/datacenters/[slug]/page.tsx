@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
 import { KpiBand } from '@/components/KpiBand';
+import { JsonLd } from '@/components/JsonLd';
+import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
@@ -21,17 +23,35 @@ export async function generateMetadata({ params }: { params: { locale: WpLocale;
   const ville = f.ville ? ` à ${f.ville}` : '';
   const desc = f.accroche
     || `Data center NDC${ville} : hébergement souverain, conception Tier III et écoresponsable. Découvrez ses caractéristiques techniques.`;
+  // hreflang avec les vrais slugs par langue (Polylang) : l'alternative n'est
+  // déclarée que si la traduction existe.
+  const cur = params.locale;
+  const otherLang = cur === 'fr' ? 'EN' : 'FR';
+  const otherSlug = dc.translations?.find(
+    (tr) => (tr?.language?.code ?? '').toUpperCase() === otherLang,
+  )?.slug ?? null;
+  const frSlug = cur === 'fr' ? dc.slug : otherSlug;
+  const enSlug = cur === 'en' ? dc.slug : otherSlug;
+  const languages: Record<string, string> = {};
+  if (frSlug) {
+    languages.fr = `/datacenters/${frSlug}`;
+    languages['x-default'] = `/datacenters/${frSlug}`;
+  }
+  if (enSlug) languages.en = `/en/datacenters/${enSlug}`;
+  const canonical = localePath(cur, `/datacenters/${dc.slug}`);
+
   return {
     title: `${dc.title}${ville ? ' — ' + f.ville : ''}`,
     description: desc,
-    alternates: {
-      canonical: `/datacenters/${dc.slug}`,
-      languages: { fr: `/datacenters/${dc.slug}`, en: `/en/datacenters/${dc.slug}` },
-    },
+    alternates: { canonical, languages },
     openGraph: {
-      title: `${dc.title} — Nation Data Center`,
+      title: `${dc.title}${ville ? ' — ' + f.ville : ''}`,
       description: desc,
       type: 'article',
+      url: canonical,
+      ...(dc.featuredImage?.node?.sourceUrl
+        ? { images: [{ url: dc.featuredImage.node.sourceUrl, alt: dc.featuredImage.node.altText || dc.title }] }
+        : {}),
     },
   };
 }
@@ -62,9 +82,38 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
   const caracs = f.caracteristiques ?? [];
   const benefices = f.benefices ?? [];
   const mapPoint = toMapPoints([dc])[0]; // présent seulement si lat/lng renseignés
+  const pageUrl = `${SITE_URL}${localePath(params.locale, `/datacenters/${dc.slug}`)}`;
 
   return (
     <main>
+      {/* Données structurées : lieu physique + fil d'Ariane. */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Place',
+          name: dc.title,
+          url: pageUrl,
+          ...(f.accroche ? { description: f.accroche } : {}),
+          ...(dc.featuredImage?.node?.sourceUrl ? { photo: dc.featuredImage.node.sourceUrl } : {}),
+          ...(f.ville
+            ? { address: { '@type': 'PostalAddress', addressLocality: f.ville, addressCountry: 'FR' } }
+            : {}),
+          ...(mapPoint
+            ? { geo: { '@type': 'GeoCoordinates', latitude: mapPoint.lat, longitude: mapPoint.lng } }
+            : {}),
+        }}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Nation Data Center', item: `${SITE_URL}${localePath(params.locale, '/')}` },
+            { '@type': 'ListItem', position: 2, name: t.back, item: `${SITE_URL}${localePath(params.locale, '/datacenters')}` },
+            { '@type': 'ListItem', position: 3, name: dc.title, item: pageUrl },
+          ],
+        }}
+      />
       {/* HERO + PHOTO */}
       <section className="dc-hero">
         <div className="container dc-hero-grid">

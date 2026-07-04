@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { OffresPersonas } from '@/components/OffresPersonas';
 import { getPersonas, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -14,7 +15,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.offresTitle,
     description: m.offresDesc,
-    alternates: { canonical: '/offres', languages: { fr: '/offres', en: '/en/offres' } },
+    alternates: alternatesFor(locale, '/offres'),
   };
 }
 

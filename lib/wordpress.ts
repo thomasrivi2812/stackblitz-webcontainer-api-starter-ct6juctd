@@ -107,6 +107,9 @@ export type Datacenter = {
     benefices?: Benefice[] | null;
     document?: { url: string; titre: string } | null
   };
+  // Liens Polylang (présents au runtime via DATACENTER_BY_SLUG) → hreflang.
+  language?: { code: string | null } | null;
+  translations?: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null;
 };
 
 // Type article pour le bandeau accueil (3 articles récents)
@@ -132,6 +135,11 @@ export type WPPost = {
   tags: { nodes: { name: string; slug: string }[] };
   author: { node: { name: string } } | null;
   document?: { url: string; titre: string } | null;
+  // Liens Polylang vers les traductions (slug propre à chaque langue) —
+  // présents au runtime via la requête POST_BY_SLUG ; servent à construire
+  // les vraies URLs hreflang/canonical des pages détail.
+  language?: { code: string | null } | null;
+  translations?: ({ slug: string | null; language: { code: string | null } | null } | null)[] | null;
 };
 
 // Type catégorie

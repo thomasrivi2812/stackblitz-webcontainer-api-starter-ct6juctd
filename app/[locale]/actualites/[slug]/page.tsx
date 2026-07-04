@@ -7,6 +7,8 @@ import {
 } from '@/lib/wordpress';
 import { ArticleDownloadButton } from '@/components/ArticleDownloadButton';
 import { sanitizeWpHtml } from '@/lib/sanitize';
+import { JsonLd } from '@/components/JsonLd';
+import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
@@ -31,12 +33,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug, params.locale);
   const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
   if (!post) return { title: t.notFound };
+
+  // hreflang avec les VRAIS slugs par langue (Polylang : chaque traduction a
+  // le sien). Le slug de l'autre langue vient de post.translations ; on ne
+  // déclare une alternative que si elle existe (sinon Google suivrait une
+  // URL qui redirige → soft-404).
+  const cur = params.locale;
+  const otherLang = cur === 'fr' ? 'EN' : 'FR';
+  const otherSlug = post.translations?.find(
+    (tr) => (tr?.language?.code ?? '').toUpperCase() === otherLang,
+  )?.slug ?? null;
+  const frSlug = cur === 'fr' ? post.slug : otherSlug;
+  const enSlug = cur === 'en' ? post.slug : otherSlug;
+  const languages: Record<string, string> = {};
+  if (frSlug) {
+    languages.fr = `/actualites/${frSlug}`;
+    languages['x-default'] = `/actualites/${frSlug}`;
+  }
+  if (enSlug) languages.en = `/en/actualites/${enSlug}`;
+
+  // Description : excerpt WP, avec repli sur le début du contenu si vide.
+  const desc = (stripHtml(post.excerpt).slice(0, 158) || stripHtml(post.content).slice(0, 158)).trim();
+  const canonical = localePath(cur, `/actualites/${post.slug}`);
+
   return {
-    title: `${post.title} — Nation Data Center`,
-    description: stripHtml(post.excerpt).slice(0, 160),
-    alternates: {
-      canonical: `/actualites/${params.slug}`,
-      languages: { fr: `/actualites/${params.slug}`, en: `/en/actualites/${params.slug}` },
+    // Sans suffixe de marque : le template « %s | Nation Data Center » du
+    // layout l'ajoute déjà (évite le titre dupliqué).
+    title: post.title,
+    description: desc,
+    alternates: { canonical, languages },
+    openGraph: {
+      title: post.title,
+      description: desc,
+      type: 'article',
+      publishedTime: post.date,
+      url: canonical,
+      ...(post.featuredImage?.node?.sourceUrl
+        ? { images: [{ url: post.featuredImage.node.sourceUrl, alt: post.featuredImage.node.altText || post.title }] }
+        : {}),
     },
   };
 }
@@ -115,8 +149,38 @@ export default async function ArticlePage({ params }: Props) {
   const allPosts = await getAllPosts(params.locale);
   const related = allPosts.filter((p) => p.slug !== post.slug).slice(0, 3);
 
+  const pageUrl = `${SITE_URL}${localePath(params.locale, `/actualites/${post.slug}`)}`;
+
   return (
     <main>
+      {/* Données structurées : article + fil d'Ariane (rich results). */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'NewsArticle',
+          headline: post.title,
+          datePublished: post.date,
+          inLanguage: params.locale,
+          mainEntityOfPage: pageUrl,
+          ...(post.featuredImage?.node?.sourceUrl ? { image: [post.featuredImage.node.sourceUrl] } : {}),
+          author: post.author?.node?.name
+            ? [{ '@type': 'Person', name: post.author.node.name }]
+            : [{ '@type': 'Organization', name: 'Nation Data Center' }],
+          publisher: { '@type': 'Organization', name: 'Nation Data Center', url: SITE_URL },
+          ...(post.excerpt ? { description: stripHtml(post.excerpt).slice(0, 160) } : {}),
+        }}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Nation Data Center', item: `${SITE_URL}${localePath(params.locale, '/')}` },
+            { '@type': 'ListItem', position: 2, name: t.back, item: `${SITE_URL}${localePath(params.locale, '/actualites')}` },
+            { '@type': 'ListItem', position: 3, name: post.title, item: pageUrl },
+          ],
+        }}
+      />
       {/* ── Hero article ── */}
       <section className="article-hero">
         <div className="container">

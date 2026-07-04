@@ -8,6 +8,7 @@ import { NetworkMap } from '@/components/NetworkMap';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -18,9 +19,11 @@ export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
-    title: m.homeTitle,
+    // `absolute` : le titre de l'accueil contient déjà la marque, on court-
+    // circuite le template « %s | Nation Data Center » du layout.
+    title: { absolute: m.homeTitle },
     description: m.homeDesc,
-    alternates: { canonical: '/', languages: { fr: '/', en: '/en' } },
+    alternates: alternatesFor(locale, '/'),
   };
 }
 

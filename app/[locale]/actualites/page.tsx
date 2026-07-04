@@ -1,6 +1,7 @@
 import { getAllPosts, getCategories, type WpLocale } from '@/lib/wordpress';
 import { ArticleSearch } from '@/components/ArticleSearch';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -13,7 +14,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.actualitesTitle,
     description: m.actualitesDesc,
-    alternates: { canonical: '/actualites', languages: { fr: '/actualites', en: '/en/actualites' } },
+    alternates: alternatesFor(locale, '/actualites'),
   };
 }
 

@@ -2,6 +2,7 @@ import { KpiBand } from '@/components/KpiBand';
 import { AltareaLogo, AltareaMark } from '@/components/AltareaLogo';
 import { getGroupe, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // Violet de la marque Altarea (accents de la page Groupe).
 const ALTAREA = '#6A2C91';
@@ -17,7 +18,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.groupeTitle,
     description: m.groupeDesc,
-    alternates: { canonical: '/groupe', languages: { fr: '/groupe', en: '/en/groupe' } },
+    alternates: alternatesFor(locale, '/groupe'),
   };
 }
 

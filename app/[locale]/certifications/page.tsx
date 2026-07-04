@@ -3,6 +3,7 @@ import { Link } from '@/i18n/routing';
 
 const camel = (k: string) => k.split('-').map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)).join('');
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -15,7 +16,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.certifsTitle,
     description: m.certifsDesc,
-    alternates: { canonical: '/certifications', languages: { fr: '/certifications', en: '/en/certifications' } },
+    alternates: alternatesFor(locale, '/certifications'),
   };
 }
 

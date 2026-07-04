@@ -1,5 +1,6 @@
 import { getMembres, getEquipesHead, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -12,7 +13,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.equipesTitle,
     description: m.equipesDesc,
-    alternates: { canonical: '/equipes', languages: { fr: '/equipes', en: '/en/equipes' } },
+    alternates: alternatesFor(locale, '/equipes'),
   };
 }
 

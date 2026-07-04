@@ -1,6 +1,7 @@
 import { getDatacenters, statutInfo, type WpLocale } from '@/lib/wordpress';
 import { DcTileImage } from '@/components/DcTileImage';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -13,7 +14,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: m.datacentersTitle,
     description: m.datacentersDesc,
-    alternates: { canonical: '/datacenters', languages: { fr: '/datacenters', en: '/en/datacenters' } },
+    alternates: alternatesFor(locale, '/datacenters'),
   };
 }
 

@@ -1,13 +1,14 @@
 import { ContactForm } from '@/components/ContactForm';
 import type { WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
+import { alternatesFor } from '@/lib/seo';
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
   const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
   return {
     title: m.contactTitle,
     description: m.contactDesc,
-    alternates: { canonical: '/contact', languages: { fr: '/contact', en: '/en/contact' } },
+    alternates: alternatesFor(locale, '/contact'),
   };
 }
 

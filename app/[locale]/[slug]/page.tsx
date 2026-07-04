@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getPage, type WpLocale } from '@/lib/wordpress';
+import { getPage, stripHtml, type WpLocale } from '@/lib/wordpress';
 import { sanitizeWpHtml } from '@/lib/sanitize';
+import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 
@@ -19,11 +20,11 @@ export async function generateMetadata({ params }: { params: { locale: WpLocale;
   const page = await getPage(params.slug, params.locale);
   if (!page) return {};
   return {
-    title: `${page.title} — Nation Data Center`,
-    alternates: {
-      canonical: `/${params.slug}`,
-      languages: { fr: `/${params.slug}`, en: `/en/${params.slug}` },
-    },
+    // Sans suffixe de marque : le template du layout l'ajoute.
+    title: page.title,
+    // Description tirée du début du contenu (sinon aucune meta description).
+    description: stripHtml(page.content ?? '').slice(0, 158).trim() || undefined,
+    alternates: alternatesFor(params.locale, `/${params.slug}`),
   };
 }
 

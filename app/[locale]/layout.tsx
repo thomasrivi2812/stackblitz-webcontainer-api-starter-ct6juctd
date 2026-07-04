@@ -5,7 +5,9 @@ import { NextIntlClientProvider } from 'next-intl';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { JsonLd } from '@/components/JsonLd';
 import { getPersonas, getDatacenters, getSiteBranding } from '@/lib/wordpress';
+import { SITE_URL } from '@/lib/seo';
 import { routing, type Locale } from '@/i18n/routing';
 import '../globals.css';
 
@@ -15,39 +17,45 @@ const jost = Jost({
   variable: '--font-jost',
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://www.nationdc.fr'),
-  title: {
-    default: 'Nation Data Center — Hébergement souverain & responsable',
-    template: '%s | Nation Data Center',
-  },
-  description:
-    'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
-  keywords: [
-    'data center France', 'hébergement souverain', 'colocation datacenter',
-    'data center écoresponsable', 'hébergement données France', 'Tier 3', 'NDC',
-  ],
-  openGraph: {
-    type: 'website',
-    locale: 'fr_FR',
-    siteName: 'Nation Data Center',
-    title: 'Nation Data Center — Hébergement souverain & responsable',
+// Metadata dépendant de la locale (og:locale correct sur /en). Les mots-clés
+// meta ont été retirés : ignorés par tous les moteurs depuis des années.
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const isEn = locale === 'en';
+  return {
+    metadataBase: new URL('https://www.nationdc.fr'),
+    title: {
+      default: 'Nation Data Center — Hébergement souverain & responsable',
+      template: '%s | Nation Data Center',
+    },
     description:
       'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
-    images: [{ url: '/hero-datacenter.jpg', width: 1200, height: 630, alt: 'Nation Data Center' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Nation Data Center — Hébergement souverain & responsable',
-    description: 'Un réseau de data centers français, souverains et écoresponsables.',
-    images: ['/hero-datacenter.jpg'],
-  },
-  robots: { index: true, follow: true },
-  icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
-    shortcut: '/favicon.svg',
-  },
-};
+    openGraph: {
+      type: 'website',
+      locale: isEn ? 'en_GB' : 'fr_FR',
+      alternateLocale: isEn ? 'fr_FR' : 'en_GB',
+      siteName: 'Nation Data Center',
+      title: 'Nation Data Center — Hébergement souverain & responsable',
+      description:
+        'Un réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
+      images: [{ url: '/hero-datacenter.jpg', width: 1200, height: 630, alt: 'Nation Data Center' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Nation Data Center — Hébergement souverain & responsable',
+      description: 'Un réseau de data centers français, souverains et écoresponsables.',
+      images: ['/hero-datacenter.jpg'],
+    },
+    robots: { index: true, follow: true },
+    icons: {
+      icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+      shortcut: '/favicon.svg',
+    },
+  };
+}
 
 // Pré-génère les deux variantes de langue à la compilation (/ et /en).
 export function generateStaticParams() {
@@ -86,6 +94,20 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={jost.variable}>
       <body>
+        {/* Données structurées Organization (rich results / knowledge panel). */}
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Nation Data Center',
+            url: SITE_URL,
+            logo: `${SITE_URL}/favicon.svg`,
+            description:
+              'Réseau de data centers français, souverains et écoresponsables.',
+            parentOrganization: { '@type': 'Organization', name: 'Altarea' },
+            // sameAs (LinkedIn…) : à ajouter quand les URLs officielles seront actives.
+          }}
+        />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SiteHeader personas={personas} datacenters={datacenters} logoUrl={branding.logo} />
 
