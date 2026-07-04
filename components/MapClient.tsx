@@ -1,7 +1,7 @@
 'use client';
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { MapPoint } from '@/lib/wordpress';
@@ -43,6 +43,9 @@ export function MapClient({
   zoom?: number;
 }) {
   const t = useTranslations('map');
+  // Préfixe de langue : FR à la racine, EN sous /en (localePrefix "as-needed").
+  const locale = useLocale();
+  const prefix = locale === 'en' ? '/en' : '';
   return (
     <MapContainer
       center={center}
@@ -65,7 +68,7 @@ export function MapClient({
               {STATUT_KEY[p.statut] ? t(STATUT_KEY[p.statut]) : ''}
             </span>
             <br />
-            <a href={`/datacenters/${p.slug}`} style={{ color: '#1c8cbd', fontWeight: 600 }}>
+            <a href={`${prefix}/datacenters/${p.slug}`} style={{ color: '#1c8cbd', fontWeight: 600 }}>
               {t('voir')}
             </a>
           </Popup>

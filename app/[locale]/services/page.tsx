@@ -1,5 +1,6 @@
 import { getServices, type WpLocale } from '@/lib/wordpress';
 import { ServiceMedia } from '@/components/ServiceMedia';
+import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
@@ -72,12 +73,12 @@ export default async function ServicesPage({ params: { locale } }: { params: { l
               <p>{t.ctaText}</p>
             </div>
             <div className="souv-cta">
-              <a className="btn-v2 btn-v2-primary" href="/contact">
+              <Link className="btn-v2 btn-v2-primary" href="/contact">
                 {t.ctaButton}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

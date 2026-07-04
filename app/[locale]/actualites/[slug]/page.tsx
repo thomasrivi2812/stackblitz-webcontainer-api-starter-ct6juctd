@@ -7,6 +7,7 @@ import {
 } from '@/lib/wordpress';
 import { ArticleDownloadButton } from '@/components/ArticleDownloadButton';
 import { sanitizeWpHtml } from '@/lib/sanitize';
+import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -119,10 +120,10 @@ export default async function ArticlePage({ params }: Props) {
       {/* ── Hero article ── */}
       <section className="article-hero">
         <div className="container">
-          <a className="back-link" href="/actualites">
+          <Link className="back-link" href="/actualites">
             <Icon name="arrow-left" />
             {t.back}
-          </a>
+          </Link>
 
           <div className="article-hero-meta">
             {post.categories.nodes.map((cat) => (
@@ -214,7 +215,7 @@ export default async function ArticlePage({ params }: Props) {
                   <h4>{t.alsoRead}</h4>
                   <div className="article-related">
                     {related.map((r) => (
-                      <a
+                      <Link
                         className="article-related-card"
                         key={r.slug}
                         href={`/actualites/${r.slug}`}
@@ -237,7 +238,7 @@ export default async function ArticlePage({ params }: Props) {
                           </span>
                           <h5>{r.title}</h5>
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -247,9 +248,9 @@ export default async function ArticlePage({ params }: Props) {
               <div className="article-sidebar-cta">
                 <h4>{t.ctaTitle}</h4>
                 <p>{t.ctaText}</p>
-                <a className="btn btn-primary" href="/contact">
+                <Link className="btn btn-primary" href="/contact">
                   {t.ctaButton}
-                </a>
+                </Link>
               </div>
             </aside>
           </div>

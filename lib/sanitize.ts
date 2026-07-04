@@ -22,10 +22,29 @@ const ALLOWED_TAGS = [
 const ALLOWED_ATTR = [
   'href', 'target', 'rel', 'title',
   'src', 'srcset', 'sizes', 'alt', 'width', 'height', 'loading', 'decoding',
-  'class', 'id', 'colspan', 'rowspan', 'scope',
-  // iframes d'intégration (YouTube/Vimeo) — le domaine est verrouillé plus bas.
+  // 'id' retiré volontairement : évite le DOM clobbering (un id injecté peut
+  // écraser des références globales window.<id> / document.<id>).
+  'class', 'colspan', 'rowspan', 'scope',
+  // iframes d'intégration (YouTube/Vimeo) — le domaine est verrouillé par le hook.
   'allow', 'allowfullscreen', 'frameborder', 'referrerpolicy',
 ];
+
+// Domaines d'iframe autorisés (intégrations vidéo). Tout autre <iframe> est
+// supprimé — défense en profondeur au niveau du sanitizer, en plus de la CSP
+// frame-src. Le hook est enregistré une seule fois au chargement du module.
+const IFRAME_ALLOWED_HOSTS = /^(www\.)?(youtube(-nocookie)?\.com|youtu\.be|player\.vimeo\.com)$/i;
+
+DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+  if (data.tagName !== 'iframe') return;
+  const src = (node as Element).getAttribute?.('src') || '';
+  let ok = false;
+  try {
+    ok = IFRAME_ALLOWED_HOSTS.test(new URL(src).hostname);
+  } catch {
+    ok = false;
+  }
+  if (!ok) (node as Element).parentNode?.removeChild(node as Element);
+});
 
 export function sanitizeWpHtml(html: string | null | undefined): string {
   if (!html) return '';

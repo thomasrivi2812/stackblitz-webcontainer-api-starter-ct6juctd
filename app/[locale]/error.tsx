@@ -6,6 +6,7 @@
 // déduite de l'URL car les frontières error/not-found ne reçoivent pas
 // `params`.
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import fr from '../../messages/fr.json';
 import en from '../../messages/en.json';
 
@@ -21,9 +22,8 @@ export default function Error({
     console.error(error);
   }, [error]);
 
-  const isEn =
-    typeof window !== 'undefined' &&
-    window.location.pathname.split('/')[1] === 'en';
+  const pathname = usePathname() || '/';
+  const isEn = pathname.split('/')[1] === 'en';
   const t = (isEn ? en : fr).states;
   const home = isEn ? '/en' : '/';
 

@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
 import { KpiBand } from '@/components/KpiBand';
+import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 
 
@@ -68,7 +69,7 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
       <section className="dc-hero">
         <div className="container dc-hero-grid">
           <div>
-            <a className="back-link" href="/datacenters">{t.back}</a>
+            <Link className="back-link" href="/datacenters">{t.back}</Link>
             <span className={`badge ${key}`} style={{ marginTop: 18 }}>
               <span className="dot" />
               {statutLabel}
@@ -77,8 +78,8 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
             {f.ville && <p className="dc-city">◍ {f.ville}</p>}
             {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
             <div className="dc-hero-cta">
-              <a className="btn btn-primary" href="/offres">{t.ctaOffres}</a>
-              <a className="btn btn-ghost" href="/contact">{t.ctaVisite}</a>
+              <Link className="btn btn-primary" href="/offres">{t.ctaOffres}</Link>
+              <Link className="btn btn-ghost" href="/contact">{t.ctaVisite}</Link>
             </div>
           </div>
           <DcPhoto slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
@@ -142,7 +143,7 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
               </div>
             )}
 
-            <a className="btn btn-primary dc-aside-cta" href="/offres">{t.ctaOffres}</a>
+            <Link className="btn btn-primary dc-aside-cta" href="/offres">{t.ctaOffres}</Link>
           </aside>
         </div>
       </section>

@@ -2,14 +2,15 @@
 
 // Page 404 du segment [locale], déclenchée par notFound() (slug WP inconnu,
 // article/datacenter supprimé…) ou une URL inexistante. La langue est déduite
-// de l'URL : les frontières not-found ne reçoivent pas `params`.
+// du chemin via usePathname() (cohérent serveur ↔ client, pas de lecture de
+// window pendant le rendu → aucun décalage d'hydratation sur /en).
+import { usePathname } from 'next/navigation';
 import fr from '../../messages/fr.json';
 import en from '../../messages/en.json';
 
 export default function NotFound() {
-  const isEn =
-    typeof window !== 'undefined' &&
-    window.location.pathname.split('/')[1] === 'en';
+  const pathname = usePathname() || '/';
+  const isEn = pathname.split('/')[1] === 'en';
   const t = (isEn ? en : fr).states;
   const home = isEn ? '/en' : '/';
 

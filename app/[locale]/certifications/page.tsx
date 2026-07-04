@@ -1,4 +1,5 @@
 import { getCertifications, groupCertifications, certifCategorieLabel, certifStatutInfo, type WpLocale } from '@/lib/wordpress';
+import { Link } from '@/i18n/routing';
 
 const camel = (k: string) => k.split('-').map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)).join('');
 import type { Metadata } from 'next';
@@ -101,9 +102,9 @@ export default async function CertificationsPage({ params: { locale } }: { param
               <p>{t.ctaText}</p>
             </div>
             <div className="souv-cta">
-              <a className="btn btn-primary" href="/contact">
+              <Link className="btn btn-primary" href="/contact">
                 {t.ctaButton}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
