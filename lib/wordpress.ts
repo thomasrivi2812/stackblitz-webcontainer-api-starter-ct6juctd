@@ -528,14 +528,20 @@ export async function getFaqs(locale: WpLocale = 'fr'): Promise<Faq[]> {
 
 // --- Accès aux données : Page personnalisée ← NOUVEAU ----------------------
 export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<CustomPage | null> {
-  if (!endpoint) return null;
+  // Repli local pour certaines pages (légales…) tant qu'elles n'existent pas
+  // dans WP — dès que la page WP est créée avec le même slug, elle gagne.
+  const fallback = async (): Promise<CustomPage | null> => {
+    const { samplePages } = await import('./sample-data');
+    return samplePages[slug] ?? null;
+  };
+  if (!endpoint) return fallback();
   try {
     const client = new GraphQLClient(endpoint);
     const data = await wpSingle<{
       pages: { nodes: { title: string; content: string | null; featuredImage: { node: { sourceUrl: string; altText: string } } | null }[] };
     }>(client, PAGE_BY_SLUG_QUERY, { slug }, locale, (d) => d.pages.nodes[0]);
     const node = data.pages.nodes[0];
-    if (!node) return null;
+    if (!node) return fallback();
     return {
       title: decodeEntities(node.title),
       content: node.content ?? '',
@@ -545,7 +551,7 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
     };
   } catch (error) {
     logWpError('page', error);
-    return null;
+    return fallback();
   }
 }
 

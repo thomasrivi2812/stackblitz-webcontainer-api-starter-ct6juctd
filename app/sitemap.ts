@@ -19,6 +19,9 @@ const STATIC_PATHS: { path: string; changeFrequency: 'weekly' | 'monthly' | 'yea
   { path: '/groupe', changeFrequency: 'yearly', priority: 0.6 },
   { path: '/actualites', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
+  { path: '/mentions-legales', changeFrequency: 'yearly', priority: 0.3 },
+  { path: '/politique-de-protection-des-donnees-personnelles', changeFrequency: 'yearly', priority: 0.3 },
+  { path: '/politique-de-cookies', changeFrequency: 'yearly', priority: 0.3 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

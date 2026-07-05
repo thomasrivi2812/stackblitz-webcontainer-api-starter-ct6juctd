@@ -528,3 +528,73 @@ export const sampleServices: Service[] = [
     home: false,
   },
 ];
+
+/* ------------------------------------------------------------------ *
+ *  Pages légales — repli tant que les pages n'existent pas dans WP.
+ *  Squelettes structurés : les mentions exactes (RCS, capital, DPO…)
+ *  sont à compléter dans WordPress (Pages → même slug), qui prend le
+ *  dessus dès que la page y est créée.
+ * ------------------------------------------------------------------ */
+import type { CustomPage } from './wordpress';
+
+export const samplePages: Record<string, CustomPage> = {
+  'mentions-legales': {
+    title: 'Mentions légales',
+    image: null,
+    content: `
+<h2>Éditeur du site</h2>
+<p>Le site nationdc.fr est édité par <strong>Nation Data Center</strong>, filiale du groupe Altarea.<br/>
+[Forme juridique, capital social, RCS, SIREN et adresse du siège : à compléter dans WordPress.]</p>
+<h2>Directeur de la publication</h2>
+<p>[Nom et qualité du directeur de la publication : à compléter.]</p>
+<h2>Hébergement</h2>
+<p>[Hébergeur du site (raison sociale, adresse, téléphone) : à compléter.]</p>
+<h2>Propriété intellectuelle</h2>
+<p>L'ensemble des contenus du site (textes, images, logos, vidéos, structure) est protégé par le droit de la propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation écrite préalable est interdite.</p>
+<h2>Responsabilité</h2>
+<p>Nation Data Center s'efforce d'assurer l'exactitude des informations publiées sur ce site, sans toutefois pouvoir garantir qu'elles soient exemptes d'erreurs ou d'omissions. Les informations sont fournies à titre indicatif et sont susceptibles d'évoluer.</p>
+<h2>Contact</h2>
+<p>Pour toute question relative au site, utilisez la <a href="/contact">page contact</a>.</p>
+`,
+  },
+  'politique-de-protection-des-donnees-personnelles': {
+    title: 'Politique de protection des données personnelles',
+    image: null,
+    content: `
+<h2>Responsable de traitement</h2>
+<p><strong>Nation Data Center</strong>, filiale du groupe Altarea, est responsable des traitements de données personnelles réalisés sur ce site. [Coordonnées complètes : à compléter dans WordPress.]</p>
+<h2>Données collectées</h2>
+<p>Les formulaires du site (contact, question, téléchargement de brochure ou de document) collectent uniquement les données que vous renseignez : adresse e-mail, et le cas échéant nom, prénom, téléphone, entreprise et message.</p>
+<h2>Finalités et bases légales</h2>
+<ul>
+<li>Répondre à vos demandes de contact et de renseignement (mesures précontractuelles / intérêt légitime) ;</li>
+<li>Vous transmettre la documentation demandée (consentement) ;</li>
+<li>Assurer le suivi commercial des demandes (intérêt légitime).</li>
+</ul>
+<h2>Durées de conservation</h2>
+<p>[Durées de conservation par finalité : à compléter — usuellement 3 ans après le dernier contact pour les prospects.]</p>
+<h2>Destinataires</h2>
+<p>Les données sont destinées aux équipes commerciales et marketing de Nation Data Center. [Sous-traitants éventuels (CRM, e-mailing…) : à compléter.]</p>
+<h2>Vos droits</h2>
+<p>Conformément au RGPD et à la loi Informatique et Libertés, vous disposez de droits d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité sur vos données. Pour les exercer : [adresse e-mail du référent données personnelles / DPO : à compléter]. Vous pouvez également saisir la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>).</p>
+`,
+  },
+  'politique-de-cookies': {
+    title: 'Politique de cookies',
+    image: null,
+    content: `
+<h2>Qu'est-ce qu'un cookie&nbsp;?</h2>
+<p>Un cookie est un petit fichier déposé sur votre appareil lors de la consultation d'un site, permettant notamment de mémoriser des préférences de navigation.</p>
+<h2>Cookies utilisés sur ce site</h2>
+<p>Ce site n'utilise <strong>aucun cookie publicitaire ni traceur tiers</strong>. Seul un cookie technique est déposé&nbsp;:</p>
+<ul>
+<li><strong>NEXT_LOCALE</strong> — mémorise votre préférence de langue (français / anglais). Durée : 12 mois. Ce cookie strictement nécessaire est exempté de consentement.</li>
+</ul>
+<p>[Si des outils de mesure d'audience ou d'autres services tiers sont ajoutés ultérieurement, compléter cette liste dans WordPress.]</p>
+<h2>Gérer les cookies</h2>
+<p>Vous pouvez à tout moment supprimer les cookies ou configurer votre navigateur pour les refuser (rubrique « confidentialité » des réglages du navigateur). Le refus du cookie de langue n'empêche pas la navigation : la langue par défaut (français) sera utilisée.</p>
+<h2>Contact</h2>
+<p>Pour toute question : voir la <a href="/politique-de-protection-des-donnees-personnelles">politique de protection des données personnelles</a>.</p>
+`,
+  },
+};
