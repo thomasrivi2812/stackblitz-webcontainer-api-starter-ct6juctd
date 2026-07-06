@@ -12,7 +12,12 @@
     "contact": "Contact",
     "apropos": "À propos de nous",
     "portail": "Portail Client",
-    "menu": "Menu"
+    "menu": "Menu",
+    "ressources": "Ressources",
+    "documentation": "Documentation",
+    "servicesAll": "Tous nos services",
+    "engagementsPromo": "Découvrir nos engagements ?",
+    "engagementsPromoEyebrow": "Éco-responsabilité"
   },
   "footer": {
     "tagline": "Hébergement souverain, responsable et de proximité, sur l’ensemble du territoire français.",

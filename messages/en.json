@@ -12,7 +12,12 @@
     "contact": "Contact",
     "apropos": "About us",
     "portail": "Client Portal",
-    "menu": "Menu"
+    "menu": "Menu",
+    "ressources": "Resources",
+    "documentation": "Documentation",
+    "servicesAll": "All our services",
+    "engagementsPromo": "Discover our commitments?",
+    "engagementsPromoEyebrow": "Sustainability"
   },
   "footer": {
     "tagline": "Sovereign, responsible and local hosting, across the whole of France.",

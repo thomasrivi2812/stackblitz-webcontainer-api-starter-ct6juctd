@@ -6,11 +6,13 @@ import { Link } from '@/i18n/routing';
 import { Logo } from '@/components/Logo';
 import { LangSwitcher } from '@/components/LangSwitcher';
 import type { Persona } from '@/lib/personas';
-import type { Datacenter } from '@/lib/wordpress';
+import type { Datacenter, Service } from '@/lib/wordpress';
 
 type Props = {
   personas?: Persona[];
   datacenters?: Datacenter[];
+  /** Services (menu déroulant « Nos services », ancrés sur /services#slug). */
+  services?: Service[];
   /** Logo du site défini dans WP (sinon marque N|D|C dessinée). */
   logoUrl?: string | null;
 };
@@ -34,7 +36,16 @@ function Chevron({ className }: { className?: string }) {
   );
 }
 
-export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: Props) {
+function LockIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+  );
+}
+
+export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
@@ -64,6 +75,12 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
     label: dc.title,
     ville: dc.datacenterFields?.ville ?? null,
   }));
+  // Chaque service pointe sur SA section de la page (ancre id={slug}).
+  const servicesChildren = services
+    .filter((s) => s.slug)
+    .map((s) => ({ href: `/services#${s.slug}`, label: s.titre }));
+
+  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || '#';
 
   return (
     <header className="site-header">
@@ -102,7 +119,7 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
             )}
           </div>
 
-          {/* Nos offres */}
+          {/* Nos offres — liens + carte promo « engagements » (image + filtre) */}
           <div
             className="nav-item"
             onMouseEnter={() => setDesktopOpen('offres')}
@@ -113,12 +130,49 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
               <Chevron className="nav-chev" />
             </Link>
             {offresChildren.length > 0 && (
-              <div className={`nav-dd${desktopOpen === 'offres' ? ' open' : ''}`}>
-                <Link href="/offres" className="nav-dd-all">
-                  {t('offresAll')}
+              <div className={`nav-dd nav-dd-split${desktopOpen === 'offres' ? ' open' : ''}`}>
+                <div className="nav-dd-col">
+                  <Link href="/offres" className="nav-dd-all">
+                    {t('offresAll')}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                  {offresChildren.map((c) => (
+                    <Link key={c.href} href={c.href} className="nav-dd-item">
+                      <span className="nav-dd-name">{c.label}</span>
+                    </Link>
+                  ))}
+                </div>
+                <Link href="/#engagements" className="nav-dd-promo">
+                  <span className="nav-dd-promo-body">
+                    <span className="nav-dd-promo-eyebrow">{t('engagementsPromoEyebrow')}</span>
+                    <span className="nav-dd-promo-text">
+                      {t('engagementsPromo')}
+                      {' '}
+                      <span className="nav-dd-promo-arrow" aria-hidden="true">→</span>
+                    </span>
+                  </span>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Nos services — chaque entrée pointe sur sa section (/services#slug) */}
+          <div
+            className="nav-item"
+            onMouseEnter={() => setDesktopOpen('services')}
+            onMouseLeave={() => setDesktopOpen(null)}
+          >
+            <Link href="/services" className="nav-link">
+              {t('services')}
+              <Chevron className="nav-chev" />
+            </Link>
+            {servicesChildren.length > 0 && (
+              <div className={`nav-dd${desktopOpen === 'services' ? ' open' : ''}`}>
+                <Link href="/services" className="nav-dd-all">
+                  {t('servicesAll')}
                   <span aria-hidden="true">→</span>
                 </Link>
-                {offresChildren.map((c) => (
+                {servicesChildren.map((c) => (
                   <Link key={c.href} href={c.href} className="nav-dd-item">
                     <span className="nav-dd-name">{c.label}</span>
                   </Link>
@@ -127,8 +181,36 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
             )}
           </div>
 
-          <Link href="/services" className="nav-link">{t('services')}</Link>
           <Link href="/certifications" className="nav-link">{t('certifications')}</Link>
+
+          {/* Ressources : documentation, actualités, portail client */}
+          <div
+            className="nav-item"
+            onMouseEnter={() => setDesktopOpen('ressources')}
+            onMouseLeave={() => setDesktopOpen(null)}
+          >
+            <button type="button" className="nav-link nav-link-btn" aria-expanded={desktopOpen === 'ressources'}>
+              {t('ressources')}
+              <Chevron className="nav-chev" />
+            </button>
+            <div className={`nav-dd${desktopOpen === 'ressources' ? ' open' : ''}`}>
+              <Link href="/documentation" className="nav-dd-item">
+                <span className="nav-dd-name">{t('documentation')}</span>
+              </Link>
+              <Link href="/actualites" className="nav-dd-item">
+                <span className="nav-dd-name">{t('actualites')}</span>
+              </Link>
+              <a
+                className="nav-dd-item row nav-dd-portal"
+                href={portalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <LockIcon />
+                <span className="nav-dd-name">{t('portail')}</span>
+              </a>
+            </div>
+          </div>
 
           {/* À propos de nous (dropdown : équipes + groupe) */}
           <div
@@ -150,22 +232,8 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
             </div>
           </div>
 
-          <Link href="/actualites" className="nav-link">{t('actualites')}</Link>
-
-          {/* Actions : Portail + Contact mis en valeur */}
+          {/* Actions : Contact mis en valeur (portail déplacé dans Ressources) */}
           <div className="nav-actions">
-            <a
-              className="nav-portal"
-              href={process.env.NEXT_PUBLIC_PORTAL_URL || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-              {t('portail')}
-            </a>
             <Link href="/contact" className="nav-cta">{t('contact')}</Link>
             <LangSwitcher />
           </div>
@@ -229,11 +297,56 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
                   {c.label}
                 </Link>
               ))}
+              <Link href="/#engagements" onClick={close}>
+                {t('engagementsPromo')}
+              </Link>
             </div>
           </div>
 
-          <Link href="/services" onClick={close}>{t('services')}</Link>
+          {/* Nos services (accordéon) */}
+          <div className="mnav-group">
+            <button
+              type="button"
+              className={`mnav-trigger${mobileSub === 'services' ? ' open' : ''}`}
+              aria-expanded={mobileSub === 'services'}
+              onClick={() => setMobileSub((v) => (v === 'services' ? null : 'services'))}
+            >
+              {t('services')}
+              <Chevron className="chev" />
+            </button>
+            <div className={`mnav-sub${mobileSub === 'services' ? ' open' : ''}`}>
+              <Link href="/services" className="all" onClick={close}>
+                {t('servicesAll')}
+              </Link>
+              {servicesChildren.map((c) => (
+                <Link key={c.href} href={c.href} onClick={close}>
+                  {c.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <Link href="/certifications" onClick={close}>{t('certifications')}</Link>
+
+          {/* Ressources (accordéon) */}
+          <div className="mnav-group">
+            <button
+              type="button"
+              className={`mnav-trigger${mobileSub === 'ressources' ? ' open' : ''}`}
+              aria-expanded={mobileSub === 'ressources'}
+              onClick={() => setMobileSub((v) => (v === 'ressources' ? null : 'ressources'))}
+            >
+              {t('ressources')}
+              <Chevron className="chev" />
+            </button>
+            <div className={`mnav-sub${mobileSub === 'ressources' ? ' open' : ''}`}>
+              <Link href="/documentation" onClick={close}>{t('documentation')}</Link>
+              <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
+              <a href={portalUrl} target="_blank" rel="noopener noreferrer" onClick={close}>
+                {t('portail')}
+              </a>
+            </div>
+          </div>
 
           {/* À propos de nous (accordéon) */}
           <div className="mnav-group">
@@ -252,23 +365,8 @@ export function SiteHeader({ personas = [], datacenters = [], logoUrl = null }: 
             </div>
           </div>
 
-          <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
-
           <div className="mnav-actions">
             <Link href="/contact" className="nav-cta" onClick={close}>{t('contact')}</Link>
-            <a
-              className="nav-portal"
-              href={process.env.NEXT_PUBLIC_PORTAL_URL || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={close}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0110 0v4" />
-              </svg>
-              {t('portail')}
-            </a>
           </div>
           <LangSwitcher />
         </nav>
