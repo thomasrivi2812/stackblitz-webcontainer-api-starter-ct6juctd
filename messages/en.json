@@ -36,7 +36,8 @@
     "cookies": "Cookie settings",
     "portail": "Client portal",
     "portailAria": "Client portal — opens in a new tab",
-    "copyright": "© {year} Nation Data Center — A Groupe Altarea subsidiary. All rights reserved."
+    "copyright": "© {year} Nation Data Center — A Groupe Altarea subsidiary. All rights reserved.",
+    "documentation": "Documentation"
   },
   "langSwitcher": {
     "label": "Language selector",
@@ -400,7 +401,9 @@
     "contactTitle": "Contact",
     "contactDesc": "Contact Nation Data Center for a quote, a site visit or any information about our sovereign hosting offerings.",
     "actualitesTitle": "News",
-    "actualitesDesc": "All the latest from Nation Data Center: new sites, innovations, CSR commitments and events."
+    "actualitesDesc": "All the latest from Nation Data Center: new sites, innovations, CSR commitments and events.",
+    "documentationTitle": "Documentation",
+    "documentationDesc": "Download Nation Data Center documentation: brochures, network datasheets and booklets about our sovereign, eco-responsible data centers."
   },
   "states": {
     "loading": "Loading…",
@@ -418,5 +421,23 @@
     "statutLivre": "Operational",
     "statutConstruction": "In progress",
     "statutAvenir": "Upcoming"
+  },
+  "documentation": {
+    "eyebrow": "Resources",
+    "h1": "Documentation",
+    "intro": "Brochures, datasheets and booklets to download: all Nation Data Center documentation in one place.",
+    "empty": "No document available yet.",
+    "eyebrowModal": "Document",
+    "downloadBtn": "Download",
+    "confirmBtn": "Get the document",
+    "emailLabel": "Your business email",
+    "emailPlaceholder": "john.smith@company.com",
+    "consent": "I agree that my email may be used to contact me about NDC offerings.",
+    "errEmail": "Please enter a valid email address.",
+    "errConsent": "Please tick the consent box.",
+    "doneTitle": "Enjoy the read!",
+    "doneText": "The download has started. If not,",
+    "doneLink": "click here",
+    "close": "Close"
   }
 }

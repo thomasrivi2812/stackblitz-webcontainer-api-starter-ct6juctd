@@ -36,7 +36,8 @@
     "cookies": "Gestion des cookies",
     "portail": "Portail Client",
     "portailAria": "Portail Client — ouvre dans un nouvel onglet",
-    "copyright": "© {year} Nation Data Center — Filiale du Groupe Altarea. Tous droits réservés."
+    "copyright": "© {year} Nation Data Center — Filiale du Groupe Altarea. Tous droits réservés.",
+    "documentation": "Documentation"
   },
   "langSwitcher": {
     "label": "Choix de la langue",
@@ -400,7 +401,9 @@
     "contactTitle": "Contact",
     "contactDesc": "Contactez Nation Data Center pour un devis, une visite de site ou tout renseignement sur nos offres d'hébergement souverain.",
     "actualitesTitle": "Actualités",
-    "actualitesDesc": "Retrouvez toutes les actualités de Nation Data Center : nouveaux sites, innovations, engagements RSE et événements."
+    "actualitesDesc": "Retrouvez toutes les actualités de Nation Data Center : nouveaux sites, innovations, engagements RSE et événements.",
+    "documentationTitle": "Documentation",
+    "documentationDesc": "Téléchargez la documentation Nation Data Center : brochures, fiches réseau et livrets sur nos data centers souverains et écoresponsables."
   },
   "states": {
     "loading": "Chargement…",
@@ -418,5 +421,23 @@
     "statutLivre": "Opérationnel",
     "statutConstruction": "En cours",
     "statutAvenir": "À venir"
+  },
+  "documentation": {
+    "eyebrow": "Ressources",
+    "h1": "Documentation",
+    "intro": "Brochures, fiches et livrets à télécharger : toute la documentation Nation Data Center au même endroit.",
+    "empty": "Aucun document disponible pour le moment.",
+    "eyebrowModal": "Document",
+    "downloadBtn": "Télécharger",
+    "confirmBtn": "Recevoir le document",
+    "emailLabel": "Votre e-mail professionnel",
+    "emailPlaceholder": "jean.dupont@entreprise.fr",
+    "consent": "J'accepte que mon e-mail soit utilisé pour me recontacter au sujet des offres NDC.",
+    "errEmail": "Merci de saisir une adresse e-mail valide.",
+    "errConsent": "Merci de cocher la case de consentement.",
+    "doneTitle": "Bonne lecture !",
+    "doneText": "Le téléchargement a démarré. Sinon,",
+    "doneLink": "cliquez ici",
+    "close": "Fermer"
   }
 }

@@ -1849,6 +1849,70 @@ export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHe
   };
 }
 
+// --- Documentation (livrets téléchargeables) ----------------------------------
+// CPT WP « livret » : couverture (image à la une), description, fichier PDF.
+// Affichés sur /documentation ; téléchargement contre e-mail (lead « download »).
+export type Livret = {
+  titre: string;
+  slug: string;
+  description: string;
+  fichierUrl: string | null;
+  cover: { sourceUrl: string; altText: string } | null;
+};
+
+const LIVRETS_QUERY = gql`
+  query Livrets($language: LanguageCodeFilterEnum) {
+    livrets(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
+      nodes {
+        title
+        slug
+        featuredImage { node { sourceUrl altText } }
+        livretFields {
+          description
+          fichier { node { mediaItemUrl } }
+        }
+      }
+    }
+  }
+`;
+
+export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
+  const fallback = async (): Promise<Livret[]> => {
+    const { sampleLivrets } = await import('./sample-data');
+    return sampleLivrets;
+  };
+  if (!endpoint) return fallback();
+  try {
+    const client = new GraphQLClient(endpoint);
+    type Node = {
+      title: string;
+      slug: string;
+      featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
+      livretFields: {
+        description: string | null;
+        fichier: { node: { mediaItemUrl: string | null } | null } | null;
+      } | null;
+    };
+    const data = await wpList<{ livrets: { nodes: Node[] } }>(
+      client, LIVRETS_QUERY, locale, (d) => d.livrets.nodes,
+    );
+    const nodes = data.livrets?.nodes ?? [];
+    if (!nodes.length) return fallback();
+    return nodes.map((n) => ({
+      titre: decodeEntities(n.title),
+      slug: n.slug,
+      description: n.livretFields?.description ?? '',
+      fichierUrl: n.livretFields?.fichier?.node?.mediaItemUrl ?? null,
+      cover: n.featuredImage?.node
+        ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
+        : null,
+    }));
+  } catch (error) {
+    logWpError('livrets', error);
+    return fallback();
+  }
+}
+
 // --- Page Contact ------------------------------------------------------------
 // Tout le contenu éditorial de la page contact (en-tête, coordonnées,
 // arguments de réassurance) est éditable dans WP : page « contact »,

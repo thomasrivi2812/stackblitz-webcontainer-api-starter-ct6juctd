@@ -598,3 +598,28 @@ export const samplePages: Record<string, CustomPage> = {
 `,
   },
 };
+
+/* ------------------------------------------------------------------ *
+ *  Livrets de documentation — repli tant que le CPT « livret » n'est
+ *  pas alimenté dans WP. Couverture null = vignette stylisée du site.
+ * ------------------------------------------------------------------ */
+import type { Livret } from './wordpress';
+
+export const sampleLivrets: Livret[] = [
+  {
+    titre: 'Brochure Nation Data Center',
+    slug: 'brochure-ndc',
+    description:
+      "Présentation du réseau NDC : notre vision de l'hébergement souverain, les sites, les offres de colocation et nos engagements écoresponsables.",
+    fichierUrl: '/brochure-ndc.pdf',
+    cover: null,
+  },
+  {
+    titre: 'Fiche réseau — sites & capacités',
+    slug: 'fiche-reseau',
+    description:
+      "L'essentiel du réseau en une fiche : implantations, puissances IT, niveaux de disponibilité et échéances d'ouverture.",
+    fichierUrl: '/brochure-ndc.pdf',
+    cover: null,
+  },
+];

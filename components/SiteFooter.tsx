@@ -52,6 +52,7 @@ export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale;
               <li><a href={lhref(locale, '/offres')}>{t.offres}</a></li>
               <li><a href={lhref(locale, '/#services')}>{t.services}</a></li>
               <li><a href={lhref(locale, '/#engagements')}>{t.engagements}</a></li>
+              <li><a href={lhref(locale, '/documentation')}>{t.documentation}</a></li>
               <li><a href={lhref(locale, '/#actualites')}>{t.actualites}</a></li>
               <li><a href={lhref(locale, '/contact')}>{t.contact}</a></li>
             </ul>
