@@ -105,7 +105,9 @@ export type Datacenter = {
     kpis?: Kpi[] | null;
     caracteristiques?: Caracteristique[] | null;
     benefices?: Benefice[] | null;
-    document?: { url: string; titre: string } | null
+    document?: { url: string; titre: string } | null;
+    // Galerie photos du bas de fiche (repeater WP « dc_photos »).
+    photos?: ({ photo: { node: { sourceUrl: string; altText: string } | null } | null } | null)[] | null;
   };
   // Liens Polylang (présents au runtime via DATACENTER_BY_SLUG) → hreflang.
   language?: { code: string | null } | null;
@@ -203,6 +205,7 @@ const DATACENTER_BY_SLUG_QUERY = gql`
           caracteristiques { categorie intitule detail }
           benefices { titre texte }
           document { url titre }
+          photos { photo { node { sourceUrl altText } } }
         }
       }
     }

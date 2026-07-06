@@ -962,6 +962,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: var(--radius-lg);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+/* Hover classique : légère élévation + ombre renforcée */
+.faq-media img:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 @media (max-width: 900px) {
   .faq-layout { grid-template-columns: 1fr; gap: 28px; }
@@ -2131,7 +2137,12 @@ select:focus-visible,
   border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line);
   min-height: 280px; box-shadow: 0 24px 60px -34px rgba(20,40,73,0.35);
 }
-.eng-illustration img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eng-illustration img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.45s ease;
+}
+/* Hover classique : zoom doux dans le cadre (l'overflow:hidden garde les bords) */
+.eng-illustration:hover img { transform: scale(1.05); }
 @media (max-width: 980px) {
   .eng-layout.has-image { grid-template-columns: 1fr; }
   .eng-illustration { min-height: 220px; order: -1; }
@@ -3494,6 +3505,30 @@ select:focus-visible,
   border-color: var(--marine);
   color: #fff;
 }
+
+/* ---------- Galerie photos (fiche data center) ---------- */
+.dc-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.dc-gallery-item {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  aspect-ratio: 4 / 3;
+  transition: box-shadow 0.35s ease;
+}
+.dc-gallery-item img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 0.45s ease;
+}
+/* Hover classique : zoom doux dans le cadre + ombre renforcée */
+.dc-gallery-item:hover { box-shadow: var(--shadow-lg); }
+.dc-gallery-item:hover img { transform: scale(1.05); }
 
 /* ---------- Groupe Altarea ---------- */
 .groupe-valeurs {

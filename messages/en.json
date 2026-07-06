@@ -182,7 +182,8 @@
     "caracRefroidissement": "Cooling",
     "caracElectrique": "Power",
     "caracConnectivite": "Connectivity",
-    "caracResilience": "Resilience"
+    "caracResilience": "Resilience",
+    "galerieTitle": "The site in pictures"
   },
   "offres": {
     "youAre": "You are?",

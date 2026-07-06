@@ -81,6 +81,10 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
   const kpis = f.kpis ?? [];
   const caracs = f.caracteristiques ?? [];
   const benefices = f.benefices ?? [];
+  // Galerie du bas de page : lignes vides du repeater filtrées.
+  const photos = (f.photos ?? [])
+    .map((p) => p?.photo?.node)
+    .filter((n): n is { sourceUrl: string; altText: string } => !!n?.sourceUrl);
   const mapPoint = toMapPoints([dc])[0]; // présent seulement si lat/lng renseignés
   const pageUrl = `${SITE_URL}${localePath(params.locale, `/datacenters/${dc.slug}`)}`;
 
@@ -196,6 +200,22 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
           </aside>
         </div>
       </section>
+
+      {/* GALERIE PHOTOS — remplie dans WP (fiche datacenter → Galerie photos) */}
+      {photos.length > 0 && (
+        <section className="section section-alt">
+          <div className="container">
+            <h2 className="fil-rouge" style={{ marginBottom: 30 }}>{t.galerieTitle}</h2>
+            <div className="dc-gallery">
+              {photos.map((p, i) => (
+                <figure className="dc-gallery-item" key={i}>
+                  <img src={p.sourceUrl} alt={p.altText || `${dc.title} — ${i + 1}`} loading="lazy" />
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
