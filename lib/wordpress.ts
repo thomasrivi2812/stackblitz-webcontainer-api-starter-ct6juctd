@@ -1814,6 +1814,54 @@ export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHe
   };
 }
 
+// --- Page Contact ------------------------------------------------------------
+// Tout le contenu éditorial de la page contact (en-tête, coordonnées,
+// arguments de réassurance) est éditable dans WP : page « contact »,
+// groupe ACF « contactFields ». Chaque champ vide retombe sur le texte
+// par défaut du site (messages/*.json ou valeur codée).
+export type ContactContent = {
+  eyebrow: string | null;
+  titre: string | null;
+  intro: string | null;
+  subsidiary: string | null;
+  email: string | null;
+  telephone: string | null;
+  adresse: string | null;
+  horaires: string | null;
+  linkedin: string | null;
+  whyTitle: string | null;
+  whys: string[]; // arguments de réassurance (vides filtrés)
+};
+
+export async function getContact(locale: WpLocale = 'fr'): Promise<ContactContent | null> {
+  type F = {
+    eyebrow: string | null; titre: string | null; intro: string | null;
+    subsidiary: string | null; email: string | null; telephone: string | null;
+    adresse: string | null; horaires: string | null; linkedin: string | null;
+    whyTitle: string | null; why1: string | null; why2: string | null;
+    why3: string | null; why4: string | null;
+  };
+  const f = await getPageFields<F>(
+    'contact', 'contactFields',
+    'eyebrow titre intro subsidiary email telephone adresse horaires linkedin whyTitle why1 why2 why3 why4',
+    locale,
+  );
+  if (!f) return null;
+  return {
+    eyebrow: f.eyebrow || null,
+    titre: f.titre || null,
+    intro: f.intro || null,
+    subsidiary: f.subsidiary || null,
+    email: f.email || null,
+    telephone: f.telephone || null,
+    adresse: f.adresse || null,
+    horaires: f.horaires || null,
+    linkedin: f.linkedin || null,
+    whyTitle: f.whyTitle || null,
+    whys: [f.why1, f.why2, f.why3, f.why4].filter((w): w is string => !!w && w.trim() !== ''),
+  };
+}
+
 
 // Déduplication par rendu (React.cache) : layout + page + generateMetadata
 // partagent le même résultat dans une même requête, au lieu de refetcher WP.
