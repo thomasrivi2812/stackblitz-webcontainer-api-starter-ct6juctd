@@ -1825,11 +1825,16 @@ export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHe
     eyebrow: string | null;
     titre: string | null;
     intro: string | null;
-    polesOrdre: ({ pole: string | null } | null)[] | null;
+    polesOrdre?: ({ pole: string | null } | null)[] | null;
   };
-  const f = await getPageFields<F>(
-    'equipes', 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
-  );
+  // 1) Requête complète. 2) Si elle échoue (champ polesOrdre pas encore créé
+  //    côté WP → erreur de schéma GraphQL), on retente SANS lui : l'en-tête
+  //    (titre/intro) reste éditable même si WP n'est pas à jour.
+  const f =
+    (await getPageFields<F>(
+      'equipes', 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
+    )) ??
+    (await getPageFields<F>('equipes', 'equipesFields', 'eyebrow titre intro', locale));
   if (!f) return null;
   // Nettoyage : lignes vides filtrées, doublons retirés (le premier gagne).
   const seen = new Set<string>();
