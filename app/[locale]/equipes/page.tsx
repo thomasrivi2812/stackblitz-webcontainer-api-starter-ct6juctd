@@ -1,4 +1,5 @@
 import { getMembres, getEquipesHead, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
+import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 
@@ -65,9 +66,6 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
             <div className="team-pole-head">
               <h2 className="team-pole-title fil-rouge">{pole(g.pole)}</h2>
               <span className="team-pole-line" aria-hidden="true" />
-              <span className="team-pole-count">
-                {g.items.length} {g.items.length !== 1 ? t.countMany : t.countOne}
-              </span>
             </div>
             <div className="team-grid">
               {g.items.map((m) => (
@@ -97,6 +95,23 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
           </div>
         </section>
       ))}
+
+      {/* ── Bandeau contact ── */}
+      <section className="op-final" style={{ ['--op-accent' as string]: 'var(--red)' } as React.CSSProperties}>
+        <div className="container">
+          <h2 className="fil-rouge">{t.ctaTitle}</h2>
+          <p className="op-final-lead">{t.ctaText}</p>
+          <div className="op-cta-row">
+            <Link
+              className="op-btn-primary"
+              href="/contact"
+              style={{ background: '#fff', color: 'var(--marine)' }}
+            >
+              {t.ctaButton} →
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

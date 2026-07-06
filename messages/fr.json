@@ -227,8 +227,9 @@
     "poleExploitation": "Exploitation",
     "poleDeveloppement": "Développement",
     "poleTransverse": "Transverse",
-    "countOne": "membre",
-    "countMany": "membres"
+    "ctaTitle": "Envie de rejoindre l’aventure ou d’échanger avec nos équipes ?",
+    "ctaText": "Un projet d’hébergement, une question technique ou une candidature : nos équipes vous répondent sous 24 heures.",
+    "ctaButton": "Nous contacter"
   },
   "certifications": {
     "eyebrow": "Conformité & confiance",

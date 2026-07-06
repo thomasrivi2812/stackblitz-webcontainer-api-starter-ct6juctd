@@ -227,8 +227,9 @@
     "poleExploitation": "Facility Operations",
     "poleDeveloppement": "Development",
     "poleTransverse": "Cross-functional",
-    "countOne": "member",
-    "countMany": "members"
+    "ctaTitle": "Want to join the adventure or talk to our teams?",
+    "ctaText": "A hosting project, a technical question or an application: our teams get back to you within 24 hours.",
+    "ctaButton": "Contact us"
   },
   "certifications": {
     "eyebrow": "Compliance & trust",
