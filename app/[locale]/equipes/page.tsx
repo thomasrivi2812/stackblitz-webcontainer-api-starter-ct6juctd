@@ -62,7 +62,13 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
       {groupes.map((g, gi) => (
         <section className={`section ${gi % 2 === 1 ? 'section-alt' : ''}`} style={gi === 0 ? { paddingTop: 0 } : undefined} key={g.pole}>
           <div className="container">
-            <h2 className="team-pole-title fil-rouge">{pole(g.pole)}</h2>
+            <div className="team-pole-head">
+              <h2 className="team-pole-title fil-rouge">{pole(g.pole)}</h2>
+              <span className="team-pole-line" aria-hidden="true" />
+              <span className="team-pole-count">
+                {g.items.length} {g.items.length !== 1 ? t.countMany : t.countOne}
+              </span>
+            </div>
             <div className="team-grid">
               {g.items.map((m) => (
                 <article className="team-card" key={m.nom + m.poste}>
@@ -73,6 +79,7 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
                       <span className="team-initials">{initials(m.nom)}</span>
                     )}
                   </div>
+                  <span className="team-dot" aria-hidden="true" />
                   <div className="team-body">
                     <h3>{m.nom}</h3>
                     {m.poste && <span className="team-poste">{m.poste}</span>}

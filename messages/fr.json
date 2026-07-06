@@ -226,7 +226,9 @@
     "poleCommerce": "Commerce",
     "poleExploitation": "Exploitation",
     "poleDeveloppement": "Développement",
-    "poleTransverse": "Transverse"
+    "poleTransverse": "Transverse",
+    "countOne": "membre",
+    "countMany": "membres"
   },
   "certifications": {
     "eyebrow": "Conformité & confiance",

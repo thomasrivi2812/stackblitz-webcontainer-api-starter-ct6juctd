@@ -226,7 +226,9 @@
     "poleCommerce": "Sales",
     "poleExploitation": "Facility Operations",
     "poleDeveloppement": "Development",
-    "poleTransverse": "Cross-functional"
+    "poleTransverse": "Cross-functional",
+    "countOne": "member",
+    "countMany": "members"
   },
   "certifications": {
     "eyebrow": "Compliance & trust",
