@@ -10,7 +10,13 @@ export async function FaqSection({
   locale = 'fr',
   eyebrow,
   title,
-}: { locale?: WpLocale; eyebrow?: string; title?: string }) {
+  images = [],
+}: {
+  locale?: WpLocale;
+  eyebrow?: string;
+  title?: string;
+  images?: ({ sourceUrl: string; altText: string } | null)[];
+}) {
   const faqs = await getFaqs(locale);
   return (
     <>
@@ -28,7 +34,7 @@ export async function FaqSection({
           }}
         />
       )}
-      <FaqHome items={faqs} eyebrow={eyebrow} title={title} />
+      <FaqHome items={faqs} eyebrow={eyebrow} title={title} images={images} />
     </>
   );
 }

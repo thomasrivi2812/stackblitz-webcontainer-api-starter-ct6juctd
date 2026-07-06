@@ -1254,6 +1254,8 @@ export type HomeContent = {
   // Section « FAQ »
   faqEyebrow: string | null;
   faqTitle: string | null;
+  faqImage: { sourceUrl: string; altText: string } | null; // illustrations à côté de la FAQ
+  faqImage2: { sourceUrl: string; altText: string } | null;
   // Section « Actualités »
   newsEyebrow: string | null;
   newsTitle: string | null;
@@ -1314,6 +1316,8 @@ const HOME_FIELDS_SELECTION = `
   visionText
   faqEyebrow
   faqTitle
+  faqImage { node { sourceUrl altText } }
+  faqImage2 { node { sourceUrl altText } }
   newsEyebrow
   newsTitle
   newsSeeAll
@@ -1400,6 +1404,8 @@ type WpHomeFields = {
   visionText: string | null;
   faqEyebrow: string | null;
   faqTitle: string | null;
+  faqImage: { node: { sourceUrl: string; altText: string } | null } | null;
+  faqImage2: { node: { sourceUrl: string; altText: string } | null } | null;
   newsEyebrow: string | null;
   newsTitle: string | null;
   newsSeeAll: string | null;
@@ -1473,6 +1479,12 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     visionText: f.visionText || null,
     faqEyebrow: f.faqEyebrow || null,
     faqTitle: f.faqTitle || null,
+    faqImage: f.faqImage?.node
+      ? { sourceUrl: f.faqImage.node.sourceUrl, altText: f.faqImage.node.altText ?? '' }
+      : null,
+    faqImage2: f.faqImage2?.node
+      ? { sourceUrl: f.faqImage2.node.sourceUrl, altText: f.faqImage2.node.altText ?? '' }
+      : null,
     newsEyebrow: f.newsEyebrow || null,
     newsTitle: f.newsTitle || null,
     newsSeeAll: f.newsSeeAll || null,

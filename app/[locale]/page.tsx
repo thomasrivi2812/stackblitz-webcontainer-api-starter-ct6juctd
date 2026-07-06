@@ -352,7 +352,17 @@ export default async function Home({ params: { locale } }: { params: { locale: W
       <CertBanner locale={locale} wp={wp} />
 
       {/* FAQ */}
-      <FaqSection locale={locale} eyebrow={wp?.faqEyebrow || undefined} title={wp?.faqTitle || undefined} />
+      {/* Deux visuels empilés à côté de la FAQ, remplaçables dans WP
+          (accueil → onglet FAQ) ; replis locaux tant que les champs sont vides. */}
+      <FaqSection
+        locale={locale}
+        eyebrow={wp?.faqEyebrow || undefined}
+        title={wp?.faqTitle || undefined}
+        images={[
+          wp?.faqImage || { sourceUrl: '/datacenters/velizy.png', altText: '' },
+          wp?.faqImage2 || { sourceUrl: '/datacenters/rouen.jpg', altText: '' },
+        ]}
+      />
 
       {/* ACTUALITÉS */}
       <section className="section" id="actualites">
