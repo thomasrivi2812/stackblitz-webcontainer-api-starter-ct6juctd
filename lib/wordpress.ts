@@ -1807,22 +1807,37 @@ export async function getGroupe(locale: WpLocale = 'fr'): Promise<GroupeContent 
   };
 }
 
-// --- Page Notre équipe (en-tête) ---------------------------------------------
+// --- Page Notre équipe (en-tête + ordre des pôles) ---------------------------
 export type EquipesHead = {
   eyebrow: string | null;
   titre: string | null;
   intro: string | null;
+  // Ordre d'affichage des pôles choisi dans WP (repeater glisser-déposer).
+  // Vide = ordre par défaut du site (POLE_ORDER).
+  polesOrdre: string[];
 };
 
 export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHead | null> {
-  const f = await getPageFields<{ eyebrow: string | null; titre: string | null; intro: string | null }>(
-    'equipes', 'equipesFields', 'eyebrow titre intro', locale,
+  type F = {
+    eyebrow: string | null;
+    titre: string | null;
+    intro: string | null;
+    polesOrdre: ({ pole: string | null } | null)[] | null;
+  };
+  const f = await getPageFields<F>(
+    'equipes', 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
   );
   if (!f) return null;
+  // Nettoyage : lignes vides filtrées, doublons retirés (le premier gagne).
+  const seen = new Set<string>();
+  const polesOrdre = (f.polesOrdre ?? [])
+    .map((r) => r?.pole ?? '')
+    .filter((p) => p && !seen.has(p) && (seen.add(p), true));
   return {
     eyebrow: f.eyebrow || null,
     titre: f.titre || null,
     intro: f.intro || null,
+    polesOrdre,
   };
 }
 

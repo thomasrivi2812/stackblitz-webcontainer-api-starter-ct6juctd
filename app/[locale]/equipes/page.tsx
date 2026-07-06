@@ -43,11 +43,17 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
   // « Membres » (nom, poste, pôle, bio, LinkedIn, photo, ordre manuel).
   const [membres, head] = await Promise.all([getMembres(locale), getEquipesHead(locale)]);
 
-  // Groupement par pôle, dans l'ordre défini (pôles inconnus en fin de liste).
-  const groupes = POLE_ORDER
+  // Groupement par pôle. L'ordre vient de WP (page « equipes », repeater
+  // « Ordre d'affichage des pôles », glisser-déposer) ; s'il est vide, on
+  // retombe sur l'ordre par défaut du site. Les pôles absents de la liste
+  // WP sont ajoutés à la fin (dans l'ordre par défaut), puis les membres
+  // aux pôles inconnus sous « Transverse ».
+  const wpOrder = head?.polesOrdre?.length ? head.polesOrdre : POLE_ORDER;
+  const ordre = [...wpOrder, ...POLE_ORDER.filter((p) => !wpOrder.includes(p))];
+  const groupes = ordre
     .map((pole) => ({ pole, items: membres.filter((m) => m.pole === pole) }))
     .filter((g) => g.items.length > 0);
-  const autres = membres.filter((m) => !POLE_ORDER.includes(m.pole));
+  const autres = membres.filter((m) => !ordre.includes(m.pole));
   if (autres.length > 0) groupes.push({ pole: 'transverse', items: autres });
 
   return (
