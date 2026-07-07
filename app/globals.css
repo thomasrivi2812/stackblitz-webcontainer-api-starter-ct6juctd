@@ -3690,6 +3690,10 @@ select:focus-visible,
   transform: translateY(8px);
 }
 .nav-dd.wide { min-width: 380px; }
+/* Menu services : deux colonnes larges + items plus respirants */
+.nav-dd-services { min-width: 480px; padding: 10px; }
+.nav-dd-services .nav-dd-grid { gap: 4px 10px; }
+.nav-dd-services .nav-dd-item { padding: 10px 12px; }
 
 /* Dropdown scindé : colonne de liens + carte promo image (façon mega-menu) */
 .nav-dd-split {

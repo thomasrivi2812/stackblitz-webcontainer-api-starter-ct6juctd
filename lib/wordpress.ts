@@ -1860,9 +1860,7 @@ export type Livret = {
   cover: { sourceUrl: string; altText: string } | null;
 };
 
-const LIVRETS_QUERY = gql`
-  query Livrets($language: LanguageCodeFilterEnum) {
-    livrets(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
+const LIVRETS_SELECTION = `
       nodes {
         title
         slug
@@ -1872,6 +1870,24 @@ const LIVRETS_QUERY = gql`
           fichier { node { mediaItemUrl } }
         }
       }
+`;
+
+const LIVRETS_QUERY = gql`
+  query Livrets($language: LanguageCodeFilterEnum) {
+    livrets(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
+      ${LIVRETS_SELECTION}
+    }
+  }
+`;
+
+// Variante SANS filtre de langue : si Polylang ne gère pas (encore) le type
+// « Livrets » (Langues → Réglages), l'argument `language` n'existe pas sur
+// cette connexion et la requête filtrée échoue entièrement. On retombe alors
+// sur cette version pour afficher quand même les livrets.
+const LIVRETS_QUERY_NOLANG = gql`
+  query LivretsAll {
+    livrets(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
+      ${LIVRETS_SELECTION}
     }
   }
 `;
@@ -1882,23 +1898,17 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
     return sampleLivrets;
   };
   if (!endpoint) return fallback();
-  try {
-    const client = new GraphQLClient(endpoint);
-    type Node = {
-      title: string;
-      slug: string;
-      featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
-      livretFields: {
-        description: string | null;
-        fichier: { node: { mediaItemUrl: string | null } | null } | null;
-      } | null;
-    };
-    const data = await wpList<{ livrets: { nodes: Node[] } }>(
-      client, LIVRETS_QUERY, locale, (d) => d.livrets.nodes,
-    );
-    const nodes = data.livrets?.nodes ?? [];
-    if (!nodes.length) return fallback();
-    return nodes.map((n) => ({
+  type Node = {
+    title: string;
+    slug: string;
+    featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
+    livretFields: {
+      description: string | null;
+      fichier: { node: { mediaItemUrl: string | null } | null } | null;
+    } | null;
+  };
+  const map = (nodes: Node[]): Livret[] =>
+    nodes.map((n) => ({
       titre: decodeEntities(n.title),
       slug: n.slug,
       description: n.livretFields?.description ?? '',
@@ -1907,10 +1917,28 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
         ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
         : null,
     }));
+
+  const client = new GraphQLClient(endpoint);
+  // 1) Requête filtrée par langue (Polylang actif sur le CPT livret).
+  try {
+    const data = await wpList<{ livrets: { nodes: Node[] } }>(
+      client, LIVRETS_QUERY, locale, (d) => d.livrets.nodes,
+    );
+    const nodes = data.livrets?.nodes ?? [];
+    if (nodes.length) return map(nodes);
+  } catch (error) {
+    logWpError('livrets (filtre langue)', error);
+  }
+  // 2) Repli sans filtre de langue (CPT non géré par Polylang, ou aucun
+  //    livret dans la langue demandée).
+  try {
+    const data = await client.request<{ livrets: { nodes: Node[] } }>(LIVRETS_QUERY_NOLANG);
+    const nodes = data.livrets?.nodes ?? [];
+    if (nodes.length) return map(nodes);
   } catch (error) {
     logWpError('livrets', error);
-    return fallback();
   }
+  return fallback();
 }
 
 // --- Page Contact ------------------------------------------------------------

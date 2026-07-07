@@ -167,16 +167,18 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
               <Chevron className="nav-chev" />
             </Link>
             {servicesChildren.length > 0 && (
-              <div className={`nav-dd${desktopOpen === 'services' ? ' open' : ''}`}>
+              <div className={`nav-dd wide nav-dd-services${desktopOpen === 'services' ? ' open' : ''}`}>
                 <Link href="/services" className="nav-dd-all">
                   {t('servicesAll')}
                   <span aria-hidden="true">→</span>
                 </Link>
-                {servicesChildren.map((c) => (
-                  <Link key={c.href} href={c.href} className="nav-dd-item">
-                    <span className="nav-dd-name">{c.label}</span>
-                  </Link>
-                ))}
+                <div className="nav-dd-grid">
+                  {servicesChildren.map((c) => (
+                    <Link key={c.href} href={c.href} className="nav-dd-item">
+                      <span className="nav-dd-name">{c.label}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
