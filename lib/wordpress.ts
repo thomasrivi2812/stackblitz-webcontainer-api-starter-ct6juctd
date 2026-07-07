@@ -573,17 +573,82 @@ export function statutInfo(statut: Datacenter['datacenterFields']['statut']): { 
 // Points pour la carte (uniquement ceux qui ont des coordonnées)
 export type MapPoint = { title: string; slug: string; ville: string | null; statut: string; lat: number; lng: number };
 
+// Coordonnées de repli par ville : un site SANS latitude/longitude dans WP
+// apparaît quand même sur la carte tant que son champ « Ville » est rempli.
+// Les coordonnées exactes saisies dans WP restent prioritaires.
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  'paris': { lat: 48.8566, lng: 2.3522 },
+  'velizy': { lat: 48.7838, lng: 2.1919 },
+  'velizy-villacoublay': { lat: 48.7838, lng: 2.1919 },
+  'rennes': { lat: 48.1173, lng: -1.6778 },
+  'noyal-sur-vilaine': { lat: 48.1119, lng: -1.5219 },
+  'mordelles': { lat: 48.0733, lng: -1.8447 },
+  'rouen': { lat: 49.4431, lng: 1.0993 },
+  'lyon': { lat: 45.764, lng: 4.8357 },
+  'marseille': { lat: 43.2965, lng: 5.3698 },
+  'lille': { lat: 50.6292, lng: 3.0573 },
+  'bordeaux': { lat: 44.8378, lng: -0.5792 },
+  'nantes': { lat: 47.2184, lng: -1.5536 },
+  'strasbourg': { lat: 48.5734, lng: 7.7521 },
+  'toulouse': { lat: 43.6047, lng: 1.4442 },
+  'nice': { lat: 43.7102, lng: 7.262 },
+  'montpellier': { lat: 43.6108, lng: 3.8767 },
+  'grenoble': { lat: 45.1885, lng: 5.7245 },
+  'dijon': { lat: 47.322, lng: 5.0415 },
+  'tours': { lat: 47.3941, lng: 0.6848 },
+  'orleans': { lat: 47.9029, lng: 1.9039 },
+  'caen': { lat: 49.1829, lng: -0.3707 },
+  'le-havre': { lat: 49.4944, lng: 0.1079 },
+  'reims': { lat: 49.2583, lng: 4.0317 },
+  'metz': { lat: 49.1193, lng: 6.1757 },
+  'nancy': { lat: 48.6921, lng: 6.1844 },
+  'clermont-ferrand': { lat: 45.7772, lng: 3.087 },
+  'angers': { lat: 47.4784, lng: -0.5632 },
+  'brest': { lat: 48.3904, lng: -4.4861 },
+  'amiens': { lat: 49.8942, lng: 2.2957 },
+  'besancon': { lat: 47.2378, lng: 6.0241 },
+};
+
+// « Vélizy-Villacoublay » → « velizy-villacoublay » (accents/casse/espaces neutralisés)
+function normalizeVille(v: string): string {
+  return v
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function toMapPoints(datacenters: Datacenter[]): MapPoint[] {
-  return datacenters
-    .filter((d) => d.datacenterFields.latitude != null && d.datacenterFields.longitude != null)
-    .map((d) => ({
+  const seen = new Map<string, number>(); // décale légèrement les doublons de ville
+  const points: MapPoint[] = [];
+  for (const d of datacenters) {
+    const f = d.datacenterFields;
+    let lat = f.latitude ?? null;
+    let lng = f.longitude ?? null;
+    // Repli : coordonnées de la ville si les champs exacts sont vides.
+    if ((lat == null || lng == null) && f.ville) {
+      const c = CITY_COORDS[normalizeVille(f.ville)];
+      if (c) {
+        const n = seen.get(normalizeVille(f.ville)) ?? 0;
+        seen.set(normalizeVille(f.ville), n + 1);
+        // Deux sites repliés sur la même ville : léger décalage pour que
+        // les deux marqueurs restent cliquables.
+        lat = c.lat + n * 0.02;
+        lng = c.lng + n * 0.02;
+      }
+    }
+    if (lat == null || lng == null) continue; // ni coordonnées ni ville connue
+    points.push({
       title: d.title,
       slug: d.slug,
-      ville: d.datacenterFields.ville,
-      statut: statutInfo(d.datacenterFields.statut).key,
-      lat: d.datacenterFields.latitude as number,
-      lng: d.datacenterFields.longitude as number,
-    }));
+      ville: f.ville,
+      statut: statutInfo(f.statut).key,
+      lat,
+      lng,
+    });
+  }
+  return points;
 }
 
 const NAMED_ENTITIES: Record<string, string> = {

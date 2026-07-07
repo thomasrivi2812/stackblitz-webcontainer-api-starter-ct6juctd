@@ -35,8 +35,10 @@ function pin(color: string) {
 
 export function MapClient({
   points,
-  center = [46.6, 2.4],
-  zoom = 5,
+  // Cadrage par défaut : la France métropolitaine (zoom 6), plutôt que
+  // l'Europe de l'Ouest entière — le réseau est 100 % français.
+  center = [46.8, 2.4],
+  zoom = 6,
 }: {
   points: MapPoint[];
   center?: [number, number];
