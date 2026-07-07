@@ -3572,6 +3572,14 @@ select:focus-visible,
 }
 .lvc-card:hover .lvc-name { color: var(--turquoise-700); }
 
+/* Note libre sous la case de consentement du formulaire (editable WP) */
+.contact-form-note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
 /* ---------- Galerie photos (fiche data center) ---------- */
 .dc-gallery {
   display: grid;

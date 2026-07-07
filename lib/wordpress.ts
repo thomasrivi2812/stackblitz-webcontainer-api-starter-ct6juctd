@@ -2082,6 +2082,8 @@ export type ContactContent = {
   linkedin: string | null;
   whyTitle: string | null;
   whys: string[]; // arguments de réassurance (vides filtrés)
+  // Petit texte affiché sous la case de consentement du formulaire (RGPD…).
+  formNote: string | null;
 };
 
 export async function getContact(locale: WpLocale = 'fr'): Promise<ContactContent | null> {
@@ -2091,12 +2093,21 @@ export async function getContact(locale: WpLocale = 'fr'): Promise<ContactConten
     adresse: string | null; horaires: string | null; linkedin: string | null;
     whyTitle: string | null; why1: string | null; why2: string | null;
     why3: string | null; why4: string | null;
+    formNote?: string | null;
   };
-  const f = await getPageFields<F>(
-    'contact', 'contactFields',
-    'eyebrow titre intro subsidiary email telephone adresse horaires linkedin whyTitle why1 why2 why3 why4',
-    locale,
-  );
+  // Requête complète, puis repli SANS formNote si le champ n'existe pas
+  // encore côté WP (le reste de la page contact reste éditable).
+  const f =
+    (await getPageFields<F>(
+      'contact', 'contactFields',
+      'eyebrow titre intro subsidiary email telephone adresse horaires linkedin whyTitle why1 why2 why3 why4 formNote',
+      locale,
+    )) ??
+    (await getPageFields<F>(
+      'contact', 'contactFields',
+      'eyebrow titre intro subsidiary email telephone adresse horaires linkedin whyTitle why1 why2 why3 why4',
+      locale,
+    ));
   if (!f) return null;
   return {
     eyebrow: f.eyebrow || null,
@@ -2110,6 +2121,7 @@ export async function getContact(locale: WpLocale = 'fr'): Promise<ContactConten
     linkedin: f.linkedin || null,
     whyTitle: f.whyTitle || null,
     whys: [f.why1, f.why2, f.why3, f.why4].filter((w): w is string => !!w && w.trim() !== ''),
+    formNote: f.formNote || null,
   };
 }
 

@@ -100,7 +100,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
           <div className="contact-layout">
             {/* Formulaire */}
             <div className="contact-form-wrap">
-              <ContactForm />
+              <ContactForm formNote={c?.formNote || null} />
             </div>
 
             {/* Sidebar informations */}
