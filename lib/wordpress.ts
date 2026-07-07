@@ -2086,6 +2086,27 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
   return fallback();
 }
 
+// --- Page Documentation : en-tête éditable -----------------------------------
+// Page WP « documentation », groupe « documentationFields » (sur-titre, titre,
+// intro). Chaque champ vide retombe sur le texte par défaut du site.
+export type DocumentationHead = {
+  eyebrow: string | null;
+  titre: string | null;
+  intro: string | null;
+};
+
+export async function getDocumentationHead(locale: WpLocale = 'fr'): Promise<DocumentationHead | null> {
+  type F = { eyebrow: string | null; titre: string | null; intro: string | null };
+  // Variantes de slug (historique de slugs dupliqués sur ce WP).
+  for (const slug of ['documentation', 'documentation-2']) {
+    const f = await getPageFields<F>(slug, 'documentationFields', 'eyebrow titre intro', locale);
+    if (f) {
+      return { eyebrow: f.eyebrow || null, titre: f.titre || null, intro: f.intro || null };
+    }
+  }
+  return null;
+}
+
 // --- Page Contact ------------------------------------------------------------
 // Tout le contenu éditorial de la page contact (en-tête, coordonnées,
 // arguments de réassurance) est éditable dans WP : page « contact »,

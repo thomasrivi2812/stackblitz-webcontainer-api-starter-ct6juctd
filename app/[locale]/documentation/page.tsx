@@ -1,4 +1,4 @@
-import { getLivrets, type WpLocale } from '@/lib/wordpress';
+import { getLivrets, getDocumentationHead, type WpLocale } from '@/lib/wordpress';
 import { LivretCard } from '@/components/LivretCard';
 import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
@@ -22,7 +22,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 // description + téléchargement contre e-mail (lead « download »).
 export default async function DocumentationPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.documentation as Record<string, string>;
-  const livrets = await getLivrets(locale);
+  // En-tête éditable dans WP (page « documentation ») ; les livrets et
+  // l'en-tête sont récupérés en parallèle. Champ vide = texte par défaut.
+  const [livrets, head] = await Promise.all([getLivrets(locale), getDocumentationHead(locale)]);
 
   // Deux documents paysage consécutifs (ordre WP) sont empilés dans la même
   // colonne : deux couvertures 16:9 ≈ la hauteur d'un livret portrait.
@@ -40,9 +42,9 @@ export default async function DocumentationPage({ params: { locale } }: { params
     <main>
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
-          <span className="eyebrow">{t.eyebrow}</span>
-          <h1 className="fil-rouge">{t.h1}</h1>
-          <p>{t.intro}</p>
+          <span className="eyebrow">{head?.eyebrow || t.eyebrow}</span>
+          <h1 className="fil-rouge">{head?.titre || t.h1}</h1>
+          <p>{head?.intro || t.intro}</p>
         </div>
       </section>
 
