@@ -3695,6 +3695,22 @@ select:focus-visible,
 .nav-dd-services .nav-dd-grid { gap: 4px 10px; }
 .nav-dd-services .nav-dd-item { padding: 10px 12px; }
 
+/* Portail client dans le menu Ressources : bouton bordé, détaché des liens */
+.nav-dd-portal {
+  margin-top: 10px;
+  border: 1.5px solid var(--turquoise-700);
+  border-radius: 8px;
+  color: var(--turquoise-700);
+  font-weight: 600;
+  justify-content: center;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.nav-dd-portal:hover {
+  background: var(--turquoise-700);
+  color: #fff;
+}
+.nav-dd-portal svg { flex-shrink: 0; }
+
 /* Dropdown scindé : colonne de liens + carte promo image (façon mega-menu) */
 .nav-dd-split {
   min-width: 520px;
