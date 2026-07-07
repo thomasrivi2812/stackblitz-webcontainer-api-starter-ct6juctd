@@ -36,7 +36,7 @@ const OBJETS: { value: string; labelKey: string }[] = [
   { value: 'Autre', labelKey: 'objAutre' },
 ];
 
-export function ContactForm() {
+export function ContactForm({ formNote = null }: { formNote?: string | null }) {
   const t = useTranslations('contactForm');
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -226,11 +226,14 @@ export function ContactForm() {
         />
         <span>
           {t('consent1')}{' '}
-          <a href="/politique-de-confidentialite">{t('consentLink')}</a>.
+          <a href="/politique-de-protection-des-donnees-personnelles">{t('consentLink')}</a>.
           <span className="contact-req"> *</span>
         </span>
       </label>
       {errors.consent && <span className="contact-error">{errors.consent}</span>}
+
+      {/* Petit texte editable dans WP (page contact → onglet Formulaire) */}
+      {formNote && <p className="contact-form-note">{formNote}</p>}
 
       {/* Erreur globale */}
       {status === 'error' && (
