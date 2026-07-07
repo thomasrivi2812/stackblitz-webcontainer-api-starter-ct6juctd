@@ -6,7 +6,7 @@
     "offresAll": "All our offerings",
     "certifications": "Certifications",
     "services": "Our services",
-    "equipes": "Our teams",
+    "equipes": "Our team",
     "groupe": "The group",
     "actualites": "News",
     "contact": "Contact",
@@ -17,7 +17,9 @@
     "documentation": "Documentation",
     "servicesAll": "All our services",
     "engagementsPromo": "Discover our commitments?",
-    "engagementsPromoEyebrow": "Sustainability"
+    "engagementsPromoEyebrow": "Sustainability",
+    "equipePromo": "Meet our team",
+    "equipePromoEyebrow": "Our experts"
   },
   "footer": {
     "tagline": "Sovereign, responsible and local hosting, across the whole of France.",
@@ -44,8 +46,7 @@
     "fr": "FR",
     "en": "EN",
     "frFull": "Français",
-    "enFull": "English",
-    "loading": "Loading…"
+    "enFull": "English"
   },
   "home": {
     "heroEyebrow": "Sovereign · Responsible · Local",
@@ -224,7 +225,7 @@
   },
   "team": {
     "eyebrow": "The people of NDC",
-    "h1": "Our teams",
+    "h1": "Our team",
     "intro": "A multidisciplinary team — engineering, operations, security and support — serving your critical infrastructure.",
     "linkedinAria": "LinkedIn of {name}",
     "poleFallback": "Team",
@@ -395,7 +396,7 @@
     "offresDesc": "Colocation offerings tailored to each profile: CIOs, SMEs, public sector, telecom and cloud operators.",
     "certifsTitle": "Our certifications",
     "certifsDesc": "Nation Data Center's certifications: ISO 27001, HDS, SecNumCloud, ISO 50001, Tier III… Demanding standards for sovereign, eco-responsible hosting.",
-    "equipesTitle": "Our teams",
+    "equipesTitle": "Our team",
     "equipesDesc": "Meet Nation Data Center's teams: management, engineering, operations and support. The people building a network of sovereign data centers.",
     "groupeTitle": "The Altarea group",
     "groupeDesc": "Nation Data Center is a wholly-owned subsidiary of Groupe Altarea, France's leader in low-carbon urban transformation. Discover how NDC fits within its group.",
@@ -440,24 +441,5 @@
     "doneText": "The download has started. If not,",
     "doneLink": "click here",
     "close": "Close"
-  },
-  "chatbot": {
-    "title": "NDC Assistant",
-    "subtitle": "Instant answers — or our team will get back to you",
-    "openLabel": "Open the assistant",
-    "close": "Close the assistant",
-    "hello": "Hello 👋 I can answer your questions about Nation Data Center. Pick a topic or type your question.",
-    "chipOther": "Something else",
-    "anythingElse": "Can I help you with anything else?",
-    "noAnswer": "I don't have the exact answer to that one. Leave us your business email and our team will get back to you shortly.",
-    "emailPlaceholder": "firstname.lastname@company.com",
-    "consent": "I agree to be contacted by Nation Data Center about my request.",
-    "errEmail": "Please enter a valid email address.",
-    "errConsent": "Please tick the consent box.",
-    "emailSubmit": "Get a call back",
-    "emailDone": "Thank you! Your request has been sent — our team will get back to you very soon. ✅",
-    "inputPlaceholder": "Type your question…",
-    "inputDisabled": "Enter your email above",
-    "send": "Send"
   }
 }

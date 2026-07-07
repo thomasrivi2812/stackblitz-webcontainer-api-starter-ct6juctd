@@ -3690,8 +3690,9 @@ select:focus-visible,
   transform: translateY(8px);
 }
 .nav-dd.wide { min-width: 380px; }
-/* Menu services : deux colonnes larges + items plus respirants */
-.nav-dd-services { min-width: 480px; padding: 10px; }
+/* Menu services : deux colonnes larges + carte « Découvrir notre équipe ».
+   Décalé vers la gauche pour ne pas déborder de l'écran à 1200px. */
+.nav-dd-services { min-width: 700px; padding: 10px; left: -140px; }
 .nav-dd-services .nav-dd-grid { gap: 4px 10px; }
 .nav-dd-services .nav-dd-item { padding: 10px 12px; }
 
@@ -3720,8 +3721,8 @@ select:focus-visible,
 }
 .nav-dd-split.open { display: grid; }
 .nav-dd-col { display: flex; flex-direction: column; }
-/* Carte promo : photo du site, voile léger seulement en bas (lisibilité du
-   texte) — la photo reste claire et visible. */
+/* Carte promo : photo (fournie en style inline — éditable WP), voile léger
+   seulement en bas (lisibilité du texte) — la photo reste claire et visible. */
 .nav-dd-promo {
   position: relative;
   display: flex;
@@ -3729,7 +3730,10 @@ select:focus-visible,
   min-height: 190px;
   border-radius: 10px;
   overflow: hidden;
-  background: url('/datacenters/velizy.png') center / cover no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--marine);
   isolation: isolate;
 }
 .nav-dd-promo::before {

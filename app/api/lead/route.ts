@@ -127,6 +127,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  // 3bis) Captcha Google reCAPTCHA v3 — actif seulement si la clé secrète
+  //       est configurée (RECAPTCHA_SECRET_KEY). Le front joint le jeton via
+  //       sendLead ; sans clé, on garde les défenses existantes uniquement.
+  //       Seuil de score ajustable via RECAPTCHA_MIN_SCORE (défaut 0.5 —
+  //       0 = robot certain, 1 = humain certain).
+  const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+  if (recaptchaSecret) {
+    const token = typeof body.captcha === 'string' ? body.captcha : '';
+    if (!token) {
+      return NextResponse.json(
+        { ok: false, error: 'Vérification anti-robot requise. Merci de réessayer.' },
+        { status: 403 },
+      );
+    }
+    try {
+      const verif = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ secret: recaptchaSecret, response: token, remoteip: ip }),
+        cache: 'no-store',
+      });
+      const outcome = (await verif.json()) as { success?: boolean; score?: number; action?: string };
+      const minScore = Number(process.env.RECAPTCHA_MIN_SCORE || '0.5');
+      const scoreOk = typeof outcome.score !== 'number' || outcome.score >= minScore;
+      if (!outcome.success || !scoreOk) {
+        return NextResponse.json(
+          { ok: false, error: 'Vérification anti-robot échouée. Merci de réessayer.' },
+          { status: 403 },
+        );
+      }
+    } catch (err) {
+      console.error('[NDC] Erreur de vérification reCAPTCHA :', err);
+      return NextResponse.json(
+        { ok: false, error: 'Vérification anti-robot indisponible. Merci de réessayer.' },
+        { status: 503 },
+      );
+    }
+  }
+
   const type = String(body.type ?? '') as LeadType;
   if (!VALID_TYPES.includes(type)) {
     return NextResponse.json({ ok: false, error: 'Type de demande inconnu.' }, { status: 400 });

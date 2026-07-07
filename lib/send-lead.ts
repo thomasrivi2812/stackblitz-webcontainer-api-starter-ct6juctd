@@ -1,5 +1,8 @@
 // Helper client partagé par tous les formulaires/modales du site.
 // Envoie la capture vers /api/lead (qui relaie ensuite vers WordPress).
+// Le jeton captcha (Turnstile) est obtenu ici, en un seul point, pour tous
+// les formulaires — null si le captcha n'est pas configuré.
+import { getCaptchaToken } from './captcha-client';
 
 export type LeadType = 'contact' | 'question' | 'brochure' | 'download';
 
@@ -19,11 +22,13 @@ export type LeadPayload = {
 
 export async function sendLead(payload: LeadPayload): Promise<boolean> {
   try {
+    const captcha = await getCaptchaToken();
     const res = await fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...payload,
+        ...(captcha ? { captcha } : {}),
         source_url: typeof window !== 'undefined' ? window.location.href : '',
       }),
     });

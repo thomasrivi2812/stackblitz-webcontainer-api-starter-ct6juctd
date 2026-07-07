@@ -34,13 +34,14 @@ const securityHeaders = [
       "default-src 'self'",
       // 'unsafe-inline' requis par le runtime Next.js (App Router) et les
       // <style>/styles inline des composants ; 'unsafe-eval' seulement en dev.
-      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
+      // google.com/gstatic.com = reCAPTCHA v3 (chargé à l'envoi des formulaires).
+      `script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS}`,
+      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://www.gstatic.com`,
       "font-src 'self' data:",
-      `connect-src 'self' https://${WP_HOST}`,
-      // Intégrations vidéo autorisées (YouTube/Vimeo) ; le reste est bloqué.
-      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+      `connect-src 'self' https://${WP_HOST} https://www.google.com`,
+      // Intégrations vidéo (YouTube/Vimeo) + iframe reCAPTCHA ; le reste est bloqué.
+      "frame-src 'self' https://www.google.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

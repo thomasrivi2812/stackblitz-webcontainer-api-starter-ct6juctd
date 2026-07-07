@@ -586,9 +586,10 @@ export const samplePages: Record<string, CustomPage> = {
 <h2>Qu'est-ce qu'un cookie&nbsp;?</h2>
 <p>Un cookie est un petit fichier déposé sur votre appareil lors de la consultation d'un site, permettant notamment de mémoriser des préférences de navigation.</p>
 <h2>Cookies utilisés sur ce site</h2>
-<p>Ce site n'utilise <strong>aucun cookie publicitaire ni traceur tiers</strong>. Seul un cookie technique est déposé&nbsp;:</p>
+<p>Ce site n'utilise <strong>aucun cookie publicitaire</strong>. Les seuls cookies déposés sont&nbsp;:</p>
 <ul>
 <li><strong>NEXT_LOCALE</strong> — mémorise votre préférence de langue (français / anglais). Durée : 12 mois. Ce cookie strictement nécessaire est exempté de consentement.</li>
+<li><strong>_GRECAPTCHA</strong> (google.com) — déposé par le dispositif anti-robots Google reCAPTCHA, chargé uniquement lors de l'envoi d'un formulaire (contact, question, téléchargement) pour protéger le site contre le spam. Durée : 6 mois.</li>
 </ul>
 <p>[Si des outils de mesure d'audience ou d'autres services tiers sont ajoutés ultérieurement, compléter cette liste dans WordPress.]</p>
 <h2>Gérer les cookies</h2>

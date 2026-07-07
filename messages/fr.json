@@ -6,7 +6,7 @@
     "offresAll": "Toutes nos offres",
     "certifications": "Certifications",
     "services": "Nos services",
-    "equipes": "Nos équipes",
+    "equipes": "Notre équipe",
     "groupe": "Le groupe",
     "actualites": "Actualités",
     "contact": "Contact",
@@ -17,7 +17,9 @@
     "documentation": "Documentation",
     "servicesAll": "Tous nos services",
     "engagementsPromo": "Découvrir nos engagements ?",
-    "engagementsPromoEyebrow": "Éco-responsabilité"
+    "engagementsPromoEyebrow": "Éco-responsabilité",
+    "equipePromo": "Découvrir notre équipe",
+    "equipePromoEyebrow": "Nos experts"
   },
   "footer": {
     "tagline": "Hébergement souverain, responsable et de proximité, sur l’ensemble du territoire français.",
@@ -44,8 +46,7 @@
     "fr": "FR",
     "en": "EN",
     "frFull": "Français",
-    "enFull": "English",
-    "loading": "Chargement…"
+    "enFull": "English"
   },
   "home": {
     "heroEyebrow": "Souverain · Responsable · De proximité",
@@ -224,7 +225,7 @@
   },
   "team": {
     "eyebrow": "Les femmes & les hommes de NDC",
-    "h1": "Nos équipes",
+    "h1": "Notre équipe",
     "intro": "Une équipe pluridisciplinaire — ingénierie, exploitation, sécurité et accompagnement — au service de vos infrastructures critiques.",
     "linkedinAria": "LinkedIn de {name}",
     "poleFallback": "Équipe",
@@ -395,7 +396,7 @@
     "offresDesc": "Des offres de colocation adaptées à chaque profil : DSI, PME/ETI, secteur public, opérateurs télécom et cloud.",
     "certifsTitle": "Nos certifications",
     "certifsDesc": "Les certifications de Nation Data Center : ISO 27001, HDS, SecNumCloud, ISO 50001, Tier III… au service d'un hébergement souverain et écoresponsable.",
-    "equipesTitle": "Nos équipes",
+    "equipesTitle": "Notre équipe",
     "equipesDesc": "Rencontrez les équipes de Nation Data Center : direction, ingénierie, exploitation et accompagnement, au service d'un réseau de data centers souverains.",
     "groupeTitle": "Le groupe Altarea",
     "groupeDesc": "Nation Data Center est une filiale à 100 % du Groupe Altarea, leader français de la transformation urbaine bas carbone. Découvrez l'articulation entre NDC et son groupe.",
@@ -440,24 +441,5 @@
     "doneText": "Le téléchargement a démarré. Sinon,",
     "doneLink": "cliquez ici",
     "close": "Fermer"
-  },
-  "chatbot": {
-    "title": "Assistant NDC",
-    "subtitle": "Réponse immédiate — ou notre équipe vous recontacte",
-    "openLabel": "Ouvrir l'assistant",
-    "close": "Fermer l'assistant",
-    "hello": "Bonjour 👋 Je peux répondre à vos questions sur Nation Data Center. Choisissez un sujet ou écrivez votre question.",
-    "chipOther": "Autre demande",
-    "anythingElse": "Puis-je vous aider sur autre chose ?",
-    "noAnswer": "Je n'ai pas la réponse exacte à cette question. Laissez-nous votre e-mail professionnel : notre équipe vous recontacte rapidement.",
-    "emailPlaceholder": "prenom.nom@entreprise.fr",
-    "consent": "J'accepte d'être recontacté par Nation Data Center au sujet de ma demande.",
-    "errEmail": "Merci de saisir une adresse e-mail valide.",
-    "errConsent": "Merci de cocher la case de consentement.",
-    "emailSubmit": "Être recontacté",
-    "emailDone": "Merci ! Votre demande est bien transmise — notre équipe revient vers vous très vite. ✅",
-    "inputPlaceholder": "Écrivez votre question…",
-    "inputDisabled": "Renseignez votre e-mail ci-dessus",
-    "send": "Envoyer"
   }
 }

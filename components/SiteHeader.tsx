@@ -15,6 +15,8 @@ type Props = {
   services?: Service[];
   /** Logo du site défini dans WP (sinon marque N|D|C dessinée). */
   logoUrl?: string | null;
+  /** Image de la carte « Découvrir notre équipe » (WP, sinon défaut). */
+  equipeImageUrl?: string | null;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -45,7 +47,7 @@ function LockIcon() {
   );
 }
 
-export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null }: Props) {
+export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
@@ -142,7 +144,11 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                     </Link>
                   ))}
                 </div>
-                <Link href="/#engagements" className="nav-dd-promo">
+                <Link
+                  href="/#engagements"
+                  className="nav-dd-promo"
+                  style={{ backgroundImage: "url('/datacenters/velizy.png')" }}
+                >
                   <span className="nav-dd-promo-body">
                     <span className="nav-dd-promo-eyebrow">{t('engagementsPromoEyebrow')}</span>
                     <span className="nav-dd-promo-text">
@@ -167,18 +173,34 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
               <Chevron className="nav-chev" />
             </Link>
             {servicesChildren.length > 0 && (
-              <div className={`nav-dd wide nav-dd-services${desktopOpen === 'services' ? ' open' : ''}`}>
-                <Link href="/services" className="nav-dd-all">
-                  {t('servicesAll')}
-                  <span aria-hidden="true">→</span>
-                </Link>
-                <div className="nav-dd-grid">
-                  {servicesChildren.map((c) => (
-                    <Link key={c.href} href={c.href} className="nav-dd-item">
-                      <span className="nav-dd-name">{c.label}</span>
-                    </Link>
-                  ))}
+              <div className={`nav-dd nav-dd-split nav-dd-services${desktopOpen === 'services' ? ' open' : ''}`}>
+                <div className="nav-dd-col">
+                  <Link href="/services" className="nav-dd-all">
+                    {t('servicesAll')}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                  <div className="nav-dd-grid">
+                    {servicesChildren.map((c) => (
+                      <Link key={c.href} href={c.href} className="nav-dd-item">
+                        <span className="nav-dd-name">{c.label}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
+                <Link
+                  href="/equipes"
+                  className="nav-dd-promo"
+                  style={{ backgroundImage: `url('${equipeImageUrl || '/datacenters/rennes-1.png'}')` }}
+                >
+                  <span className="nav-dd-promo-body">
+                    <span className="nav-dd-promo-eyebrow">{t('equipePromoEyebrow')}</span>
+                    <span className="nav-dd-promo-text">
+                      {t('equipePromo')}
+                      {'\u00A0'}
+                      <span className="nav-dd-promo-arrow" aria-hidden="true">→</span>
+                    </span>
+                  </span>
+                </Link>
               </div>
             )}
           </div>
@@ -325,6 +347,9 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                   {c.label}
                 </Link>
               ))}
+              <Link href="/equipes" onClick={close}>
+                {t('equipePromo')}
+              </Link>
             </div>
           </div>
 
