@@ -1924,26 +1924,46 @@ export type EquipesHead = {
   polesOrdre: string[];
 };
 
+// Slugs possibles de la page « équipe » : WP suffixe les slugs dupliqués
+// (« equipes-2 »…) quand une page du même nom a existé — on les tente tous.
+const EQUIPES_SLUGS = ['equipes', 'equipes-2', 'nos-equipes', 'notre-equipe'];
+
 export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHead | null> {
   type F = {
     eyebrow: string | null;
     titre: string | null;
     intro: string | null;
-    polesOrdre?: ({ pole: string | null } | null)[] | null;
+    polesOrdre?: ({ pole: string | string[] | { value?: string } | null } | null)[] | null;
   };
-  // 1) Requête complète. 2) Si elle échoue (champ polesOrdre pas encore créé
-  //    côté WP → erreur de schéma GraphQL), on retente SANS lui : l'en-tête
-  //    (titre/intro) reste éditable même si WP n'est pas à jour.
-  const f =
-    (await getPageFields<F>(
-      'equipes', 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
-    )) ??
-    (await getPageFields<F>('equipes', 'equipesFields', 'eyebrow titre intro', locale));
+  // 1) Requête complète sur chaque variante de slug. 2) Si tout échoue
+  //    (champ polesOrdre pas encore créé côté WP → erreur de schéma), on
+  //    retente SANS lui : l'en-tête reste éditable même si WP n'est pas à jour.
+  let f: F | null = null;
+  for (const slug of EQUIPES_SLUGS) {
+    f = await getPageFields<F>(
+      slug, 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
+    );
+    if (f) break;
+  }
+  if (!f) {
+    for (const slug of EQUIPES_SLUGS) {
+      f = await getPageFields<F>(slug, 'equipesFields', 'eyebrow titre intro', locale);
+      if (f) break;
+    }
+  }
   if (!f) return null;
+  // Normalisation : la valeur du select peut arriver en chaîne, tableau ou
+  // objet {value} selon le réglage du champ — on ramène tout à une chaîne.
+  const poleValue = (v: unknown): string => {
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v)) return poleValue(v[0]);
+    if (v && typeof v === 'object' && 'value' in v) return String((v as { value?: unknown }).value ?? '');
+    return '';
+  };
   // Nettoyage : lignes vides filtrées, doublons retirés (le premier gagne).
   const seen = new Set<string>();
   const polesOrdre = (f.polesOrdre ?? [])
-    .map((r) => r?.pole ?? '')
+    .map((r) => poleValue(r?.pole))
     .filter((p) => p && !seen.has(p) && (seen.add(p), true));
   return {
     eyebrow: f.eyebrow || null,

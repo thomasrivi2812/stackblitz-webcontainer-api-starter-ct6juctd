@@ -395,6 +395,9 @@ a { color: inherit; text-decoration: none; }
   .hero-grid { grid-template-columns: 1fr; }
   .hero .motif { max-width: 360px; margin-top: 10px; }
   .piliers-grid { grid-template-columns: 1fr; }
+}
+/* Le header desktop manque de place sous ~980px : bascule burger plus tôt. */
+@media (max-width: 980px) {
   .nav { display: none; }
   .nav-burger { display: flex; }
 }
@@ -1903,7 +1906,7 @@ select:focus-visible,
 }
 
 /* La barre mobile n'apparaît que sous le breakpoint ; au-dessus elle reste masquée */
-@media (min-width: 901px) {
+@media (min-width: 981px) {
   .mobile-nav, .mobile-nav-overlay, .nav-burger { display: none !important; }
 }
 
@@ -3131,10 +3134,10 @@ select:focus-visible,
 .burger.open span:nth-child(2) { opacity: 0; }
 .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .burger { display: flex; }
 }
-@media (min-width: 901px) {
+@media (min-width: 981px) {
   .burger { display: none !important; }
 }
 
@@ -3691,8 +3694,19 @@ select:focus-visible,
 }
 .nav-dd.wide { min-width: 380px; }
 /* Menu services : deux colonnes larges + carte « Découvrir notre équipe »
-   allongée. Décalé vers la gauche pour ne pas déborder de l'écran à 1200px. */
-.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: -280px; }
+   allongée. Calé sur le bord gauche du bouton ; la largeur se réduit avec
+   l'écran pour ne jamais déborder à droite. */
+.nav-dd-split.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: 0; }
+@media (max-width: 1439px) {
+  .nav-dd-split.nav-dd-services { min-width: 720px; grid-template-columns: 1fr 290px; }
+}
+@media (max-width: 1199px) {
+  .nav-dd-split.nav-dd-services { min-width: 600px; grid-template-columns: 1fr 240px; }
+}
+@media (max-width: 1049px) {
+  .nav-dd-split.nav-dd-services { min-width: 390px; grid-template-columns: 1fr; }
+  .nav-dd-services .nav-dd-promo { min-height: 120px; }
+}
 .nav-dd-services .nav-dd-grid { gap: 4px 10px; }
 .nav-dd-services .nav-dd-item { padding: 10px 12px; }
 
