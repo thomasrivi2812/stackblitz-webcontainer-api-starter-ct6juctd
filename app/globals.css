@@ -3690,9 +3690,9 @@ select:focus-visible,
   transform: translateY(8px);
 }
 .nav-dd.wide { min-width: 380px; }
-/* Menu services : deux colonnes larges + carte « Découvrir notre équipe ».
-   Décalé vers la gauche pour ne pas déborder de l'écran à 1200px. */
-.nav-dd-services { min-width: 700px; padding: 10px; left: -140px; }
+/* Menu services : deux colonnes larges + carte « Découvrir notre équipe »
+   allongée. Décalé vers la gauche pour ne pas déborder de l'écran à 1200px. */
+.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: -280px; }
 .nav-dd-services .nav-dd-grid { gap: 4px 10px; }
 .nav-dd-services .nav-dd-item { padding: 10px 12px; }
 
@@ -3714,9 +3714,9 @@ select:focus-visible,
 
 /* Dropdown scindé : colonne de liens + carte promo image (façon mega-menu) */
 .nav-dd-split {
-  min-width: 520px;
+  min-width: 590px;
   display: grid;
-  grid-template-columns: 1fr 230px;
+  grid-template-columns: 1fr 280px;
   gap: 10px;
 }
 .nav-dd-split.open { display: grid; }

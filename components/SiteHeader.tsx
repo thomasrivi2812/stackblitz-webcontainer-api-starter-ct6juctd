@@ -17,6 +17,8 @@ type Props = {
   logoUrl?: string | null;
   /** Image de la carte « Découvrir notre équipe » (WP, sinon défaut). */
   equipeImageUrl?: string | null;
+  /** Image de la carte « Découvrir nos engagements » (WP, sinon défaut). */
+  offresImageUrl?: string | null;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -47,7 +49,7 @@ function LockIcon() {
   );
 }
 
-export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null }: Props) {
+export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null, offresImageUrl = null }: Props) {
   const t = useTranslations('nav');
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop survolé
@@ -147,7 +149,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                 <Link
                   href="/#engagements"
                   className="nav-dd-promo"
-                  style={{ backgroundImage: "url('/datacenters/velizy.png')" }}
+                  style={{ backgroundImage: `url('${offresImageUrl || '/datacenters/velizy.png'}')` }}
                 >
                   <span className="nav-dd-promo-body">
                     <span className="nav-dd-promo-eyebrow">{t('engagementsPromoEyebrow')}</span>

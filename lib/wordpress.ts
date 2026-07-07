@@ -1635,9 +1635,10 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
 export type SiteBranding = {
   logo: string | null;
   logoWhite: string | null;
-  // Image de la carte « Découvrir notre équipe » du menu Nos services
-  // (éditable dans WP, onglet Marque de l'accueil). Null = image par défaut.
-  equipeImage: string | null;
+  // Images des cartes promo des menus déroulants (éditables dans WP,
+  // onglet Marque de l'accueil). Null = image par défaut du site.
+  equipeImage: string | null;   // carte « Découvrir notre équipe » (Nos services)
+  offresImage: string | null;   // carte « Découvrir nos engagements » (Nos offres)
 };
 
 const SITE_BRANDING_QUERY = gql`
@@ -1648,6 +1649,7 @@ const SITE_BRANDING_QUERY = gql`
           siteLogo { node { sourceUrl } }
           siteLogoWhite { node { sourceUrl } }
           headerEquipeImage { node { sourceUrl } }
+          headerOffresImage { node { sourceUrl } }
         }
       }
     }
@@ -1671,12 +1673,13 @@ const SITE_BRANDING_QUERY_LEGACY = gql`
 `;
 
 async function _getSiteBranding(): Promise<SiteBranding> {
-  const empty: SiteBranding = { logo: null, logoWhite: null, equipeImage: null };
+  const empty: SiteBranding = { logo: null, logoWhite: null, equipeImage: null, offresImage: null };
   if (!endpoint) return empty;
   type F = {
     siteLogo: { node: { sourceUrl: string | null } | null } | null;
     siteLogoWhite: { node: { sourceUrl: string | null } | null } | null;
     headerEquipeImage?: { node: { sourceUrl: string | null } | null } | null;
+    headerOffresImage?: { node: { sourceUrl: string | null } | null } | null;
   };
   const client = new GraphQLClient(endpoint);
   const run = async (query: string) => {
@@ -1696,6 +1699,7 @@ async function _getSiteBranding(): Promise<SiteBranding> {
       logo: f?.siteLogo?.node?.sourceUrl || null,
       logoWhite: f?.siteLogoWhite?.node?.sourceUrl || null,
       equipeImage: f?.headerEquipeImage?.node?.sourceUrl || null,
+      offresImage: f?.headerOffresImage?.node?.sourceUrl || null,
     };
   } catch (error) {
     logWpError('branding (logo du site)', error);

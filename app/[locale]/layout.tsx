@@ -117,6 +117,7 @@ export default async function LocaleLayout({
             services={services}
             logoUrl={branding.logo}
             equipeImageUrl={branding.equipeImage}
+            offresImageUrl={branding.offresImage}
           />
 
           {children}
