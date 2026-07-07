@@ -64,8 +64,11 @@ export function LivretCard({ livret }: { livret: Livret }) {
     setDone(true);
   }
 
+  // Format choisi dans WP : paysage = couverture 16:9 (slides), carte élargie.
+  const paysage = livret.format === 'paysage';
+
   const cover = (
-    <span className="lvc-cover">
+    <span className={`lvc-cover${paysage ? ' lvc-cover--paysage' : ''}`}>
       {livret.cover?.sourceUrl ? (
         <img src={livret.cover.sourceUrl} alt={livret.cover.altText || livret.titre} loading="lazy" />
       ) : (
@@ -79,7 +82,7 @@ export function LivretCard({ livret }: { livret: Livret }) {
 
   return (
     <>
-      <button type="button" className="lvc-card" onClick={() => setOpen(true)}>
+      <button type="button" className={`lvc-card${paysage ? ' lvc-card--paysage' : ''}`} onClick={() => setOpen(true)}>
         {cover}
         <span className="lvc-name">{livret.titre}</span>
       </button>
@@ -91,7 +94,7 @@ export function LivretCard({ livret }: { livret: Livret }) {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
             </button>
 
-            <div className="lvc-modal-grid">
+            <div className={`lvc-modal-grid${paysage ? ' lvc-modal-grid--paysage' : ''}`}>
               <div className="lvc-modal-cover">{cover}</div>
 
               <div className="lvc-modal-body">
@@ -154,8 +157,9 @@ export function LivretCard({ livret }: { livret: Livret }) {
             .lvc-close{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:34px;height:34px;border:none;border-radius:8px;background:transparent;color:var(--muted,#5d6b85);cursor:pointer;transition:background .15s ease,color .15s ease;z-index:1}
             .lvc-close:hover{background:var(--surface-alt,#f1f5fa);color:var(--ink,#1b3360)}
             .lvc-modal-grid{display:grid;grid-template-columns:170px 1fr;gap:26px;align-items:start}
+            .lvc-modal-grid--paysage{grid-template-columns:250px 1fr}
             .lvc-modal-cover .lvc-cover{box-shadow:0 18px 40px -18px rgba(20,40,73,.45)}
-            @media (max-width:600px){.lvc-modal-grid{grid-template-columns:1fr}.lvc-modal-cover{max-width:170px;margin:0 auto}}
+            @media (max-width:600px){.lvc-modal-grid,.lvc-modal-grid--paysage{grid-template-columns:1fr}.lvc-modal-cover{max-width:170px;margin:0 auto}.lvc-modal-grid--paysage .lvc-modal-cover{max-width:250px}}
 
             .lvc-eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--turquoise-700,#1c8cbd);margin-bottom:12px}
             .lvc-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red,#ff0000);flex-shrink:0}

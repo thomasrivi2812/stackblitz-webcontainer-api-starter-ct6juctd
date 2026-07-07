@@ -24,6 +24,18 @@ export default async function DocumentationPage({ params: { locale } }: { params
   const t = (await import(`../../../messages/${locale}.json`)).default.documentation as Record<string, string>;
   const livrets = await getLivrets(locale);
 
+  // Deux documents paysage consécutifs (ordre WP) sont empilés dans la même
+  // colonne : deux couvertures 16:9 ≈ la hauteur d'un livret portrait.
+  const groups: (typeof livrets)[] = [];
+  for (let i = 0; i < livrets.length; i++) {
+    if (livrets[i].format === 'paysage' && livrets[i + 1]?.format === 'paysage') {
+      groups.push([livrets[i], livrets[i + 1]]);
+      i++;
+    } else {
+      groups.push([livrets[i]]);
+    }
+  }
+
   return (
     <main>
       <section className="section" style={{ paddingBottom: 24 }}>
@@ -38,9 +50,16 @@ export default async function DocumentationPage({ params: { locale } }: { params
         <div className="container">
           {livrets.length > 0 ? (
             <div className="lvc-grid">
-              {livrets.map((l) => (
-                <LivretCard key={l.slug} livret={l} />
-              ))}
+              {groups.map((g) =>
+                g.length === 2 ? (
+                  <div className="lvc-stack" key={g[0].slug}>
+                    <LivretCard livret={g[0]} />
+                    <LivretCard livret={g[1]} />
+                  </div>
+                ) : (
+                  <LivretCard key={g[0].slug} livret={g[0]} />
+                ),
+              )}
             </div>
           ) : (
             <p style={{ color: 'var(--muted)' }}>{t.empty}</p>

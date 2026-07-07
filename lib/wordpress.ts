@@ -1982,24 +1982,31 @@ export type Livret = {
   description: string;
   fichierUrl: string | null;
   cover: { sourceUrl: string; altText: string } | null;
+  // Format de la couverture, choisi dans WP : « portrait » (livret A4)
+  // ou « paysage » (slides / présentation 16:9).
+  format: 'portrait' | 'paysage';
 };
 
-const LIVRETS_SELECTION = `
+// Sélection en deux variantes : avec le champ `format` et sans lui — un champ
+// absent du schéma WP (snippet pas encore mis à jour) ferait échouer toute la
+// requête, on retente donc sans avant d'abandonner.
+const livretsSelection = (withFormat: boolean) => `
       nodes {
         title
         slug
         featuredImage { node { sourceUrl altText } }
         livretFields {
           description
+          ${withFormat ? 'format' : ''}
           fichier { node { mediaItemUrl } }
         }
       }
 `;
 
-const LIVRETS_QUERY = gql`
+const livretsQuery = (withFormat: boolean) => gql`
   query Livrets($language: LanguageCodeFilterEnum) {
     livrets(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
-      ${LIVRETS_SELECTION}
+      ${livretsSelection(withFormat)}
     }
   }
 `;
@@ -2008,10 +2015,10 @@ const LIVRETS_QUERY = gql`
 // « Livrets » (Langues → Réglages), l'argument `language` n'existe pas sur
 // cette connexion et la requête filtrée échoue entièrement. On retombe alors
 // sur cette version pour afficher quand même les livrets.
-const LIVRETS_QUERY_NOLANG = gql`
+const livretsQueryNoLang = (withFormat: boolean) => gql`
   query LivretsAll {
     livrets(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
-      ${LIVRETS_SELECTION}
+      ${livretsSelection(withFormat)}
     }
   }
 `;
@@ -2028,8 +2035,16 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
     featuredImage: { node: { sourceUrl: string; altText: string } | null } | null;
     livretFields: {
       description: string | null;
+      format?: unknown;
       fichier: { node: { mediaItemUrl: string | null } | null } | null;
     } | null;
+  };
+  // Le select ACF peut arriver en chaîne, tableau ou objet {value} selon la
+  // config du champ — tout ce qui contient « pays » vaut paysage.
+  const livretFormat = (v: unknown): Livret['format'] => {
+    const raw = Array.isArray(v) ? v[0] : v;
+    const s = typeof raw === 'string' ? raw : ((raw as { value?: string } | null)?.value ?? '');
+    return s.toLowerCase().includes('pays') ? 'paysage' : 'portrait';
   };
   const map = (nodes: Node[]): Livret[] =>
     nodes.map((n) => ({
@@ -2040,27 +2055,33 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
       cover: n.featuredImage?.node
         ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
         : null,
+      format: livretFormat(n.livretFields?.format),
     }));
 
   const client = new GraphQLClient(endpoint);
-  // 1) Requête filtrée par langue (Polylang actif sur le CPT livret).
-  try {
-    const data = await wpList<{ livrets: { nodes: Node[] } }>(
-      client, LIVRETS_QUERY, locale, (d) => d.livrets.nodes,
-    );
-    const nodes = data.livrets?.nodes ?? [];
-    if (nodes.length) return map(nodes);
-  } catch (error) {
-    logWpError('livrets (filtre langue)', error);
+  // 1) Requête filtrée par langue (Polylang actif sur le CPT livret),
+  //    avec le champ format puis sans lui (WP pas encore à jour).
+  for (const withFormat of [true, false]) {
+    try {
+      const data = await wpList<{ livrets: { nodes: Node[] } }>(
+        client, livretsQuery(withFormat), locale, (d) => d.livrets.nodes,
+      );
+      const nodes = data.livrets?.nodes ?? [];
+      if (nodes.length) return map(nodes);
+    } catch (error) {
+      logWpError('livrets (filtre langue)', error);
+    }
   }
   // 2) Repli sans filtre de langue (CPT non géré par Polylang, ou aucun
-  //    livret dans la langue demandée).
-  try {
-    const data = await client.request<{ livrets: { nodes: Node[] } }>(LIVRETS_QUERY_NOLANG);
-    const nodes = data.livrets?.nodes ?? [];
-    if (nodes.length) return map(nodes);
-  } catch (error) {
-    logWpError('livrets', error);
+  //    livret dans la langue demandée), mêmes deux tentatives.
+  for (const withFormat of [true, false]) {
+    try {
+      const data = await client.request<{ livrets: { nodes: Node[] } }>(livretsQueryNoLang(withFormat));
+      const nodes = data.livrets?.nodes ?? [];
+      if (nodes.length) return map(nodes);
+    } catch (error) {
+      logWpError('livrets', error);
+    }
   }
   return fallback();
 }

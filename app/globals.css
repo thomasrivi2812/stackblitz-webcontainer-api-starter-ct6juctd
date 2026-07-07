@@ -3541,6 +3541,11 @@ select:focus-visible,
   box-shadow: var(--shadow-lg);
 }
 .lvc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Format paysage (slides / présentation, choisi dans WP) : couverture 16:9,
+   même emprise que les autres cartes de la grille */
+.lvc-cover--paysage { aspect-ratio: 16 / 9; }
+/* Deux paysage consécutifs empilés dans la même colonne de la grille */
+.lvc-stack { display: flex; flex-direction: column; gap: 24px; }
 /* Vignette stylisée quand aucune couverture n'est définie dans WP */
 .lvc-cover-ph {
   display: flex;

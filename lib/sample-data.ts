@@ -614,6 +614,7 @@ export const sampleLivrets: Livret[] = [
       "Présentation du réseau NDC : notre vision de l'hébergement souverain, les sites, les offres de colocation et nos engagements écoresponsables.",
     fichierUrl: '/brochure-ndc.pdf',
     cover: null,
+    format: 'portrait',
   },
   {
     titre: 'Fiche réseau — sites & capacités',
@@ -622,5 +623,15 @@ export const sampleLivrets: Livret[] = [
       "L'essentiel du réseau en une fiche : implantations, puissances IT, niveaux de disponibilité et échéances d'ouverture.",
     fichierUrl: '/brochure-ndc.pdf',
     cover: null,
+    format: 'paysage',
+  },
+  {
+    titre: 'Présentation Nation Data Center',
+    slug: 'presentation-ndc',
+    description:
+      'Le support de présentation du réseau NDC : chiffres clés, offres et feuille de route, au format slides.',
+    fichierUrl: '/brochure-ndc.pdf',
+    cover: null,
+    format: 'paysage',
   },
 ];
