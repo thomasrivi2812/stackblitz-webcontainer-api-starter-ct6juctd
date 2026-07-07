@@ -5,8 +5,9 @@ import { NextIntlClientProvider } from 'next-intl';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { ChatBot } from '@/components/ChatBot';
 import { JsonLd } from '@/components/JsonLd';
-import { getPersonas, getDatacenters, getServices, getSiteBranding } from '@/lib/wordpress';
+import { getPersonas, getDatacenters, getServices, getSiteBranding, getFaqs } from '@/lib/wordpress';
 import { SITE_URL } from '@/lib/seo';
 import { routing, type Locale } from '@/i18n/routing';
 import '../globals.css';
@@ -83,7 +84,7 @@ export default async function LocaleLayout({
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,
   // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
-  const [personas, datacenters, services, branding] = await Promise.all([
+  const [personas, datacenters, services, branding, faqs] = await Promise.all([
     getPersonas(locale as Locale),
     getDatacenters(locale as Locale),
     // Liste des services pour le menu déroulant « Nos services » (ancres).
@@ -91,6 +92,8 @@ export default async function LocaleLayout({
     // Logo du site (header + footer), éditable dans WP. Repli sur la marque
     // N|D|C dessinée si aucun logo n'est défini.
     getSiteBranding(),
+    // FAQ du site : alimente l'assistant (bulle en bas à droite).
+    getFaqs(locale as Locale),
   ]);
 
   return (
@@ -116,6 +119,9 @@ export default async function LocaleLayout({
           {children}
 
           <SiteFooter locale={locale as Locale} logoUrl={branding.logoWhite || branding.logo} />
+
+          {/* Assistant du site : bulle en bas à droite (FAQ + capture e-mail). */}
+          <ChatBot faqs={faqs} />
         </NextIntlClientProvider>
       </body>
     </html>

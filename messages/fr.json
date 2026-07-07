@@ -439,5 +439,24 @@
     "doneText": "Le téléchargement a démarré. Sinon,",
     "doneLink": "cliquez ici",
     "close": "Fermer"
+  },
+  "chatbot": {
+    "title": "Assistant NDC",
+    "subtitle": "Réponse immédiate — ou notre équipe vous recontacte",
+    "openLabel": "Ouvrir l'assistant",
+    "close": "Fermer l'assistant",
+    "hello": "Bonjour 👋 Je peux répondre à vos questions sur Nation Data Center. Choisissez un sujet ou écrivez votre question.",
+    "chipOther": "Autre demande",
+    "anythingElse": "Puis-je vous aider sur autre chose ?",
+    "noAnswer": "Je n'ai pas la réponse exacte à cette question. Laissez-nous votre e-mail professionnel : notre équipe vous recontacte rapidement.",
+    "emailPlaceholder": "prenom.nom@entreprise.fr",
+    "consent": "J'accepte d'être recontacté par Nation Data Center au sujet de ma demande.",
+    "errEmail": "Merci de saisir une adresse e-mail valide.",
+    "errConsent": "Merci de cocher la case de consentement.",
+    "emailSubmit": "Être recontacté",
+    "emailDone": "Merci ! Votre demande est bien transmise — notre équipe revient vers vous très vite. ✅",
+    "inputPlaceholder": "Écrivez votre question…",
+    "inputDisabled": "Renseignez votre e-mail ci-dessus",
+    "send": "Envoyer"
   }
 }
