@@ -339,32 +339,49 @@ a { color: inherit; text-decoration: none; }
 .section-head p { color: var(--muted); margin-top: 12px; max-width: 50ch; }
 
 /* ---------- Grille datacenters ---------- */
-.dc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px; }
+.dc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 22px; }
+/* Carte site : image plein cadre, textes en surimpression sur dégradé sombre
+   (badge de statut, ville, titre, accroche, lien « En savoir plus »). */
 .dc-card {
   position: relative; overflow: hidden;
-  border: 1px solid var(--line); border-radius: 10px; padding: 0; background: var(--surface);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  display: flex; flex-direction: column;
+  min-height: 460px; border-radius: 16px; padding: 0;
+  box-shadow: 0 20px 48px -30px rgba(20, 40, 73, 0.5);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-/* Image d'illustration en haut de la carte (image mise en avant WP). */
-.dc-card-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-alt); }
-.dc-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-.dc-card:hover .dc-card-media img { transform: scale(1.04); }
-.dc-card-media .badge {
-  position: absolute; top: 12px; left: 12px; margin: 0;
-  background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(4px);
-  box-shadow: 0 4px 14px -6px rgba(20,40,73,0.4);
+.dc-card-media { position: absolute; inset: 0; background: var(--surface-alt); }
+.dc-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.45s ease; }
+.dc-card:hover .dc-card-media img { transform: scale(1.05); }
+/* Dégradé de lisibilité du bas */
+.dc-card::after {
+  content: ''; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(13, 27, 51, 0.05) 30%, rgba(13, 27, 51, 0.86) 82%);
 }
-.dc-card-body { padding: 20px 24px 26px; }
-.dc-card::before {
-  content: ''; position: absolute; top: 0; left: 0; height: 4px; width: 0;
-  background: var(--red); transition: width 0.22s ease;
+.dc-card > .badge {
+  position: absolute; top: 16px; left: 16px; z-index: 2; margin: 0;
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(4px);
+  box-shadow: 0 4px 14px -6px rgba(20, 40, 73, 0.4);
 }
-.dc-card:hover { border-color: #cdd9ea; box-shadow: 0 18px 44px -26px rgba(20,40,73,0.4); transform: translateY(-2px); }
-.dc-card:hover::before { width: 100%; }
-.dc-card .city { display: flex; align-items: center; gap: 7px; font-size: 13.5px; color: var(--muted); margin-bottom: 14px; }
-.dc-card .city svg { color: var(--turquoise-700); }
-.dc-card h3 { font-size: 27px; margin-bottom: 12px; }
-.dc-card .accroche { color: var(--muted); font-size: 15px; }
+.dc-card-body {
+  position: relative; z-index: 2; margin-top: auto;
+  padding: 24px 26px 26px; color: #fff;
+}
+.dc-card:hover { box-shadow: 0 28px 56px -28px rgba(20, 40, 73, 0.6); transform: translateY(-3px); }
+.dc-card .city {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78); margin-bottom: 10px;
+}
+.dc-card .city svg { color: var(--turquoise); }
+.dc-card h3 { font-size: 27px; color: #fff; margin-bottom: 10px; }
+.dc-card .accroche { color: rgba(255, 255, 255, 0.86); font-size: 14.5px; line-height: 1.55; margin-bottom: 16px; }
+.dc-card-more {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: #fff;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.45); padding-bottom: 3px;
+  transition: border-color 0.2s ease, gap 0.2s ease;
+}
+.dc-card:hover .dc-card-more { border-color: var(--turquoise); gap: 12px; }
 
 .badge {
   display: inline-flex; align-items: center; gap: 7px;
@@ -409,7 +426,7 @@ a { color: inherit; text-decoration: none; }
 }
 .map-loading { height: 100%; display: grid; place-items: center; color: var(--muted); background: #f4f7fb; }
 .leaflet-container { font-family: var(--font-jost), sans-serif; }
-.dc-card { display: block; } /* la carte de liste devient un lien */
+/* la carte de liste est un lien ; layout défini plus haut (flex, overlay) */
 
 /* ---------- Page détail data center ---------- */
 .dc-hero { padding: 56px 0 40px; background: radial-gradient(110% 110% at 100% 0%, rgba(45,175,230,0.10), transparent 50%); }

@@ -57,11 +57,11 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
                 <a className="dc-card" key={dc.slug} href={`/datacenters/${dc.slug}`}>
                   <div className="dc-card-media">
                     <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
-                    <span className={`badge ${key}`}>
-                      <span className="dot" />
-                      {statutLabel(key)}
-                    </span>
                   </div>
+                  <span className={`badge ${key}`}>
+                    <span className="dot" />
+                    {statutLabel(key)}
+                  </span>
                   <div className="dc-card-body">
                     {dc.datacenterFields.ville && (
                       <div className="city">
@@ -73,6 +73,12 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
                     {dc.datacenterFields.accroche && (
                       <p className="accroche">{dc.datacenterFields.accroche}</p>
                     )}
+                    <span className="dc-card-more">
+                      {t.readMore}
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
                 </a>
               );

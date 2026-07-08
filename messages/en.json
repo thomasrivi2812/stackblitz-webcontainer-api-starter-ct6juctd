@@ -206,7 +206,8 @@
     "visitEyebrow": "On site",
     "visitTitle": "Come and visit our data centers",
     "visitText": "Nothing beats an on-site visit. Our teams welcome you to discover the NDC network infrastructure, security measures and environmental commitments, anywhere in France.",
-    "visitCta": "Request a visit"
+    "visitCta": "Request a visit",
+    "readMore": "Learn more"
   },
   "offres": {
     "youAre": "You are?",
