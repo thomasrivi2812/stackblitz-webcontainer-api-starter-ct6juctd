@@ -9,6 +9,19 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+// Remonte toute la chaîne de causes d'une erreur réseau (undici enveloppe la
+// vraie cause — ENOTFOUND, ECONNRESET, CERT… — dans error.cause).
+function causeChain(e: unknown): { name?: string; code?: string; message?: string }[] {
+  const chain: { name?: string; code?: string; message?: string }[] = [];
+  let c: unknown = e;
+  for (let i = 0; c && i < 6; i++) {
+    const err = c as { name?: string; code?: string; message?: string; cause?: unknown };
+    chain.push({ name: err.name, code: err.code, message: err.message });
+    c = err.cause;
+  }
+  return chain;
+}
+
 export async function GET() {
   const endpoint = process.env.WORDPRESS_GRAPHQL_ENDPOINT || null;
   const out: Record<string, unknown> = {
@@ -45,7 +58,29 @@ export async function GET() {
       : 'L\'endpoint répond mais pas normalement (pare-feu, challenge anti-bot, redirection ou plugin de sécurité ?). Voir le corps de la réponse ci-dessus.';
   } catch (e) {
     out.erreurFetch = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    out.erreurCauses = causeChain(e);
     out.diagnostic = 'Vercel n\'arrive PAS à joindre l\'endpoint (site WP en pause, DNS, pare-feu…).';
+  }
+
+  // Tests complémentaires pour localiser le blocage :
+  // DNS vu par Vercel, puis GET simple sur la racine du site WP.
+  const host = new URL(endpoint).hostname;
+  try {
+    const dns = await import('node:dns/promises');
+    out.dns = await dns.lookup(host, { all: true });
+  } catch (e) {
+    out.dnsErreur = causeChain(e);
+  }
+  try {
+    const r = await fetch(new URL(endpoint).origin, {
+      method: 'GET',
+      redirect: 'manual',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
+    });
+    out.racineHttpStatus = r.status;
+  } catch (e) {
+    out.racineErreur = causeChain(e);
   }
   return NextResponse.json(out);
 }
