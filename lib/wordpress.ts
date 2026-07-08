@@ -2130,9 +2130,23 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
       meta: n.livretFields?.meta || null,
     }));
 
+  // Erreur de schéma « attendue » lors du sondage (argument/champ absent) :
+  // on dégrade la requête sans la journaliser comme une panne d'API.
+  const isSchemaError = (e: unknown): boolean => {
+    const m = e instanceof Error ? e.message : String(e);
+    return /not defined by type|Cannot query field|Unknown argument|WhereArgs/i.test(m);
+  };
+  // Le CPT « livret » n'est pas géré par Polylang → l'argument `language`
+  // n'existe pas sur cette connexion : inutile d'insister avec la langue.
+  const isLangArgError = (e: unknown): boolean => {
+    const m = e instanceof Error ? e.message : String(e);
+    return /"language"|LivretConnectionWhereArgs/i.test(m);
+  };
+
   const client = new GraphQLClient(endpoint);
   // 1) Requête filtrée par langue (Polylang actif sur le CPT livret),
   //    en dégradant la sélection si le WP n'est pas à jour.
+  langLoop:
   for (const extra of LIVRET_FIELD_TIERS) {
     try {
       const data = await wpList<{ livrets: { nodes: Node[] } }>(
@@ -2141,7 +2155,11 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
       const nodes = data.livrets?.nodes ?? [];
       if (nodes.length) return map(nodes);
     } catch (error) {
-      logWpError('livrets (filtre langue)', error);
+      // Polylang ne gère pas ce CPT : on abandonne le filtre langue en
+      // silence et on passe directement à la variante sans langue.
+      if (isLangArgError(error)) break langLoop;
+      // Sondage de champ (meta/format) : on essaie le palier suivant sans bruit.
+      if (!isSchemaError(error)) logWpError('livrets (filtre langue)', error);
     }
   }
   // 2) Repli sans filtre de langue (CPT non géré par Polylang, ou aucun
@@ -2152,7 +2170,7 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
       const nodes = data.livrets?.nodes ?? [];
       if (nodes.length) return map(nodes);
     } catch (error) {
-      logWpError('livrets', error);
+      if (!isSchemaError(error)) logWpError('livrets', error);
     }
   }
   return fallback();
