@@ -39,7 +39,8 @@
     "portail": "Portail Client",
     "portailAria": "Portail Client — ouvre dans un nouvel onglet",
     "copyright": "© {year} Nation Data Center — Filiale du Groupe Altarea. Tous droits réservés.",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "cookiesPrefs": "Gérer mes cookies"
   },
   "langSwitcher": {
     "label": "Choix de la langue",
@@ -191,7 +192,11 @@
     "caracElectrique": "Électrique",
     "caracConnectivite": "Connectivité",
     "caracResilience": "Résilience",
-    "galerieTitle": "Le site en images"
+    "galerieTitle": "Le site en images",
+    "visitEyebrow": "Sur le terrain",
+    "visitTitle": "Venez visiter nos data centers",
+    "visitText": "Rien ne remplace une visite sur site. Nos équipes vous accueillent pour découvrir les infrastructures, les dispositifs de sécurité et les engagements environnementaux du réseau NDC, partout en France.",
+    "visitCta": "Demander une visite"
   },
   "offres": {
     "youAre": "Vous êtes ?",

@@ -39,7 +39,8 @@
     "portail": "Client portal",
     "portailAria": "Client portal — opens in a new tab",
     "copyright": "© {year} Nation Data Center — A Groupe Altarea subsidiary. All rights reserved.",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "cookiesPrefs": "Manage my cookies"
   },
   "langSwitcher": {
     "label": "Language selector",
@@ -191,7 +192,11 @@
     "caracElectrique": "Power",
     "caracConnectivite": "Connectivity",
     "caracResilience": "Resilience",
-    "galerieTitle": "The site in pictures"
+    "galerieTitle": "The site in pictures",
+    "visitEyebrow": "On site",
+    "visitTitle": "Come and visit our data centers",
+    "visitText": "Nothing beats an on-site visit. Our teams welcome you to discover the NDC network infrastructure, security measures and environmental commitments, anywhere in France.",
+    "visitCta": "Request a visit"
   },
   "offres": {
     "youAre": "You are?",

@@ -2107,6 +2107,33 @@ export async function getDocumentationHead(locale: WpLocale = 'fr'): Promise<Doc
   return null;
 }
 
+// --- Page Nos data centers : bandeau visite -----------------------------------
+// Page WP « datacenters », groupe « datacentersPageFields » : textes du bandeau
+// carte + « Demander une visite ». Chaque champ vide = texte par défaut du site.
+export type DatacentersVisit = {
+  visitEyebrow: string | null;
+  visitTitle: string | null;
+  visitText: string | null;
+  visitCta: string | null;
+};
+
+export async function getDatacentersVisit(locale: WpLocale = 'fr'): Promise<DatacentersVisit | null> {
+  type F = { visitEyebrow: string | null; visitTitle: string | null; visitText: string | null; visitCta: string | null };
+  // Variantes de slug (historique de slugs dupliqués sur ce WP).
+  for (const slug of ['datacenters', 'datacenters-2', 'nos-data-centers']) {
+    const f = await getPageFields<F>(slug, 'datacentersPageFields', 'visitEyebrow visitTitle visitText visitCta', locale);
+    if (f) {
+      return {
+        visitEyebrow: f.visitEyebrow || null,
+        visitTitle: f.visitTitle || null,
+        visitText: f.visitText || null,
+        visitCta: f.visitCta || null,
+      };
+    }
+  }
+  return null;
+}
+
 // --- Page Contact ------------------------------------------------------------
 // Tout le contenu éditorial de la page contact (en-tête, coordonnées,
 // arguments de réassurance) est éditable dans WP : page « contact »,

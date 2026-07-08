@@ -1,5 +1,6 @@
-import { getDatacenters, statutInfo, type WpLocale } from '@/lib/wordpress';
+import { getDatacenters, getDatacentersVisit, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
 import { DcTileImage } from '@/components/DcTileImage';
+import { NetworkMap } from '@/components/NetworkMap';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 
@@ -30,7 +31,9 @@ function PinIcon() {
 
 export default async function DatacentersPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.datacenters as Record<string, string>;
-  const datacenters = await getDatacenters(locale);
+  // Bandeau visite éditable dans WP (page « datacenters ») ; chaque champ
+  // vide retombe sur le texte par défaut du site. Fetch en parallèle.
+  const [datacenters, visit] = await Promise.all([getDatacenters(locale), getDatacentersVisit(locale)]);
 
   const statutLabel = (k: string) =>
     t[`statut${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.statutInconnu;
@@ -74,6 +77,24 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
                 </a>
               );
             })}
+          </div>
+
+          {/* ── Bandeau : carte du réseau + demande de visite ── */}
+          <div className="dc-visit-card">
+            <div className="dc-visit-map">
+              <NetworkMap points={toMapPoints(datacenters)} />
+            </div>
+            <div className="dc-visit-body">
+              <span className="eyebrow">{visit?.visitEyebrow || t.visitEyebrow}</span>
+              <h3>{visit?.visitTitle || t.visitTitle}</h3>
+              <p>{visit?.visitText || t.visitText}</p>
+              <a
+                className="btn-v2 btn-v2-primary"
+                href={locale === 'en' ? '/en/contact' : '/contact'}
+              >
+                {visit?.visitCta || t.visitCta}
+              </a>
+            </div>
           </div>
         </div>
       </section>

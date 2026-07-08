@@ -1,6 +1,7 @@
 import { getDatacenters, type WpLocale } from '@/lib/wordpress';
 import { Logo } from './Logo';
 import { AltareaLogo } from './AltareaLogo';
+import { CookiePreferencesLink } from './CookiePreferencesLink';
 
 // Préfixe les liens internes selon la langue (FR à la racine, EN sous /en).
 // On évite ici les helpers de next-intl côté serveur (Link / getLocale), qui
@@ -82,6 +83,8 @@ export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale;
               <li><a href={lhref(locale, '/mentions-legales')}>{t.mentions}</a></li>
               <li><a href={lhref(locale, '/politique-de-protection-des-donnees-personnelles')}>{t.confidentialite}</a></li>
               <li><a href={lhref(locale, '/politique-de-cookies')}>{t.cookies}</a></li>
+              {/* Rouvre la modale Didomi (rendu seulement si la CMP est configurée) */}
+              <CookiePreferencesLink label={t.cookiesPrefs} />
             </ul>
             <div className="footer-social">
               <a href="#" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 102.5 6 2.5 2.5 0 004.98 3.5zM3 8.98h4v12H3zM9 8.98h3.8v1.64h.05a4.17 4.17 0 013.75-2.06c4 0 4.75 2.64 4.75 6.07v6.35h-4v-5.63c0-1.34 0-3.07-1.87-3.07s-2.16 1.46-2.16 2.97v5.73H9z"/></svg></a>

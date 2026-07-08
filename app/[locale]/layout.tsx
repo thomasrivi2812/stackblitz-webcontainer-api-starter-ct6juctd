@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { JsonLd } from '@/components/JsonLd';
+import { DidomiConsent } from '@/components/DidomiConsent';
 import { getPersonas, getDatacenters, getServices, getSiteBranding } from '@/lib/wordpress';
 import { SITE_URL } from '@/lib/seo';
 import { routing, type Locale } from '@/i18n/routing';
@@ -96,6 +97,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={jost.variable}>
       <body>
+        {/* CMP Didomi (bannière cookies) — inactive tant que la clé API
+            NEXT_PUBLIC_DIDOMI_API_KEY n'est pas configurée. */}
+        <DidomiConsent locale={locale} />
         {/* Données structurées Organization (rich results / knowledge panel). */}
         <JsonLd
           data={{
