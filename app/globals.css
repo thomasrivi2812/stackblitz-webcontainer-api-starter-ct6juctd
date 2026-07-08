@@ -3584,20 +3584,19 @@ select:focus-visible,
 .lvc-card:hover .lvc-name { color: var(--turquoise-700); }
 
 /* ---------- Bandeau visite (page Nos data centers) ---------- */
-/* Grande carte horizontale : carte du réseau à gauche, texte + CTA à droite */
-.dc-visit-card {
+/* Bandeau pleine largeur (bord à bord) : carte du réseau à gauche,
+   texte compact + CTA « Demander une visite » à droite */
+.dc-visit-band {
   display: grid;
   /* Carte du réseau volontairement dominante, colonne texte compacte */
   grid-template-columns: 1.9fr 1fr;
   margin-top: 44px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   background: var(--surface);
-  box-shadow: 0 18px 44px -28px rgba(20, 40, 73, 0.35);
 }
-.dc-visit-map { position: relative; min-height: 400px; }
-/* La carte remplit sa colonne : le cadre est porté par la card, pas par la map */
+.dc-visit-map { position: relative; min-height: 440px; }
+/* La carte remplit sa colonne : le cadre est porté par le bandeau, pas par la map */
 .dc-visit-map .map-shell {
   height: 100%;
   border: none;
@@ -3605,22 +3604,25 @@ select:focus-visible,
   box-shadow: none;
 }
 .dc-visit-body {
-  padding: 34px 32px;
+  padding: 48px clamp(24px, 5vw, 80px) 48px 44px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
 }
 .dc-visit-body h3 {
-  font-size: clamp(19px, 2vw, 23px);
+  font-size: clamp(20px, 2.2vw, 26px);
   color: var(--heading);
   line-height: 1.25;
   margin: 8px 0 10px;
 }
-.dc-visit-body p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 22px; }
+.dc-visit-body p {
+  color: var(--muted); font-size: 14.5px; line-height: 1.6;
+  max-width: 48ch; margin: 0 0 24px;
+}
 @media (max-width: 900px) {
-  .dc-visit-card { grid-template-columns: 1fr; }
-  .dc-visit-map { min-height: 280px; }
+  .dc-visit-band { grid-template-columns: 1fr; }
+  .dc-visit-map { min-height: 300px; }
   .dc-visit-body { padding: 28px 22px; }
 }
 

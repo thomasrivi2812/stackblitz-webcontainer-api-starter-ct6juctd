@@ -78,24 +78,24 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
               );
             })}
           </div>
+        </div>
+      </section>
 
-          {/* ── Bandeau : carte du réseau + demande de visite ── */}
-          <div className="dc-visit-card">
-            <div className="dc-visit-map">
-              <NetworkMap points={toMapPoints(datacenters)} />
-            </div>
-            <div className="dc-visit-body">
-              <span className="eyebrow">{visit?.visitEyebrow || t.visitEyebrow}</span>
-              <h3>{visit?.visitTitle || t.visitTitle}</h3>
-              <p>{visit?.visitText || t.visitText}</p>
-              <a
-                className="btn-v2 btn-v2-primary"
-                href={locale === 'en' ? '/en/contact' : '/contact'}
-              >
-                {visit?.visitCta || t.visitCta}
-              </a>
-            </div>
-          </div>
+      {/* ── Bandeau pleine largeur : carte du réseau + demande de visite ── */}
+      <section className="dc-visit-band">
+        <div className="dc-visit-map">
+          <NetworkMap points={toMapPoints(datacenters)} />
+        </div>
+        <div className="dc-visit-body">
+          <span className="eyebrow">{visit?.visitEyebrow || t.visitEyebrow}</span>
+          <h3>{visit?.visitTitle || t.visitTitle}</h3>
+          <p>{visit?.visitText || t.visitText}</p>
+          <a
+            className="btn-v2 btn-v2-primary"
+            href={locale === 'en' ? '/en/contact' : '/contact'}
+          >
+            {visit?.visitCta || t.visitCta}
+          </a>
         </div>
       </section>
     </main>
