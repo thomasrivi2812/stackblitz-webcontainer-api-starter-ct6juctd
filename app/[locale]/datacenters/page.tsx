@@ -97,7 +97,7 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
           <h3>{visit?.visitTitle || t.visitTitle}</h3>
           <p>{visit?.visitText || t.visitText}</p>
           <a
-            className="btn-v2 btn-v2-primary"
+            className="btn btn-primary"
             href={locale === 'en' ? '/en/contact' : '/contact'}
           >
             {visit?.visitCta || t.visitCta}

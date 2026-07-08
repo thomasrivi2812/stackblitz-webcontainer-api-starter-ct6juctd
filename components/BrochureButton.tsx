@@ -145,7 +145,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
             .ndcm-consent input{margin-top:3px;flex-shrink:0;accent-color:var(--marine,#1b3360)}
             .ndcm-error{color:var(--red,#ff0000);font-size:13.5px;margin:0 0 14px;font-weight:500}
 
-            /* Submit : style btn-v2-primary (marine + accent rouge en bas) */
+            /* Submit : style btn-primary (marine + accent rouge en bas) */
             .ndcm-submit{position:relative;width:100%;padding:15px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-size:15px;font-weight:600;color:#fff;background:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,transform .15s ease,border-color .15s ease}
             .ndcm-submit::after{content:'';position:absolute;left:14px;right:14px;bottom:6px;height:2px;background:var(--red,#ff0000);opacity:.85;border-radius:1px}
             .ndcm-submit:hover{background:var(--marine-800,#102240);border-color:var(--marine-800,#102240);transform:translateY(-1px)}
@@ -156,7 +156,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
             .ndcm-done .ndcm-title::before{display:none}
             .ndcm-done a{color:var(--marine,#1b3360);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 
-            /* Ghost : style btn-v2-ghost (bordure marine) */
+            /* Ghost : style btn-ghost (bordure marine) */
             .ndcm-ghost{margin-top:8px;padding:13px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-weight:600;background:transparent;color:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,color .15s ease}
             .ndcm-ghost:hover{background:var(--marine,#1b3360);color:#fff}
           `}</style>

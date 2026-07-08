@@ -121,7 +121,7 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
 
             .aq-error{color:var(--red,#ff0000);font-size:13.5px;margin:0 0 14px;font-weight:500}
 
-            /* Submit : style btn-v2-primary (marine + accent rouge en bas) */
+            /* Submit : style btn-primary (marine + accent rouge en bas) */
             .aq-submit{position:relative;width:100%;padding:15px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-size:15px;font-weight:600;color:#fff;background:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,transform .15s ease,border-color .15s ease;margin-top:6px}
             .aq-submit::after{content:'';position:absolute;left:14px;right:14px;bottom:6px;height:2px;background:var(--red,#ff0000);opacity:.85;border-radius:1px}
             .aq-submit:hover{background:var(--marine-800,#102240);border-color:var(--marine-800,#102240);transform:translateY(-1px)}
@@ -131,7 +131,7 @@ export function AskQuestionButton({ accent = 'var(--op-accent)' }: { accent?: st
             .aq-done .aq-title{padding-left:0;text-align:center}
             .aq-done .aq-title::before{display:none}
 
-            /* Ghost : style btn-v2-ghost (bordure marine) */
+            /* Ghost : style btn-ghost (bordure marine) */
             .aq-ghost{margin-top:8px;padding:13px 22px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-weight:600;background:transparent;color:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease,color .15s ease}
             .aq-ghost:hover{background:var(--marine,#1b3360);color:#fff}
           `}</style>

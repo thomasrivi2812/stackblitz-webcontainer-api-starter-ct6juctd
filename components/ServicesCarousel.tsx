@@ -47,7 +47,7 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
           <span className="eyebrow"><span className="eyebrow-dot" />{s.accroche || t('eyebrowFallback')}</span>
           <h3>{s.titre}</h3>
           <p>{s.description}</p>
-          <a className="btn-v2 btn-v2-ghost" href={s.lienUrl || '/services'}>
+          <a className="btn btn-ghost" href={s.lienUrl || '/services'}>
             {s.lienLabel || t('linkFallback')}
           </a>
         </div>

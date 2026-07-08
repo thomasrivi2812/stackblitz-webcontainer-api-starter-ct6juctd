@@ -71,7 +71,7 @@ export default async function DocumentationPage({ params: { locale } }: { params
               )}
               <div className="doc-hero-cta">
                 <BrochureButton
-                  className="btn-v2 btn-v2-primary"
+                  className="btn btn-primary"
                   pdfUrl={head?.brochureFileUrl}
                   label={head?.brochureCta || t.brochureCta}
                 />

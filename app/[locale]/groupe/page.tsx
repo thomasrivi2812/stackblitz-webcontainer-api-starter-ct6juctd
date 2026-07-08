@@ -71,7 +71,7 @@ export default async function GroupePage({ params: { locale } }: { params: { loc
             <p className="hero-lead">{wp?.heroLead || t.heroLead}</p>
             <div className="cta-row">
               <a
-                className="btn-v2 btn-v2-primary"
+                className="btn btn-primary"
                 href={wp?.heroCta1Url || 'https://altarea.com'}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -81,7 +81,7 @@ export default async function GroupePage({ params: { locale } }: { params: { loc
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn-v2 btn-v2-ghost" href={wp?.heroCta2Url || '#engagement'}>
+              <a className="btn btn-ghost" href={wp?.heroCta2Url || '#engagement'}>
                 {wp?.heroCta2Label || t.heroCta2}
               </a>
             </div>

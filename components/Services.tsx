@@ -67,13 +67,13 @@ export function Services() {
               vos équipements : installation, remplacement de composants, gestion des accès et
               reporting. Un guichet unique, réactif et local, pour une exploitation sans friction.
             </p>
-            <a className="btn-v2 btn-v2-ghost" href="/contact">Découvrir le catalogue de proximité</a>
+            <a className="btn btn-ghost" href="/contact">Découvrir le catalogue de proximité</a>
           </div>
         </div>
 
         <div className="services-cta">
-          <BrochureButton className="btn-v2 btn-v2-ghost" />
-          <a className="btn-v2 btn-v2-primary" href="/contact">
+          <BrochureButton className="btn btn-ghost" />
+          <a className="btn btn-primary" href="/contact">
             Demander un audit
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
               <path d="M5 12h14M13 5l7 7-7 7" />

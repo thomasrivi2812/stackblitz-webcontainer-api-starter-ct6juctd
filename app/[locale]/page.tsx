@@ -164,13 +164,13 @@ export default async function Home({ params: { locale } }: { params: { locale: W
             </h1>
             <p className="hero-lead">{wp?.heroLead || t.heroLead}</p>
             <div className="cta-row">
-              <a className="btn-v2 btn-v2-primary" href={wp?.heroCtaPrimaryUrl || "/datacenters"}>
+              <a className="btn btn-primary" href={wp?.heroCtaPrimaryUrl || "/datacenters"}>
                 {wp?.heroCtaPrimaryLabel || t.heroCtaPrimary}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn-v2 btn-v2-ghost" href={wp?.heroCtaSecondaryUrl || "/contact"}>{wp?.heroCtaSecondaryLabel || t.heroCtaSecondary}</a>
+              <a className="btn btn-ghost" href={wp?.heroCtaSecondaryUrl || "/contact"}>{wp?.heroCtaSecondaryLabel || t.heroCtaSecondary}</a>
             </div>
           </div>
           <div className="hero-visual">
@@ -310,13 +310,13 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           <ServicesCarousel services={carouselServices} />
 
           <div className="services-cta">
-            <Link className="btn-v2 btn-v2-primary" href="/services">
+            <Link className="btn btn-primary" href="/services">
               {wp?.servicesCta || t.servicesCta}
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </Link>
-            <BrochureButton className="btn-v2 btn-v2-ghost" pdfUrl={wp?.brochureUrl} />
+            <BrochureButton className="btn btn-ghost" pdfUrl={wp?.brochureUrl} />
           </div>
         </div>
       </section>

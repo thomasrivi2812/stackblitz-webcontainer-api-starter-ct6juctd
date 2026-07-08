@@ -55,7 +55,7 @@ export default async function ServicesPage({ params: { locale } }: { params: { l
                     <span><em>{t.benefice}</em>{s.benefice}</span>
                   </div>
                 )}
-                <a className="btn-v2 btn-v2-ghost svc-row-btn" href={s.lienUrl || '/contact'}>
+                <a className="btn btn-ghost svc-row-btn" href={s.lienUrl || '/contact'}>
                   {s.lienLabel || t.fallbackLink}
                 </a>
               </div>
@@ -74,7 +74,7 @@ export default async function ServicesPage({ params: { locale } }: { params: { l
               <p>{t.ctaText}</p>
             </div>
             <div className="souv-cta">
-              <Link className="btn-v2 btn-v2-primary" href="/contact">
+              <Link className="btn btn-primary" href="/contact">
                 {t.ctaButton}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
