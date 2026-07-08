@@ -3226,6 +3226,79 @@ select:focus-visible,
   .btn-ghost:hover { background: var(--on-dark); color: var(--marine-800); }
 }
 
+/* ---------- Fiche data center : hero immersif (image plein cadre) ---------- */
+.dc-hero-cover {
+  position: relative; overflow: visible;
+  padding: 0; background: none; min-height: 520px;
+  display: flex; align-items: flex-end;
+}
+/* Neutralise la grille de fond des autres sous-page heroes */
+.dc-hero-cover::before { display: none; }
+.dc-hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; background: var(--surface-alt); }
+.dc-hero-bg .dc-photo { width: 100%; height: 100%; margin: 0; }
+.dc-hero-bg .dc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Dégradé de lisibilité (plus dense à gauche, sous le texte) */
+.dc-hero-cover::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(13, 27, 51, 0.92) 0%, rgba(13, 27, 51, 0.7) 46%, rgba(13, 27, 51, 0.32) 100%),
+    linear-gradient(0deg, rgba(13, 27, 51, 0.55), rgba(13, 27, 51, 0) 40%);
+}
+/* padding-top seul : conserve le padding horizontal du .container */
+.dc-hero-inner { position: relative; z-index: 2; padding-top: 60px; padding-bottom: 0; color: #fff; width: 100%; }
+.dc-hero-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.dc-hero-cover .back-link { margin: 0; color: rgba(255, 255, 255, 0.82); }
+.dc-hero-cover .back-link:hover { color: #fff; }
+.dc-hero-cover .badge {
+  margin: 0;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(4px);
+}
+.dc-hero-cover h1 { color: #fff; margin: 0 0 14px; }
+.dc-hero-cover .dc-city {
+  display: inline-flex; align-items: center; gap: 8px; margin: 0 0 16px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+.dc-hero-cover .dc-city svg { color: var(--turquoise); }
+.dc-hero-cover .dc-accroche { color: rgba(255, 255, 255, 0.9); max-width: 56ch; margin: 0 0 26px; }
+.dc-hero-cover .dc-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+/* Boutons lisibles sur fond sombre */
+.dc-hero-cover .btn-primary {
+  position: relative; background: #fff; color: var(--marine); border-color: #fff;
+}
+.dc-hero-cover .btn-primary::after {
+  content: ''; position: absolute; left: 16px; right: 16px; bottom: 7px;
+  height: 2px; background: var(--red); border-radius: 1px;
+}
+.dc-hero-cover .btn-primary:hover { background: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.9); }
+.dc-hero-cover .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.5); }
+.dc-hero-cover .btn-ghost:hover { background: rgba(255, 255, 255, 0.14); border-color: #fff; color: #fff; }
+/* Barre de stats flottante, débordant sur la section suivante */
+.dc-hero-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  margin: 44px 0 -52px; position: relative; z-index: 3;
+  background: var(--line); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 26px 60px -28px rgba(13, 27, 51, 0.5);
+}
+.dc-hero-stat { background: var(--surface); padding: 22px 26px; }
+.dc-hero-stat-label {
+  display: block; margin-bottom: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+}
+.dc-hero-stat-val { font-size: clamp(24px, 3vw, 30px); font-weight: 700; line-height: 1; color: var(--heading); }
+.dc-hero-stat-unit { margin-left: 6px; font-size: 14px; font-weight: 600; color: var(--turquoise-700); }
+/* Compense le débordement de la barre de stats sur la section suivante */
+.dc-hero-cover + .section { padding-top: 96px; }
+@media (max-width: 860px) {
+  .dc-hero-cover { min-height: 440px; }
+  .dc-hero-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 460px) {
+  .dc-hero-stats { grid-template-columns: 1fr; }
+}
+
 /* ---------- Fix burger : le JSX utilise `.burger`, le CSS `.nav-burger`.
    On crée un alias pour que le bouton mobile retrouve son style.
    Version sans contour, alignée à droite. ---------- */

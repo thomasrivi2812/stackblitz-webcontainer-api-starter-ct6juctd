@@ -2,7 +2,6 @@ import { getDatacenter, getDatacenters, statutInfo, toMapPoints, type WpLocale }
 import { notFound, redirect } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
-import { KpiBand } from '@/components/KpiBand';
 import { JsonLd } from '@/components/JsonLd';
 import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
@@ -88,6 +87,18 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
   const mapPoint = toMapPoints([dc])[0]; // présent seulement si lat/lng renseignés
   const pageUrl = `${SITE_URL}${localePath(params.locale, `/datacenters/${dc.slug}`)}`;
 
+  // Barre de stats du hero : puissance (si renseignée) + KPIs WP, plafonnée à
+  // 4 tuiles. La puissance « 7 MW IT » est scindée en valeur + unité.
+  const heroStats: { label: string; valeur: string; unite: string }[] = [];
+  if (f.puissance) {
+    const [val, ...rest] = f.puissance.trim().split(/\s+/);
+    heroStats.push({ label: t.puissanceLabel, valeur: val, unite: rest.join(' ') });
+  }
+  for (const k of kpis) {
+    if (heroStats.length >= 4) break;
+    heroStats.push({ label: k.label, valeur: k.valeur, unite: k.unite });
+  }
+
   return (
     <main>
       {/* Données structurées : lieu physique + fil d'Ariane. */}
@@ -118,29 +129,50 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
           ],
         }}
       />
-      {/* HERO + PHOTO */}
-      <section className="dc-hero">
-        <div className="container dc-hero-grid">
-          <div>
+      {/* HERO immersif : image plein cadre + textes en surimpression + stats */}
+      <section className="dc-hero dc-hero-cover">
+        <div className="dc-hero-bg">
+          <DcPhoto slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
+        </div>
+        <div className="container dc-hero-inner">
+          <div className="dc-hero-top">
             <Link className="back-link" href="/datacenters">{t.back}</Link>
-            <span className={`badge ${key}`} style={{ marginTop: 18 }}>
+            <span className={`badge ${key}`}>
               <span className="dot" />
               {statutLabel}
             </span>
-            <h1 className="fil-rouge">{dc.title}</h1>
-            {f.ville && <p className="dc-city">◍ {f.ville}</p>}
-            {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
-            <div className="dc-hero-cta">
-              <Link className="btn btn-primary" href="/offres">{t.ctaOffres}</Link>
-              <Link className="btn btn-ghost" href="/contact">{t.ctaVisite}</Link>
-            </div>
           </div>
-          <DcPhoto slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
+          <h1 className="fil-rouge">{dc.title}</h1>
+          {f.ville && (
+            <p className="dc-city">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg>
+              {f.ville}{f.region ? ` — ${f.region}` : ''}
+            </p>
+          )}
+          {f.accroche && <p className="dc-accroche">{f.accroche}</p>}
+          <div className="dc-hero-cta">
+            <Link className="btn btn-primary" href="/offres">{t.ctaOffres}</Link>
+            <Link className="btn btn-ghost" href="/contact">{t.ctaVisite}</Link>
+          </div>
+
+          {heroStats.length > 0 && (
+            <div className="dc-hero-stats">
+              {heroStats.map((s, i) => (
+                <div className="dc-hero-stat" key={i}>
+                  <span className="dc-hero-stat-label">{s.label}</span>
+                  <span className="dc-hero-stat-val">
+                    {s.valeur}
+                    {s.unite && <span className="dc-hero-stat-unit">{s.unite}</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
-
-      {/* KPI */}
-      {kpis.length > 0 && <KpiBand kpis={kpis} title={t.kpiTitle} meta={dc.title} />}
 
       {/* CORPS : présentation + caractéristiques / aside bénéfices + carte */}
       <section className="section">
