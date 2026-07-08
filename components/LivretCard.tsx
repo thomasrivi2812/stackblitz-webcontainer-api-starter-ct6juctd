@@ -64,7 +64,9 @@ export function LivretCard({ livret }: { livret: Livret }) {
     setDone(true);
   }
 
-  // Format choisi dans WP : paysage = couverture 16:9 (slides), carte élargie.
+  // Format choisi dans WP : les couvertures portrait sont présentées entières
+  // (object-fit contain) dans la même zone 16:9 que les paysage → la grille
+  // reste alignée quel que soit le mélange de formats.
   const paysage = livret.format === 'paysage';
 
   const cover = (
@@ -83,8 +85,16 @@ export function LivretCard({ livret }: { livret: Livret }) {
   return (
     <>
       <button type="button" className={`lvc-card${paysage ? ' lvc-card--paysage' : ''}`} onClick={() => setOpen(true)}>
-        {cover}
-        <span className="lvc-name">{livret.titre}</span>
+        <span className={`lvc-card-media${!paysage ? ' lvc-card-media--portrait' : ''}`}>{cover}</span>
+        <span className="lvc-card-bar">
+          <span className="lvc-card-txt">
+            <span className="lvc-name">{livret.titre}</span>
+            <span className="lvc-meta">{livret.meta || 'PDF'}</span>
+          </span>
+          <span className="lvc-dl" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+          </span>
+        </span>
       </button>
 
       {open && (

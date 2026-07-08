@@ -2052,28 +2052,31 @@ export type Livret = {
   // Format de la couverture, choisi dans WP : « portrait » (livret A4)
   // ou « paysage » (slides / présentation 16:9).
   format: 'portrait' | 'paysage';
+  // Ligne d'infos affichée sous le titre (ex. « PDF · 2,4 Mo · FR »).
+  meta: string | null;
 };
 
-// Sélection en deux variantes : avec le champ `format` et sans lui — un champ
-// absent du schéma WP (snippet pas encore mis à jour) ferait échouer toute la
-// requête, on retente donc sans avant d'abandonner.
-const livretsSelection = (withFormat: boolean) => `
+// Sélection en trois paliers : complète (meta + format), puis sans meta,
+// puis minimale — un champ absent du schéma WP (snippet pas encore mis à
+// jour) ferait échouer toute la requête, on dégrade donc progressivement.
+const LIVRET_FIELD_TIERS = ['meta format', 'format', ''] as const;
+const livretsSelection = (extra: string) => `
       nodes {
         title
         slug
         featuredImage { node { sourceUrl altText } }
         livretFields {
           description
-          ${withFormat ? 'format' : ''}
+          ${extra}
           fichier { node { mediaItemUrl } }
         }
       }
 `;
 
-const livretsQuery = (withFormat: boolean) => gql`
+const livretsQuery = (extra: string) => gql`
   query Livrets($language: LanguageCodeFilterEnum) {
     livrets(first: 50, where: { language: $language, orderby: { field: MENU_ORDER, order: ASC } }) {
-      ${livretsSelection(withFormat)}
+      ${livretsSelection(extra)}
     }
   }
 `;
@@ -2082,10 +2085,10 @@ const livretsQuery = (withFormat: boolean) => gql`
 // « Livrets » (Langues → Réglages), l'argument `language` n'existe pas sur
 // cette connexion et la requête filtrée échoue entièrement. On retombe alors
 // sur cette version pour afficher quand même les livrets.
-const livretsQueryNoLang = (withFormat: boolean) => gql`
+const livretsQueryNoLang = (extra: string) => gql`
   query LivretsAll {
     livrets(first: 50, where: { orderby: { field: MENU_ORDER, order: ASC } }) {
-      ${livretsSelection(withFormat)}
+      ${livretsSelection(extra)}
     }
   }
 `;
@@ -2103,6 +2106,7 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
     livretFields: {
       description: string | null;
       format?: unknown;
+      meta?: string | null;
       fichier: { node: { mediaItemUrl: string | null } | null } | null;
     } | null;
   };
@@ -2123,15 +2127,16 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
         ? { sourceUrl: n.featuredImage.node.sourceUrl, altText: n.featuredImage.node.altText ?? '' }
         : null,
       format: livretFormat(n.livretFields?.format),
+      meta: n.livretFields?.meta || null,
     }));
 
   const client = new GraphQLClient(endpoint);
   // 1) Requête filtrée par langue (Polylang actif sur le CPT livret),
-  //    avec le champ format puis sans lui (WP pas encore à jour).
-  for (const withFormat of [true, false]) {
+  //    en dégradant la sélection si le WP n'est pas à jour.
+  for (const extra of LIVRET_FIELD_TIERS) {
     try {
       const data = await wpList<{ livrets: { nodes: Node[] } }>(
-        client, livretsQuery(withFormat), locale, (d) => d.livrets.nodes,
+        client, livretsQuery(extra), locale, (d) => d.livrets.nodes,
       );
       const nodes = data.livrets?.nodes ?? [];
       if (nodes.length) return map(nodes);
@@ -2140,10 +2145,10 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
     }
   }
   // 2) Repli sans filtre de langue (CPT non géré par Polylang, ou aucun
-  //    livret dans la langue demandée), mêmes deux tentatives.
-  for (const withFormat of [true, false]) {
+  //    livret dans la langue demandée), mêmes paliers.
+  for (const extra of LIVRET_FIELD_TIERS) {
     try {
-      const data = await client.request<{ livrets: { nodes: Node[] } }>(livretsQueryNoLang(withFormat));
+      const data = await client.request<{ livrets: { nodes: Node[] } }>(livretsQueryNoLang(extra));
       const nodes = data.livrets?.nodes ?? [];
       if (nodes.length) return map(nodes);
     } catch (error) {
@@ -2153,25 +2158,101 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
   return fallback();
 }
 
-// --- Page Documentation : en-tête éditable -----------------------------------
-// Page WP « documentation », groupe « documentationFields » (sur-titre, titre,
-// intro). Chaque champ vide retombe sur le texte par défaut du site.
+// --- Page Documentation : contenu éditable -----------------------------------
+// Page WP « documentation », groupe « documentationFields » : en-tête,
+// bandeau brochure, titres de sections et vidéos. Chaque champ vide retombe
+// sur le texte par défaut du site ; section vidéos masquée si vide.
+export type DocVideo = {
+  categorie: string | null;
+  titre: string;
+  url: string;
+  duree: string | null;
+  image: string | null;
+};
+
 export type DocumentationHead = {
   eyebrow: string | null;
   titre: string | null;
   intro: string | null;
+  brochureImage: { sourceUrl: string; altText: string } | null;
+  brochureEyebrow: string | null;
+  brochureTitle: string | null;
+  brochureText: string | null;
+  brochureMetas: string[]; // étiquettes non vides (PDF, FR/EN, pages…)
+  brochureCta: string | null;
+  brochureNote: string | null;
+  brochureFileUrl: string | null;
+  docsTitle: string | null;
+  docsNote: string | null;
+  videosTitle: string | null;
+  videosSeeAllLabel: string | null;
+  videosSeeAllUrl: string | null;
+  videos: DocVideo[];
 };
 
+const DOC_SELECTION_FULL = `eyebrow titre intro
+  brochureImage { node { sourceUrl altText } }
+  brochureEyebrow brochureTitle brochureText
+  brochureMeta1 brochureMeta2 brochureMeta3
+  brochureCta brochureNote
+  brochureFichier { node { mediaItemUrl } }
+  docsTitle docsNote
+  videosTitle videosSeeAllLabel videosSeeAllUrl
+  videos { categorie titre url duree image { node { sourceUrl } } }`;
+
 export async function getDocumentationHead(locale: WpLocale = 'fr'): Promise<DocumentationHead | null> {
-  type F = { eyebrow: string | null; titre: string | null; intro: string | null };
-  // Variantes de slug (historique de slugs dupliqués sur ce WP).
-  for (const slug of ['documentation', 'documentation-2']) {
-    const f = await getPageFields<F>(slug, 'documentationFields', 'eyebrow titre intro', locale);
-    if (f) {
-      return { eyebrow: f.eyebrow || null, titre: f.titre || null, intro: f.intro || null };
+  type F = {
+    eyebrow: string | null; titre: string | null; intro: string | null;
+    brochureImage?: { node: { sourceUrl: string; altText: string | null } | null } | null;
+    brochureEyebrow?: string | null; brochureTitle?: string | null; brochureText?: string | null;
+    brochureMeta1?: string | null; brochureMeta2?: string | null; brochureMeta3?: string | null;
+    brochureCta?: string | null; brochureNote?: string | null;
+    brochureFichier?: { node: { mediaItemUrl: string | null } | null } | null;
+    docsTitle?: string | null; docsNote?: string | null;
+    videosTitle?: string | null; videosSeeAllLabel?: string | null; videosSeeAllUrl?: string | null;
+    videos?: ({ categorie: string | null; titre: string | null; url: string | null; duree: string | null; image: { node: { sourceUrl: string | null } | null } | null } | null)[] | null;
+  };
+  // Variantes de slug (historique de slugs dupliqués sur ce WP), sélection
+  // complète puis repli en-tête seul (WP pas encore à jour).
+  let f: F | null = null;
+  for (const selection of [DOC_SELECTION_FULL, 'eyebrow titre intro']) {
+    for (const slug of ['documentation', 'documentation-2']) {
+      f = await getPageFields<F>(slug, 'documentationFields', selection, locale);
+      if (f) break;
     }
+    if (f) break;
   }
-  return null;
+  if (!f) return null;
+  return {
+    eyebrow: f.eyebrow || null,
+    titre: f.titre || null,
+    intro: f.intro || null,
+    brochureImage: f.brochureImage?.node
+      ? { sourceUrl: f.brochureImage.node.sourceUrl, altText: f.brochureImage.node.altText ?? '' }
+      : null,
+    brochureEyebrow: f.brochureEyebrow || null,
+    brochureTitle: f.brochureTitle || null,
+    brochureText: f.brochureText || null,
+    brochureMetas: [f.brochureMeta1, f.brochureMeta2, f.brochureMeta3]
+      .filter((m): m is string => !!m && m.trim() !== ''),
+    brochureCta: f.brochureCta || null,
+    brochureNote: f.brochureNote || null,
+    brochureFileUrl: f.brochureFichier?.node?.mediaItemUrl || null,
+    docsTitle: f.docsTitle || null,
+    docsNote: f.docsNote || null,
+    videosTitle: f.videosTitle || null,
+    videosSeeAllLabel: f.videosSeeAllLabel || null,
+    videosSeeAllUrl: f.videosSeeAllUrl || null,
+    videos: (f.videos ?? [])
+      .filter((v): v is NonNullable<typeof v> => !!v && !!v.url)
+      .map((v) => ({
+        categorie: v.categorie || null,
+        titre: decodeEntities(v.titre ?? ''),
+        url: v.url as string,
+        duree: v.duree || null,
+        image: v.image?.node?.sourceUrl || null,
+      })),
+  };
 }
 
 // --- Page Nos data centers : bandeau visite -----------------------------------

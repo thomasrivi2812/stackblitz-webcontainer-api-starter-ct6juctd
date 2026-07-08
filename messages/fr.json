@@ -455,6 +455,18 @@
     "doneTitle": "Bonne lecture !",
     "doneText": "Le téléchargement a démarré. Sinon,",
     "doneLink": "cliquez ici",
-    "close": "Fermer"
+    "close": "Fermer",
+    "brochureEyebrow": "Brochure réseau",
+    "brochureTitle": "Brochure Nation Data Center",
+    "brochureText": "L'essentiel du réseau en un document : implantations, puissances IT, niveaux de disponibilité, engagements environnementaux et échéances d'ouverture.",
+    "brochureMeta1": "PDF",
+    "brochureMeta2": "FR / EN",
+    "brochureCta": "Télécharger la brochure",
+    "brochureNote": "Envoi contre e-mail professionnel",
+    "docsTitle": "Documents à télécharger",
+    "docsNote": "Plaquettes, fiches et livrets · PDF",
+    "videosTitle": "En vidéo",
+    "videosSeeAll": "Voir toutes les vidéos",
+    "playVideo": "Lire la vidéo"
   }
 }

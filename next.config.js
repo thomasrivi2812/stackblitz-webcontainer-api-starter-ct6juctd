@@ -38,7 +38,8 @@ const securityHeaders = [
       // sdk.privacy-center.org / api.privacy-center.org = CMP Didomi (cookies).
       `script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://sdk.privacy-center.org${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://www.gstatic.com https://sdk.privacy-center.org`,
+      // i.ytimg.com = vignettes YouTube déduites (vidéos de la page Documentation).
+      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://www.gstatic.com https://sdk.privacy-center.org https://i.ytimg.com`,
       "font-src 'self' data:",
       `connect-src 'self' https://${WP_HOST} https://www.google.com https://sdk.privacy-center.org https://api.privacy-center.org`,
       // Intégrations vidéo (YouTube/Vimeo) + iframe reCAPTCHA ; le reste est bloqué.

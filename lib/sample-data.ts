@@ -615,6 +615,7 @@ export const sampleLivrets: Livret[] = [
     fichierUrl: '/brochure-ndc.pdf',
     cover: null,
     format: 'portrait',
+    meta: 'PDF · FR',
   },
   {
     titre: 'Fiche réseau — sites & capacités',
@@ -624,6 +625,7 @@ export const sampleLivrets: Livret[] = [
     fichierUrl: '/brochure-ndc.pdf',
     cover: null,
     format: 'paysage',
+    meta: 'PDF · FR',
   },
   {
     titre: 'Présentation Nation Data Center',
@@ -633,5 +635,6 @@ export const sampleLivrets: Livret[] = [
     fichierUrl: '/brochure-ndc.pdf',
     cover: null,
     format: 'paysage',
+    meta: 'PDF · FR',
   },
 ];

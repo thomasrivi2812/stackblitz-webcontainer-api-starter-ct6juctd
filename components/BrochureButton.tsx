@@ -16,9 +16,13 @@ type Props = {
   className?: string;
   /** URL du document défini dans WP (champ « Brochure » de l'accueil). */
   pdfUrl?: string | null;
+  /** Libellé du bouton (WP) ; défaut = texte du site. */
+  label?: string | null;
+  /** Contenu enrichi du déclencheur (icône…) — prioritaire sur label. */
+  children?: React.ReactNode;
 };
 
-export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: Props) {
+export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, label = null, children }: Props) {
   const t = useTranslations('brochure');
   const PDF_URL = pdfUrl || DEFAULT_PDF_URL;
   const [open, setOpen] = useState(false);
@@ -69,7 +73,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null }: P
   return (
     <>
       <button type="button" className={className} onClick={() => setOpen(true)}>
-        {t('trigger')}
+        {children ?? label ?? t('trigger')}
       </button>
 
       {open && (

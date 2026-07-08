@@ -3603,24 +3603,106 @@ select:focus-visible,
   color: #fff;
 }
 
-/* ---------- Documentation (livrets) ---------- */
+/* ---------- Documentation ---------- */
+/* Bandeau brochure : couverture + textes + étiquettes + CTA (tout WP) */
+.doc-hero {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 44px;
+  align-items: center;
+  padding: 40px 44px;
+  border-radius: 16px;
+  background: var(--surface-alt, #f4f7fb);
+  border: 1px solid var(--line);
+}
+.doc-hero-cover { display: flex; justify-content: center; }
+.doc-hero-cover img {
+  max-width: 100%;
+  max-height: 340px;
+  border-radius: 8px;
+  box-shadow: 0 22px 50px -22px rgba(20, 40, 73, 0.5);
+}
+.doc-hero-ph {
+  display: flex; flex-direction: column; justify-content: space-between;
+  width: 240px; aspect-ratio: 3 / 4; padding: 20px 18px;
+  border-radius: 8px;
+  background: linear-gradient(160deg, var(--marine) 0%, var(--marine-800) 100%);
+  box-shadow: 0 22px 50px -22px rgba(20, 40, 73, 0.5);
+}
+.doc-hero-ph-mark { color: rgba(255, 255, 255, 0.9); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; }
+.doc-hero-ph-title { color: #fff; font-size: 18px; font-weight: 700; line-height: 1.3; border-top: 2px solid var(--red); padding-top: 12px; }
+.doc-hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--turquoise-700); margin-bottom: 12px;
+}
+.doc-hero-eyebrow::before { content: ''; width: 22px; height: 2.5px; border-radius: 2px; background: var(--red); }
+.doc-hero-body h2 { font-size: clamp(22px, 2.6vw, 28px); color: var(--heading); margin: 0 0 10px; }
+.doc-hero-body > p { color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 62ch; margin: 0 0 16px; }
+.doc-hero-metas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+.doc-hero-metas span {
+  font-size: 12px; font-weight: 600; color: #1c7fae;
+  background: rgba(45, 175, 230, 0.12);
+  padding: 4px 11px; border-radius: 6px;
+}
+.doc-hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.doc-hero-note { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 860px) {
+  .doc-hero { grid-template-columns: 1fr; gap: 26px; padding: 26px 22px; }
+  .doc-hero-cover img, .doc-hero-ph { max-height: 260px; width: auto; }
+}
+
+/* Têtes de section (titre + note ou lien à droite) */
+.doc-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.doc-sec-head h2 { font-size: clamp(20px, 2.2vw, 24px); color: var(--heading); margin: 0; }
+.doc-sec-note { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+
+/* Grille des documents : cartes uniformes (zone média 16:9), les couvertures
+   portrait sont présentées entières dans la même zone → rangées alignées */
 .lvc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 .lvc-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   padding: 0;
-  border: none;
-  background: none;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 14px 34px -26px rgba(20, 40, 73, 0.45);
   cursor: pointer;
   font: inherit;
   text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-/* Couverture au format livre (3:4), ombre portée façon ouvrage posé */
+.lvc-card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -26px rgba(20, 40, 73, 0.55); }
+.lvc-card-media { position: relative; display: block; aspect-ratio: 16 / 9; background: var(--surface-alt, #f1f5fa); }
+.lvc-card-media .lvc-cover { position: absolute; inset: 0; aspect-ratio: auto; border: none; border-radius: 0; box-shadow: none; }
+.lvc-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Document vertical : couverture entière, centrée sur fond doux */
+.lvc-card-media--portrait { background: linear-gradient(150deg, #e8eef7 0%, #f4f7fb 100%); }
+.lvc-card-media--portrait img { object-fit: contain; padding: 12px 0; }
+.lvc-card-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--line);
+}
+.lvc-card-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lvc-name { font-size: 15px; font-weight: 600; color: var(--heading); line-height: 1.3; }
+.lvc-meta { font-size: 12.5px; color: var(--muted); }
+.lvc-dl {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--line); display: grid; place-items: center;
+  color: var(--marine);
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.lvc-card:hover .lvc-dl { background: var(--marine); border-color: var(--marine); color: #fff; }
+.lvc-card:hover .lvc-name { color: var(--turquoise-700); }
+
+/* Couverture (utilisée dans la MODALE) : format livre 3:4, paysage 16:9 */
 .lvc-cover {
   display: block;
   aspect-ratio: 3 / 4;
@@ -3628,18 +3710,9 @@ select:focus-visible,
   overflow: hidden;
   border: 1px solid var(--line);
   box-shadow: var(--shadow-md);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.lvc-card:hover .lvc-cover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
 }
 .lvc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
-/* Format paysage (slides / présentation, choisi dans WP) : couverture 16:9,
-   même emprise que les autres cartes de la grille */
 .lvc-cover--paysage { aspect-ratio: 16 / 9; }
-/* Deux paysage consécutifs empilés dans la même colonne de la grille */
-.lvc-stack { display: flex; flex-direction: column; gap: 24px; }
 /* Vignette stylisée quand aucune couverture n'est définie dans WP */
 .lvc-cover-ph {
   display: flex;
@@ -3663,13 +3736,49 @@ select:focus-visible,
   border-top: 2px solid var(--red);
   padding-top: 12px;
 }
-.lvc-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--heading);
-  line-height: 1.35;
+
+/* Vidéos (vignettes + lecteur en modale) */
+.vdc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
-.lvc-card:hover .lvc-name { color: var(--turquoise-700); }
+.vdc-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 14px 34px -26px rgba(20, 40, 73, 0.45);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.vdc-card:hover { transform: translateY(-3px); box-shadow: 0 22px 44px -26px rgba(20, 40, 73, 0.55); }
+.vdc-media { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; }
+.vdc-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vdc-media-ph { position: absolute; inset: 0; background: linear-gradient(150deg, var(--marine) 0%, var(--marine-800) 100%); }
+.vdc-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.94); color: var(--marine);
+  box-shadow: 0 10px 26px -8px rgba(13, 27, 51, 0.55);
+  transition: transform 0.18s ease;
+}
+.vdc-card:hover .vdc-play { transform: translate(-50%, -50%) scale(1.1); }
+.vdc-duration {
+  position: absolute; right: 10px; bottom: 10px;
+  background: rgba(13, 27, 51, 0.85); color: #fff;
+  font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+}
+.vdc-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; }
+.vdc-cat { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--turquoise-700); }
+.vdc-title { font-size: 15px; font-weight: 600; color: var(--heading); line-height: 1.35; }
+.vdc-card:hover .vdc-title { color: var(--turquoise-700); }
 
 /* ---------- Bandeau visite (page Nos data centers) ---------- */
 /* Bandeau pleine largeur (bord à bord) : carte du réseau à gauche,

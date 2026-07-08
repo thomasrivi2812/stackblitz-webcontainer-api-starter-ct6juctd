@@ -455,6 +455,18 @@
     "doneTitle": "Enjoy the read!",
     "doneText": "The download has started. If not,",
     "doneLink": "click here",
-    "close": "Close"
+    "close": "Close",
+    "brochureEyebrow": "Network brochure",
+    "brochureTitle": "Nation Data Center brochure",
+    "brochureText": "The essentials of the network in one document: locations, IT power, availability levels, environmental commitments and opening timelines.",
+    "brochureMeta1": "PDF",
+    "brochureMeta2": "FR / EN",
+    "brochureCta": "Download the brochure",
+    "brochureNote": "Sent against a business email",
+    "docsTitle": "Documents to download",
+    "docsNote": "Booklets, sheets and brochures · PDF",
+    "videosTitle": "On video",
+    "videosSeeAll": "See all videos",
+    "playVideo": "Play video"
   }
 }
