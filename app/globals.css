@@ -3229,7 +3229,7 @@ select:focus-visible,
 /* ---------- Fiche data center : hero immersif (image plein cadre) ---------- */
 .dc-hero-cover {
   position: relative; overflow: visible;
-  padding: 0; background: none; min-height: 520px;
+  padding: 0; background: none; min-height: 600px;
   display: flex; align-items: flex-end;
 }
 /* Neutralise la grille de fond des autres sous-page heroes */
@@ -3242,12 +3242,12 @@ select:focus-visible,
 .dc-hero-cover::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
-    /* Colonne gauche uniformément sombre (horizontal → indépendant de la hauteur) */
-    linear-gradient(90deg, rgba(11, 22, 44, 0.94) 0%, rgba(11, 22, 44, 0.9) 34%, rgba(11, 22, 44, 0.5) 68%, rgba(11, 22, 44, 0.34) 100%),
+    /* Colonne gauche assombrie (horizontal → indépendant de la hauteur) */
+    linear-gradient(90deg, rgba(11, 22, 44, 0.82) 0%, rgba(11, 22, 44, 0.76) 34%, rgba(11, 22, 44, 0.42) 68%, rgba(11, 22, 44, 0.26) 100%),
     /* Renfort bas (CTA / stats) */
-    linear-gradient(0deg, rgba(11, 22, 44, 0.72) 0%, rgba(11, 22, 44, 0) 50%),
-    /* Plancher global : jamais totalement transparent, même image très claire */
-    linear-gradient(0deg, rgba(11, 22, 44, 0.22), rgba(11, 22, 44, 0.22));
+    linear-gradient(0deg, rgba(11, 22, 44, 0.58) 0%, rgba(11, 22, 44, 0) 50%),
+    /* Plancher global léger : jamais totalement transparent, même image claire */
+    linear-gradient(0deg, rgba(11, 22, 44, 0.14), rgba(11, 22, 44, 0.14));
 }
 /* padding-top seul : conserve le padding horizontal du .container.
    Sélecteur à double classe : bat la règle partagée « .dc-hero .container
