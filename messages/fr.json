@@ -16,10 +16,15 @@
     "ressources": "Ressources",
     "documentation": "Documentation",
     "servicesAll": "Tous nos services",
-    "engagementsPromo": "Découvrir nos engagements ?",
+    "engagementsPromo": "Découvrir nos engagements",
     "engagementsPromoEyebrow": "Éco-responsabilité",
     "equipePromo": "Découvrir notre équipe",
-    "equipePromoEyebrow": "Nos experts"
+    "equipePromoEyebrow": "Nos experts",
+    "ariaMain": "Navigation principale",
+    "documentationSub": "Livrets et brochures à télécharger",
+    "actualitesSub": "La vie du réseau NDC",
+    "visitePromo": "Demander une visite",
+    "visitePromoEyebrow": "Sur le terrain"
   },
   "footer": {
     "tagline": "Hébergement souverain, responsable et de proximité, sur l’ensemble du territoire français.",

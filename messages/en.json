@@ -16,10 +16,15 @@
     "ressources": "Resources",
     "documentation": "Documentation",
     "servicesAll": "All our services",
-    "engagementsPromo": "Discover our commitments?",
+    "engagementsPromo": "Discover our commitments",
     "engagementsPromoEyebrow": "Sustainability",
     "equipePromo": "Meet our team",
-    "equipePromoEyebrow": "Our experts"
+    "equipePromoEyebrow": "Our experts",
+    "ariaMain": "Main navigation",
+    "documentationSub": "Booklets and brochures to download",
+    "actualitesSub": "Life of the NDC network",
+    "visitePromo": "Request a visit",
+    "visitePromoEyebrow": "On site"
   },
   "footer": {
     "tagline": "Sovereign, responsible and local hosting, across the whole of France.",

@@ -1639,10 +1639,29 @@ export type SiteBranding = {
   // onglet Marque de l'accueil). Null = image par défaut du site.
   equipeImage: string | null;   // carte « Découvrir notre équipe » (Nos services)
   offresImage: string | null;   // carte « Découvrir nos engagements » (Nos offres)
+  reseauImage: string | null;   // carte « Demander une visite » (Notre réseau)
 };
 
 const SITE_BRANDING_QUERY = gql`
   query SiteBranding {
+    pages(first: 1, where: { name: "accueil", language: FR }) {
+      nodes {
+        homeFields {
+          siteLogo { node { sourceUrl } }
+          siteLogoWhite { node { sourceUrl } }
+          headerEquipeImage { node { sourceUrl } }
+          headerOffresImage { node { sourceUrl } }
+          headerReseauImage { node { sourceUrl } }
+        }
+      }
+    }
+  }
+`;
+
+// Variante SANS headerReseauImage (champ le plus récent) : si le WP n'est pas
+// encore à jour, on garde au moins le logo et les deux autres cartes.
+const SITE_BRANDING_QUERY_NO_RESEAU = gql`
+  query SiteBrandingNoReseau {
     pages(first: 1, where: { name: "accueil", language: FR }) {
       nodes {
         homeFields {
@@ -1656,9 +1675,8 @@ const SITE_BRANDING_QUERY = gql`
   }
 `;
 
-// Variante SANS headerEquipeImage : si le champ n'existe pas encore dans le
-// schéma WP (groupe non mis à jour), la requête complète échoue — on retombe
-// sur celle-ci pour ne pas perdre le logo.
+// Variante minimale : si même headerEquipeImage n'existe pas dans le schéma,
+// on retombe ici pour ne pas perdre le logo.
 const SITE_BRANDING_QUERY_LEGACY = gql`
   query SiteBrandingLegacy {
     pages(first: 1, where: { name: "accueil", language: FR }) {
@@ -1673,13 +1691,14 @@ const SITE_BRANDING_QUERY_LEGACY = gql`
 `;
 
 async function _getSiteBranding(): Promise<SiteBranding> {
-  const empty: SiteBranding = { logo: null, logoWhite: null, equipeImage: null, offresImage: null };
+  const empty: SiteBranding = { logo: null, logoWhite: null, equipeImage: null, offresImage: null, reseauImage: null };
   if (!endpoint) return empty;
   type F = {
     siteLogo: { node: { sourceUrl: string | null } | null } | null;
     siteLogoWhite: { node: { sourceUrl: string | null } | null } | null;
     headerEquipeImage?: { node: { sourceUrl: string | null } | null } | null;
     headerOffresImage?: { node: { sourceUrl: string | null } | null } | null;
+    headerReseauImage?: { node: { sourceUrl: string | null } | null } | null;
   };
   const client = new GraphQLClient(endpoint);
   const run = async (query: string) => {
@@ -1687,19 +1706,24 @@ async function _getSiteBranding(): Promise<SiteBranding> {
     return data.pages?.nodes?.[0]?.homeFields ?? null;
   };
   try {
-    // 1) Requête complète ; 2) repli sans headerEquipeImage si le champ
-    //    n'existe pas encore côté WP (le logo reste servi).
+    // Requête complète, puis replis progressifs si le schéma WP n'a pas
+    // encore les champs les plus récents (le logo reste toujours servi).
     let f: F | null = null;
     try {
       f = await run(SITE_BRANDING_QUERY);
     } catch {
-      f = await run(SITE_BRANDING_QUERY_LEGACY);
+      try {
+        f = await run(SITE_BRANDING_QUERY_NO_RESEAU);
+      } catch {
+        f = await run(SITE_BRANDING_QUERY_LEGACY);
+      }
     }
     return {
       logo: f?.siteLogo?.node?.sourceUrl || null,
       logoWhite: f?.siteLogoWhite?.node?.sourceUrl || null,
       equipeImage: f?.headerEquipeImage?.node?.sourceUrl || null,
       offresImage: f?.headerOffresImage?.node?.sourceUrl || null,
+      reseauImage: f?.headerReseauImage?.node?.sourceUrl || null,
     };
   } catch (error) {
     logWpError('branding (logo du site)', error);

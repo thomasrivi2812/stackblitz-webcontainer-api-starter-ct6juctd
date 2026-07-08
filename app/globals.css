@@ -3759,18 +3759,60 @@ select:focus-visible,
    allongée. Calé sur le bord gauche du bouton ; la largeur se réduit avec
    l'écran pour ne jamais déborder à droite. */
 .nav-dd-split.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: 0; }
+/* Menu réseau : sites (nom + pastille de statut + ville) + carte « Demander
+   une visite ». Mêmes règles de rétrécissement que le menu services. */
+.nav-dd-split.nav-dd-reseau { min-width: 780px; grid-template-columns: 1fr 300px; padding: 10px; left: 0; }
 @media (max-width: 1439px) {
   .nav-dd-split.nav-dd-services { min-width: 720px; grid-template-columns: 1fr 290px; }
+  .nav-dd-split.nav-dd-reseau { min-width: 660px; grid-template-columns: 1fr 260px; }
 }
 @media (max-width: 1199px) {
   .nav-dd-split.nav-dd-services { min-width: 600px; grid-template-columns: 1fr 240px; }
+  .nav-dd-split.nav-dd-reseau { min-width: 560px; grid-template-columns: 1fr 220px; }
 }
 @media (max-width: 1049px) {
   .nav-dd-split.nav-dd-services { min-width: 390px; grid-template-columns: 1fr; }
   .nav-dd-services .nav-dd-promo { min-height: 120px; }
+  .nav-dd-split.nav-dd-reseau { min-width: 390px; grid-template-columns: 1fr; }
+  .nav-dd-reseau .nav-dd-promo { min-height: 120px; }
 }
 .nav-dd-services .nav-dd-grid { gap: 4px 10px; }
 .nav-dd-services .nav-dd-item { padding: 10px 12px; }
+.nav-dd-reseau .nav-dd-grid { gap: 4px 10px; }
+.nav-dd-reseau .nav-dd-item { padding: 10px 12px; }
+
+/* Pastille de statut du menu réseau — même code couleur que les cards */
+.nav-dd-status {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1.5px 8px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: 1.5px;
+  white-space: nowrap;
+}
+.nav-dd-status.livre { background: rgba(57, 177, 132, 0.13); color: #25835f; }
+.nav-dd-status.construction { background: rgba(232, 192, 78, 0.18); color: #96741a; }
+.nav-dd-status.avenir { background: rgba(45, 175, 230, 0.13); color: #1c7fae; }
+
+/* Petits menus (Ressources, À propos) : mêmes respirations que les grands */
+.nav-dd-menu { min-width: 280px; padding: 10px; }
+.nav-dd-menu .nav-dd-item { padding: 10px 12px; }
+
+/* Page courante : soulignement persistant + accent (repère de navigation) */
+.nav .nav-link.active { color: var(--turquoise-700); }
+.nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--turquoise);
+  border-radius: 1px;
+}
 
 /* Portail client dans le menu Ressources : bouton bordé, détaché des liens */
 .nav-dd-portal {
