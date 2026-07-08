@@ -217,25 +217,28 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               </svg>
             </Link>
           </div>
-          <div className="dc-grid-v2">
-            {preview.map((dc) => {
+          {/* Vitrine : grand site à la une + deux cards compactes + carte
+              marine « Le réseau grandit » (textes éditables dans WP). */}
+          <div className="dc-showcase">
+            {preview[0] && (() => {
+              const dc = preview[0];
               const { key, label } = statutInfo(dc.datacenterFields.statut);
               return (
-                <a className="dc-tile" key={dc.slug} href={`/datacenters/${dc.slug}`}>
-                  <div className="dc-tile-media">
+                <a className="dc-feature" href={`/datacenters/${dc.slug}`}>
+                  <div className="dc-feature-media">
                     <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
-                    <span className={`dc-tile-status ${key}`}><span className="bar" />{label}</span>
                   </div>
-                  <div className="dc-tile-body">
-                    <div className="dc-tile-top">
-                      <h3>{dc.title}</h3>
-                      {dc.datacenterFields.ville && <span className="dc-tile-region">{dc.datacenterFields.ville}</span>}
-                    </div>
-                    <ul className="dc-tile-specs">
+                  <span className={`dc-tile-status ${key}`}><span className="bar" />{label}</span>
+                  <div className="dc-feature-body">
+                    <h3>
+                      {dc.title}
+                      {dc.datacenterFields.ville && <span className="dc-feature-ville">{dc.datacenterFields.ville}</span>}
+                    </h3>
+                    {dc.datacenterFields.accroche && <p>{dc.datacenterFields.accroche}</p>}
+                    <ul className="dc-feature-specs">
                       {dc.datacenterFields.puissance && (
                         <li><span>{t.specPuissance}</span><strong>{dc.datacenterFields.puissance}</strong></li>
                       )}
-                      {/* Statut retiré : déjà affiché en badge sur l'image (évite la répétition). */}
                       {dc.datacenterFields.region && (
                         <li><span>{t.specRegion}</span><strong>{dc.datacenterFields.region}</strong></li>
                       )}
@@ -243,7 +246,49 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                   </div>
                 </a>
               );
-            })}
+            })()}
+
+            <div className="dc-side">
+              {preview.slice(1, 3).map((dc) => {
+                const { key, label } = statutInfo(dc.datacenterFields.statut);
+                return (
+                  <a className="dc-mini" key={dc.slug} href={`/datacenters/${dc.slug}`}>
+                    <div className="dc-mini-media">
+                      <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
+                    </div>
+                    <div className="dc-mini-body">
+                      <span className={`dc-mini-status ${key}`}><span className="bar" />{label}</span>
+                      <div className="dc-mini-top">
+                        <h3>{dc.title}</h3>
+                        {dc.datacenterFields.ville && <span className="dc-mini-ville">{dc.datacenterFields.ville}</span>}
+                      </div>
+                      <p className="dc-mini-specs">
+                        {dc.datacenterFields.puissance && <strong>{dc.datacenterFields.puissance}</strong>}
+                        {dc.datacenterFields.puissance && dc.datacenterFields.region && <span aria-hidden="true"> · </span>}
+                        {dc.datacenterFields.region}
+                      </p>
+                    </div>
+                  </a>
+                );
+              })}
+
+              {/* Carte « Le réseau grandit » — chaque texte éditable dans WP */}
+              <Link href="/datacenters" className="dc-grow">
+                <span className="dc-grow-eyebrow">{wp?.growEyebrow || t.growEyebrow}</span>
+                <span className="dc-grow-num">
+                  {wp?.growNumber || t.growNumber}
+                  <span>{wp?.growNumberLabel || t.growNumberLabel}</span>
+                </span>
+                <p>{wp?.growText || t.growText}</p>
+                <span className="dc-grow-cta">
+                  {wp?.growCta || t.growCta}
+                  {' '}
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            </div>
           </div>
           <div className="map-wrap">
             <NetworkMap points={points} />

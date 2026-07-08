@@ -1292,6 +1292,12 @@ export type HomeContent = {
   dcTitle: string | null;
   dcSub: string | null;
   dcSeeAll: string | null;
+  // Carte marine « Le réseau grandit » (section data centers de la home).
+  growEyebrow: string | null;
+  growNumber: string | null;
+  growNumberLabel: string | null;
+  growText: string | null;
+  growCta: string | null;
   // Section « Nos services »
   servicesEyebrow: string | null;
   servicesTitle1: string | null;
@@ -1398,12 +1404,23 @@ const HOME_FIELDS_SELECTION = `
   brochure { node { mediaItemUrl } }
 `;
 
-const HOME_QUERY = gql`
+// Champs les plus récents (carte « Le réseau grandit ») isolés de la sélection
+// principale : si le WP n'a pas encore ces champs dans son schéma, la requête
+// complète échoue et on retente SANS eux — le reste de la home reste éditable.
+const HOME_FIELDS_GROW = `
+  growEyebrow
+  growNumber
+  growNumberLabel
+  growText
+  growCta
+`;
+
+const homeQuery = (selection: string) => gql`
   query HomeContent($language: LanguageCodeFilterEnum) {
     pages(first: 1, where: { name: "accueil", language: $language }) {
       nodes {
         language { code }
-        homeFields { ${HOME_FIELDS_SELECTION} }
+        homeFields { ${selection} }
       }
     }
   }
@@ -1413,21 +1430,26 @@ const HOME_QUERY = gql`
 // Sert quand la page traduite porte un slug différent (ex. « accueil-2 ») et n'est
 // donc pas trouvée par name:"accueil". Appelée dans un try/catch isolé : si le
 // schéma WPGraphQL n'expose pas `translations`, on retombe sans casse sur le FR.
-const HOME_TRANSLATIONS_QUERY = gql`
+const homeTranslationsQuery = (selection: string) => gql`
   query HomeContentTranslations {
     pages(first: 1, where: { name: "accueil", language: FR }) {
       nodes {
-        homeFields { ${HOME_FIELDS_SELECTION} }
+        homeFields { ${selection} }
         translations {
           ... on Page {
             language { code }
-            homeFields { ${HOME_FIELDS_SELECTION} }
+            homeFields { ${selection} }
           }
         }
       }
     }
   }
 `;
+
+const HOME_QUERY = homeQuery(HOME_FIELDS_SELECTION + HOME_FIELDS_GROW);
+const HOME_QUERY_LEGACY = homeQuery(HOME_FIELDS_SELECTION);
+const HOME_TRANSLATIONS_QUERY = homeTranslationsQuery(HOME_FIELDS_SELECTION + HOME_FIELDS_GROW);
+const HOME_TRANSLATIONS_QUERY_LEGACY = homeTranslationsQuery(HOME_FIELDS_SELECTION);
 
 type WpHomeFields = {
   heroEyebrow: string | null;
@@ -1446,6 +1468,11 @@ type WpHomeFields = {
   dcTitle: string | null;
   dcSub: string | null;
   dcSeeAll: string | null;
+  growEyebrow?: string | null;
+  growNumber?: string | null;
+  growNumberLabel?: string | null;
+  growText?: string | null;
+  growCta?: string | null;
   servicesEyebrow: string | null;
   servicesTitle1: string | null;
   servicesTitle2: string | null;
@@ -1509,6 +1536,11 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     dcTitle: f.dcTitle || null,
     dcSub: f.dcSub || null,
     dcSeeAll: f.dcSeeAll || null,
+    growEyebrow: f.growEyebrow || null,
+    growNumber: f.growNumber || null,
+    growNumberLabel: f.growNumberLabel || null,
+    growText: f.growText || null,
+    growCta: f.growCta || null,
     servicesEyebrow: f.servicesEyebrow || null,
     servicesTitle1: f.servicesTitle1 || null,
     servicesTitle2: f.servicesTitle2 || null,
@@ -1584,9 +1616,14 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
   //    slug traduit diffère (ex. « accueil-2 ») → on la rejette pour passer au
   //    repli traduction (étape 2), qui ramène le bon contenu traduit.
   try {
-    const data = await client.request<{ pages: { nodes: { language: { code: string | null } | null; homeFields: WpHomeFields }[] } }>(
-      HOME_QUERY, { language: wpLang(locale) },
-    );
+    type HomeData = { pages: { nodes: { language: { code: string | null } | null; homeFields: WpHomeFields }[] } };
+    let data: HomeData;
+    try {
+      data = await client.request<HomeData>(HOME_QUERY, { language: wpLang(locale) });
+    } catch {
+      // Champs « grow » absents du schéma WP → on retente sans eux.
+      data = await client.request<HomeData>(HOME_QUERY_LEGACY, { language: wpLang(locale) });
+    }
     const node = data.pages?.nodes?.[0];
     const code = (node?.language?.code ?? '').toUpperCase();
     // Accepte si la langue correspond, OU si le schéma n'expose pas `language`
@@ -1604,12 +1641,18 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
   // 2) Langue secondaire introuvable par slug (slug traduit différent, ex.
   //    « accueil-2 ») → on récupère la page FR et sa traduction via Polylang.
   try {
-    const data = await client.request<{
+    type HomeTrData = {
       pages: { nodes: {
         homeFields: WpHomeFields;
         translations: ({ language: { code: string | null } | null; homeFields: WpHomeFields } | null)[] | null;
       }[] };
-    }>(HOME_TRANSLATIONS_QUERY, {});
+    };
+    let data: HomeTrData;
+    try {
+      data = await client.request<HomeTrData>(HOME_TRANSLATIONS_QUERY, {});
+    } catch {
+      data = await client.request<HomeTrData>(HOME_TRANSLATIONS_QUERY_LEGACY, {});
+    }
     const node = data.pages?.nodes?.[0];
     const want = wpLang(locale);
     const tr = node?.translations?.find(

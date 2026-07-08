@@ -1958,6 +1958,94 @@ select:focus-visible,
 
 /* ===================== Tuiles Data Centers v2 ===================== */
 .dc-grid-v2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+
+/* ---------- Vitrine data centers (home) : feature + minis + carte marine --- */
+.dc-showcase { display: grid; grid-template-columns: 1.55fr 1fr; gap: 24px; }
+/* Grand site à la une : image plein cadre, textes en surimpression */
+.dc-feature {
+  position: relative; display: flex; flex-direction: column;
+  min-height: 540px; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 24px 60px -30px rgba(20, 40, 73, 0.5);
+}
+.dc-feature-media { position: absolute; inset: 0; }
+.dc-feature-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.dc-feature:hover .dc-feature-media img { transform: scale(1.03); }
+.dc-feature::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(13, 27, 51, 0) 32%, rgba(13, 27, 51, 0.82) 78%);
+}
+.dc-feature .dc-tile-status { position: absolute; top: 18px; left: 18px; z-index: 2; }
+.dc-feature-body { position: relative; z-index: 2; margin-top: auto; padding: 26px 30px 22px; color: #fff; }
+.dc-feature-body h3 { font-size: clamp(26px, 3vw, 34px); font-weight: 700; color: #fff; margin: 0 0 8px; }
+.dc-feature-ville { margin-left: 12px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); }
+.dc-feature-body > p { max-width: 52ch; color: rgba(255, 255, 255, 0.88); font-size: 14.5px; line-height: 1.55; margin: 0 0 18px; }
+.dc-feature-specs { display: flex; margin: 0; padding: 14px 0 0; list-style: none; border-top: 1px solid rgba(255, 255, 255, 0.28); }
+.dc-feature-specs li { display: flex; flex-direction: column; gap: 3px; padding-right: 26px; }
+.dc-feature-specs li + li { padding-left: 26px; border-left: 1px solid rgba(255, 255, 255, 0.28); }
+.dc-feature-specs span { font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }
+.dc-feature-specs strong { font-size: 16.5px; font-weight: 700; color: #fff; }
+/* Colonne droite : deux cards compactes + carte marine */
+.dc-side { display: flex; flex-direction: column; gap: 20px; }
+.dc-mini {
+  display: grid; grid-template-columns: 150px 1fr;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 14px 34px -24px rgba(20, 40, 73, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dc-mini:hover { transform: translateY(-3px); box-shadow: 0 20px 44px -24px rgba(20, 40, 73, 0.5); }
+.dc-mini-media { min-height: 118px; }
+.dc-mini-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dc-mini-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.dc-mini-status { display: inline-flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; }
+.dc-mini-status .bar { width: 3px; height: 12px; border-radius: 2px; }
+.dc-mini-status.livre { color: #25835f; }
+.dc-mini-status.livre .bar { background: #39b184; }
+.dc-mini-status.construction { color: #96741a; }
+.dc-mini-status.construction .bar { background: #e8c04e; }
+.dc-mini-status.avenir { color: #1c7fae; }
+.dc-mini-status.avenir .bar { background: #2dafe6; }
+.dc-mini-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.dc-mini-top h3 { font-size: 19px; font-weight: 700; color: var(--heading); margin: 0; }
+.dc-mini-ville { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.dc-mini-specs { margin: 0; font-size: 13.5px; color: var(--muted); }
+.dc-mini-specs strong { color: var(--heading); font-weight: 700; }
+/* Carte marine « Le réseau grandit » (textes éditables dans WP) */
+.dc-grow {
+  flex: 1; display: flex; flex-direction: column; align-items: flex-start;
+  padding: 28px 30px; border-radius: 14px; color: #fff;
+  background:
+    radial-gradient(120% 120% at 85% 90%, rgba(45, 175, 230, 0.28) 0%, rgba(45, 175, 230, 0) 55%),
+    linear-gradient(150deg, var(--marine) 0%, var(--marine-800) 100%);
+  box-shadow: 0 20px 48px -26px rgba(13, 27, 51, 0.65);
+  transition: transform 0.2s ease;
+}
+.dc-grow:hover { transform: translateY(-3px); }
+.dc-grow-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #d6e2f5; margin-bottom: 14px;
+}
+.dc-grow-eyebrow::before { content: ''; width: 22px; height: 2.5px; border-radius: 2px; background: var(--red); }
+.dc-grow-num { font-size: clamp(42px, 4.5vw, 58px); font-weight: 700; line-height: 1; color: #fff; margin-bottom: 10px; }
+.dc-grow-num span { margin-left: 10px; font-size: 15px; font-weight: 600; color: var(--turquoise); }
+.dc-grow > p { color: #c2d3ea; font-size: 14.5px; line-height: 1.6; margin: 0 0 20px; }
+.dc-grow-cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: auto;
+  font-size: 14.5px; font-weight: 600; color: #fff;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.45); padding-bottom: 3px;
+  transition: border-color 0.2s ease, gap 0.2s ease;
+}
+.dc-grow:hover .dc-grow-cta { border-color: var(--turquoise); gap: 12px; }
+@media (max-width: 980px) {
+  .dc-showcase { grid-template-columns: 1fr; }
+  .dc-feature { min-height: 420px; }
+}
+@media (max-width: 520px) {
+  .dc-mini { grid-template-columns: 116px 1fr; }
+  .dc-mini-body { padding: 13px 14px; }
+  .dc-feature-body { padding: 20px 18px 16px; }
+}
 .dc-tile {
   display: flex; flex-direction: column;
   background: var(--surface);
@@ -3838,7 +3926,9 @@ select:focus-visible,
   gap: 10px;
 }
 .nav-dd-split.open { display: grid; }
-.nav-dd-col { display: flex; flex-direction: column; }
+.nav-dd-col { display: flex; flex-direction: column; gap: 3px; }
+/* Menu offres (liens directs dans la colonne) : lignes plus aérées */
+.nav-dd-split .nav-dd-col > .nav-dd-item { padding: 12px; }
 /* Carte promo : photo (fournie en style inline — éditable WP), voile léger
    seulement en bas (lisibilité du texte) — la photo reste claire et visible. */
 .nav-dd-promo {

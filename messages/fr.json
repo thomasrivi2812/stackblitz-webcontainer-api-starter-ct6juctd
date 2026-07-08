@@ -108,7 +108,12 @@
     "newsCatReseau": "Réseau",
     "newsCatActu": "Actualité",
     "newsRead": "Lire l'article",
-    "heroImageAlt": "Intérieur d’un data center Nation Data Center"
+    "heroImageAlt": "Intérieur d’un data center Nation Data Center",
+    "growEyebrow": "Le réseau grandit",
+    "growNumber": "15",
+    "growNumberLabel": "sites visés",
+    "growText": "Un maillage territorial complet du réseau souverain à l'horizon 2030.",
+    "growCta": "Découvrir le réseau"
   },
   "services": {
     "eyebrow": "Nos services",

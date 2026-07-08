@@ -108,7 +108,12 @@
     "newsCatReseau": "Network",
     "newsCatActu": "News",
     "newsRead": "Read the article",
-    "heroImageAlt": "Inside a Nation Data Center data centre"
+    "heroImageAlt": "Inside a Nation Data Center data centre",
+    "growEyebrow": "The network is growing",
+    "growNumber": "15",
+    "growNumberLabel": "target sites",
+    "growText": "Complete territorial coverage of the sovereign network by 2030.",
+    "growCta": "Discover the network"
   },
   "services": {
     "eyebrow": "Our services",
