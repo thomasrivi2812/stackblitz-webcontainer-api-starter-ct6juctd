@@ -59,6 +59,14 @@ const nextConfig = {
     remotePatterns: [{ protocol: 'https', hostname: WP_HOST }],
   },
   poweredByHeader: false, // masque l'en-tête X-Powered-By: Next.js
+  // Embarque certs/ dans chaque fonction serveur déployée (Vercel) : requis
+  // pour NODE_EXTRA_CA_CERTS=/var/task/certs/instawp-ca.pem — le serveur
+  // InstaWP n'envoie pas ses certificats intermédiaires, on les fournit à Node.
+  experimental: {
+    outputFileTracingIncludes: {
+      '/**': ['./certs/**'],
+    },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
