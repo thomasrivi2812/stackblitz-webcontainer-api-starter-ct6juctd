@@ -1,4 +1,4 @@
-import { getServices, type WpLocale } from '@/lib/wordpress';
+import { getServices, getServicesPage, type WpLocale } from '@/lib/wordpress';
 import { ServiceMedia } from '@/components/ServiceMedia';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
@@ -22,15 +22,16 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 export default async function ServicesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
   const t = (await import(`../../../messages/${locale}.json`)).default.services as Record<string, string>;
-  const services = await getServices(locale);
+  // En-tête éditable dans WP (page « services ») ; champ vide = texte du site.
+  const [services, head] = await Promise.all([getServices(locale), getServicesPage(locale)]);
 
   return (
     <main>
       <section className="section" style={{ paddingBottom: 12 }}>
         <div className="container section-head">
-          <span className="eyebrow"><span className="eyebrow-dot" />{t.eyebrow}</span>
-          <h1 className="fil-rouge">{t.h1}</h1>
-          <p>{t.intro}</p>
+          <span className="eyebrow"><span className="eyebrow-dot" />{head?.eyebrow || t.eyebrow}</span>
+          <h1 className="fil-rouge">{head?.titre || t.h1}</h1>
+          <p>{head?.intro || t.intro}</p>
         </div>
       </section>
 

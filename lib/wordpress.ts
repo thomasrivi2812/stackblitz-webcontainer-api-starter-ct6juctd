@@ -2273,10 +2273,14 @@ export async function getDocumentationHead(locale: WpLocale = 'fr'): Promise<Doc
   };
 }
 
-// --- Page Nos data centers : bandeau visite -----------------------------------
-// Page WP « datacenters », groupe « datacentersPageFields » : textes du bandeau
-// carte + « Demander une visite ». Chaque champ vide = texte par défaut du site.
+// --- Page Nos data centers : en-tête + bandeau visite --------------------------
+// Page WP « datacenters », groupe « datacentersPageFields » : en-tête de page
+// (sur-titre, titre, intro) + textes du bandeau « Demander une visite ».
+// Chaque champ vide = texte par défaut du site.
 export type DatacentersVisit = {
+  eyebrow: string | null;
+  titre: string | null;
+  intro: string | null;
   visitEyebrow: string | null;
   visitTitle: string | null;
   visitText: string | null;
@@ -2284,17 +2288,49 @@ export type DatacentersVisit = {
 };
 
 export async function getDatacentersVisit(locale: WpLocale = 'fr'): Promise<DatacentersVisit | null> {
-  type F = { visitEyebrow: string | null; visitTitle: string | null; visitText: string | null; visitCta: string | null };
-  // Variantes de slug (historique de slugs dupliqués sur ce WP).
-  for (const slug of ['datacenters', 'datacenters-2', 'nos-data-centers']) {
-    const f = await getPageFields<F>(slug, 'datacentersPageFields', 'visitEyebrow visitTitle visitText visitCta', locale);
+  type F = {
+    eyebrow?: string | null; titre?: string | null; intro?: string | null;
+    visitEyebrow: string | null; visitTitle: string | null; visitText: string | null; visitCta: string | null;
+  };
+  // Sélection complète, puis repli sans les champs d'en-tête (WP pas encore
+  // à jour) ; variantes de slug (historique de slugs dupliqués sur ce WP).
+  let f: F | null = null;
+  for (const selection of [
+    'eyebrow titre intro visitEyebrow visitTitle visitText visitCta',
+    'visitEyebrow visitTitle visitText visitCta',
+  ]) {
+    for (const slug of ['datacenters', 'datacenters-2', 'nos-data-centers']) {
+      f = await getPageFields<F>(slug, 'datacentersPageFields', selection, locale);
+      if (f) break;
+    }
+    if (f) break;
+  }
+  if (!f) return null;
+  return {
+    eyebrow: f.eyebrow || null,
+    titre: f.titre || null,
+    intro: f.intro || null,
+    visitEyebrow: f.visitEyebrow || null,
+    visitTitle: f.visitTitle || null,
+    visitText: f.visitText || null,
+    visitCta: f.visitCta || null,
+  };
+}
+
+// --- Page Nos services : en-tête éditable --------------------------------------
+// Page WP « services », groupe « servicesPageFields » (sur-titre, titre, intro).
+export type ServicesPageHead = {
+  eyebrow: string | null;
+  titre: string | null;
+  intro: string | null;
+};
+
+export async function getServicesPage(locale: WpLocale = 'fr'): Promise<ServicesPageHead | null> {
+  type F = { eyebrow: string | null; titre: string | null; intro: string | null };
+  for (const slug of ['services', 'services-2', 'nos-services']) {
+    const f = await getPageFields<F>(slug, 'servicesPageFields', 'eyebrow titre intro', locale);
     if (f) {
-      return {
-        visitEyebrow: f.visitEyebrow || null,
-        visitTitle: f.visitTitle || null,
-        visitText: f.visitText || null,
-        visitCta: f.visitCta || null,
-      };
+      return { eyebrow: f.eyebrow || null, titre: f.titre || null, intro: f.intro || null };
     }
   }
   return null;

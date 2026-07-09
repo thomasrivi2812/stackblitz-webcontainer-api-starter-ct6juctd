@@ -42,9 +42,9 @@ export default async function DatacentersPage({ params: { locale } }: { params: 
     <main>
       <section className="section" style={{ paddingBottom: 24 }}>
         <div className="container section-head">
-          <span className="eyebrow">{t.eyebrow}</span>
-          <h2 className="fil-rouge">{t.h2}</h2>
-          <p>{t.intro}</p>
+          <span className="eyebrow">{visit?.eyebrow || t.eyebrow}</span>
+          <h2 className="fil-rouge">{visit?.titre || t.h2}</h2>
+          <p>{visit?.intro || t.intro}</p>
         </div>
       </section>
 

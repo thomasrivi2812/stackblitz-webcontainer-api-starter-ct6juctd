@@ -62,6 +62,42 @@ export async function GET() {
     out.diagnostic = 'Vercel n\'arrive PAS à joindre l\'endpoint (site WP en pause, DNS, pare-feu…).';
   }
 
+  // Sonde « liaison pages » : slugs des pages WP + présence des groupes ACF
+  // dans le schéma GraphQL, pour diagnostiquer un bandeau non relié
+  // (page au mauvais slug vs snippet/JSON pas importé).
+  const gq = async (query: string): Promise<{ data?: unknown; error?: string }> => {
+    try {
+      const r = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query }),
+        cache: 'no-store',
+        signal: AbortSignal.timeout(10000),
+      });
+      const j = (await r.json()) as { data?: unknown; errors?: { message: string }[] };
+      if (j.errors?.length) return { error: j.errors[0].message };
+      return { data: j.data };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : String(e) };
+    }
+  };
+  const slugsRes = await gq('{ pages(first: 100) { nodes { slug } } }');
+  out.pagesSlugs = slugsRes.error
+    ? `erreur: ${slugsRes.error}`
+    : ((slugsRes.data as { pages?: { nodes?: { slug: string }[] } })?.pages?.nodes ?? []).map((n) => n.slug);
+  const groupes: Record<string, string> = {
+    datacentersPageFields: '{ pages(where: {name: "datacenters"}) { nodes { slug datacentersPageFields { visitTitle } } } }',
+    servicesPageFields: '{ pages(where: {name: "services"}) { nodes { slug servicesPageFields { titre } } } }',
+    documentationFields: '{ pages(where: {name: "documentation"}) { nodes { slug documentationFields { titre } } } }',
+    homeGrow: '{ pages(where: {name: "accueil"}) { nodes { slug homeFields { growNumber } } } }',
+  };
+  const probe: Record<string, unknown> = {};
+  for (const [nom, query] of Object.entries(groupes)) {
+    const r = await gq(query);
+    probe[nom] = r.error ? `ABSENT DU SCHEMA (${r.error.slice(0, 80)})` : r.data;
+  }
+  out.groupes = probe;
+
   // Tests complémentaires pour localiser le blocage :
   // DNS vu par Vercel, puis GET simple sur la racine du site WP.
   const host = new URL(endpoint).hostname;
