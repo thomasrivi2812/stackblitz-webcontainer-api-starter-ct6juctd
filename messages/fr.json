@@ -116,7 +116,11 @@
     "growCta": "Découvrir le réseau",
     "linkedinTitle": "Sur LinkedIn",
     "linkedinFollow": "Suivre Nation Data Center",
-    "linkedinRead": "Voir le post"
+    "linkedinRead": "Voir le post",
+    "newsMinRead": "min de lecture",
+    "newsPromoTitle": "Ne manquez aucune actualité",
+    "newsPromoText": "Nouveaux sites, innovations, RSE et événements — suivez le réseau.",
+    "newsPromoCta": "Tout voir"
   },
   "services": {
     "eyebrow": "Nos services",
@@ -343,7 +347,8 @@
     "articlesOne": "article",
     "articlesMany": "articles",
     "forQuery": "pour",
-    "readArticle": "Lire l'article →",
+    "readArticle": "Lire l'article",
+    "minRead": "min",
     "empty": "Aucun article ne correspond à votre recherche.",
     "reset": "Réinitialiser les filtres",
     "back": "Retour aux actualités",
@@ -354,6 +359,14 @@
     "ctaTitle": "Un projet d'hébergement ?",
     "ctaText": "Nos équipes sont à votre écoute pour étudier votre besoin.",
     "ctaButton": "Nous contacter",
+    "share": "Partager",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié !",
+    "copy": "Copier",
+    "shareBoxTitle": "Cet article vous a été utile ?",
+    "shareBoxText": "Partagez-le à votre réseau ou envoyez-le à un collègue.",
+    "shareLinkedin": "LinkedIn",
+    "shareEmail": "E-mail",
     "notFound": "Article introuvable — NDC"
   },
   "download": {

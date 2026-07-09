@@ -116,7 +116,11 @@
     "growCta": "Discover the network",
     "linkedinTitle": "On LinkedIn",
     "linkedinFollow": "Follow Nation Data Center",
-    "linkedinRead": "View the post"
+    "linkedinRead": "View the post",
+    "newsMinRead": "min read",
+    "newsPromoTitle": "Never miss an update",
+    "newsPromoText": "New sites, innovations, CSR and events — follow the network.",
+    "newsPromoCta": "See all"
   },
   "services": {
     "eyebrow": "Our services",
@@ -343,7 +347,8 @@
     "articlesOne": "article",
     "articlesMany": "articles",
     "forQuery": "for",
-    "readArticle": "Read the article →",
+    "readArticle": "Read the article",
+    "minRead": "min",
     "empty": "No article matches your search.",
     "reset": "Reset filters",
     "back": "Back to news",
@@ -354,6 +359,14 @@
     "ctaTitle": "A hosting project?",
     "ctaText": "Our teams are here to study your needs.",
     "ctaButton": "Contact us",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "copied": "Link copied!",
+    "copy": "Copy",
+    "shareBoxTitle": "Did you find this article useful?",
+    "shareBoxText": "Share it with your network or send it to a colleague.",
+    "shareLinkedin": "LinkedIn",
+    "shareEmail": "E-mail",
     "notFound": "Article not found — NDC"
   },
   "download": {

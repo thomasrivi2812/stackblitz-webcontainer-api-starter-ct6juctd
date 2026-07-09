@@ -30,9 +30,11 @@ export default async function ActualitesPage({ params: { locale } }: { params: {
     <main>
       {/* ── Hero ── */}
       <section className="actu-hero">
-        <div className="container">
-          <span className="eyebrow">{t.eyebrow}</span>
-          <h1 className="fil-rouge">{t.h1}</h1>
+        <div className="container actu-hero-grid">
+          <div>
+            <span className="eyebrow">{t.eyebrow}</span>
+            <h1 className="fil-rouge">{t.h1}</h1>
+          </div>
           <p>{t.intro}</p>
         </div>
       </section>

@@ -6,6 +6,7 @@ import {
   type WpLocale,
 } from '@/lib/wordpress';
 import { ArticleDownloadButton } from '@/components/ArticleDownloadButton';
+import { ShareButtons } from '@/components/ShareButtons';
 import { sanitizeWpHtml } from '@/lib/sanitize';
 import { JsonLd } from '@/components/JsonLd';
 import { SITE_URL, localePath } from '@/lib/seo';
@@ -210,6 +211,8 @@ export default async function ArticlePage({ params }: Props) {
                 {post.author.node.name}
               </span>
             )}
+            {/* Partage : URL et titre réels de l'article */}
+            <ShareButtons url={pageUrl} title={post.title} variant="header" />
           </div>
         </div>
       </section>
@@ -232,11 +235,14 @@ export default async function ArticlePage({ params }: Props) {
       <section className="section">
         <div className="container">
           <div className="article-layout">
-            {/* Contenu principal */}
-            <article
-              className="article-content"
-              dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(post.content) }}
-            />
+            {/* Contenu principal + encart partage */}
+            <div className="article-main">
+              <article
+                className="article-content"
+                dangerouslySetInnerHTML={{ __html: sanitizeWpHtml(post.content) }}
+              />
+              <ShareButtons url={pageUrl} title={post.title} variant="box" />
+            </div>
 
             {/* Sidebar */}
             <aside className="article-sidebar">

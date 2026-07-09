@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { stripHtml } from '@/lib/wordpress';
+import { stripHtml, readingMinutes } from '@/lib/wordpress';
 import type { WPPost } from '@/lib/wordpress';
 
 function SearchIcon() {
@@ -70,7 +70,7 @@ export function ArticleSearch({ posts, categories }: Props) {
 
   return (
     <>
-      {/* ── Barre de recherche ── */}
+      {/* ── Barre de recherche + filtres catégories (même bandeau) ── */}
       <div className="actu-search-bar">
         <div className="actu-search-input-wrap">
           <span className="actu-search-icon">
@@ -93,25 +93,23 @@ export function ArticleSearch({ posts, categories }: Props) {
             </button>
           )}
         </div>
-      </div>
-
-      {/* ── Filtres catégories ── */}
-      <div className="actu-filters">
-        <button
-          className={`actu-filter-btn ${activeCat === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveCat('all')}
-        >
-          {t('all')}
-        </button>
-        {categories.map((cat) => (
+        <div className="actu-filters">
           <button
-            key={cat.slug}
-            className={`actu-filter-btn ${activeCat === cat.slug ? 'active' : ''}`}
-            onClick={() => setActiveCat(cat.slug)}
+            className={`actu-filter-btn ${activeCat === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveCat('all')}
           >
-            {cat.name}
+            {t('all')}
           </button>
-        ))}
+          {categories.map((cat) => (
+            <button
+              key={cat.slug}
+              className={`actu-filter-btn ${activeCat === cat.slug ? 'active' : ''}`}
+              onClick={() => setActiveCat(cat.slug)}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Compteur résultats ── */}
@@ -140,17 +138,22 @@ export function ArticleSearch({ posts, categories }: Props) {
                     <BuildingIcon />
                   </span>
                 )}
+                {p.categories.nodes[0] && (
+                  <span className="news-pill navy">{p.categories.nodes[0].name}</span>
+                )}
               </div>
               <div className="actu-card-body">
-                <div className="actu-card-meta">
-                  <span className="actu-card-date">{fmtDate(p.date)}</span>
-                  {p.categories.nodes[0] && (
-                    <span className="actu-card-cat">{p.categories.nodes[0].name}</span>
-                  )}
-                </div>
+                <span className="actu-card-meta">
+                  {fmtDate(p.date)} · {readingMinutes(p.content)} {t('minRead')}
+                </span>
                 <h3>{p.title}</h3>
                 <p>{stripHtml(p.excerpt)}</p>
-                <span className="actu-card-link">{t('readArticle')}</span>
+                <span className="actu-card-link">
+                  {t('readArticle')}
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
             </Link>
           ))}

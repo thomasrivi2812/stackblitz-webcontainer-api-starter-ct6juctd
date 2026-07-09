@@ -426,51 +426,67 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           </div>
 
           {posts.length > 0 && (
-            <div className="news-grid-v2">
-              {/* Article principal (le plus récent) */}
-              <a className="news-feat" href={`/actualites/${posts[0].slug}`}>
-                <div className="news-feat-media">
+            <div className="news-v3">
+              {/* Article principal — image à gauche, pastille catégorie WP sur l'image */}
+              <Link className="news-feat3" href={`/actualites/${posts[0].slug}`}>
+                <div className="news-feat3-media">
                   {posts[0].featuredImage?.node?.sourceUrl
                     ? <img src={posts[0].featuredImage.node.sourceUrl} alt={posts[0].featuredImage.node.altText || posts[0].title} />
                     : <span className="news-ph"><Icon name="building" /></span>}
+                  <span className="news-pill">{posts[0].categorie || t.newsCatActu}</span>
                 </div>
-                <div className="news-feat-body">
-                  <div className="news-meta-v2">
-                    <span className="news-cat">{posts[0].categorie || t.newsCatReseau}</span>
-                    <span className="news-date-v2">{fmtDate(posts[0].date)}</span>
-                  </div>
+                <div className="news-feat3-body">
+                  <span className="news-meta3">
+                    {fmtDate(posts[0].date)} · {posts[0].minutes ?? 1} {t.newsMinRead}
+                  </span>
                   <h3>{posts[0].title}</h3>
                   <p>{stripHtml(posts[0].excerpt)}</p>
-                  <span className="link-arrow small">
+                  <span className="news-read3">
                     {t.newsRead}
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                   </span>
                 </div>
-              </a>
+              </Link>
 
-              {/* Articles secondaires */}
-              {posts.length > 1 && (
-                <div className="news-side">
-                  {posts.slice(1).map((p) => (
-                    <a className="news-sm" key={p.slug} href={`/actualites/${p.slug}`}>
-                      <div className="news-sm-media">
-                        {p.featuredImage?.node?.sourceUrl
-                          ? <img src={p.featuredImage.node.sourceUrl} alt={p.featuredImage.node.altText || p.title} />
-                          : <span className="news-ph"><Icon name="building" /></span>}
-                      </div>
-                      <div className="news-sm-body">
-                        <div className="news-meta-v2">
-                          <span className="news-cat alt">{p.categorie || t.newsCatActu}</span>
-                          <span className="news-date-v2">{fmtDate(p.date)}</span>
-                        </div>
-                        <h3>{p.title}</h3>
-                      </div>
-                    </a>
-                  ))}
+              {/* Articles secondaires + carte « Ne manquez aucune actualité » */}
+              <div className="news-row3">
+                {posts.slice(1, 3).map((p) => (
+                  <Link className="news-card3" key={p.slug} href={`/actualites/${p.slug}`}>
+                    <div className="news-card3-media">
+                      {p.featuredImage?.node?.sourceUrl
+                        ? <img src={p.featuredImage.node.sourceUrl} alt={p.featuredImage.node.altText || p.title} />
+                        : <span className="news-ph"><Icon name="building" /></span>}
+                    </div>
+                    <div className="news-card3-body">
+                      <span className="news-meta3">
+                        <strong className="news-cat3">{p.categorie || t.newsCatActu}</strong> · {fmtDate(p.date)}
+                      </span>
+                      <h3>{p.title}</h3>
+                      <span className="news-read3">
+                        {t.newsRead}
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M5 12h14M13 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+
+                <div className="news-promo3">
+                  <div className="news-promo3-txt">
+                    <h3>{wp?.newsPromoTitle || t.newsPromoTitle}</h3>
+                    <p>{wp?.newsPromoText || t.newsPromoText}</p>
+                  </div>
+                  <Link className="news-promo3-cta" href="/actualites">
+                    {wp?.newsPromoCta || t.newsPromoCta}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14M13 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 </div>
-              )}
+              </div>
             </div>
           )}
 

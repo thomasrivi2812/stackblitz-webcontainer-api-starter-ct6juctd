@@ -123,6 +123,8 @@ export type Post = {
   featuredImage?: { node: { sourceUrl: string; altText: string } } | null;
   // Première catégorie WP de l'article (pastille) ; null = libellé par défaut.
   categorie?: string | null;
+  // Temps de lecture réel (minutes), calculé depuis le contenu WP (~200 mots/min).
+  minutes?: number;
 };
 
 // Type article complet (page listing + page article individuelle)
@@ -226,6 +228,7 @@ const recentPostsQuery = (withOrdre: boolean) => gql`
         slug
         date
         excerpt
+        content
         featuredImage { node { sourceUrl altText } }
         categories(first: 1) { nodes { name } }
         ${withOrdre ? 'actuFields { homeOrdre }' : ''}
@@ -383,6 +386,7 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
     return samplePosts;
   }
   type Node = Post & {
+    content?: string | null;
     categories?: { nodes: ({ name: string | null } | null)[] | null } | null;
     actuFields?: { homeOrdre: number | null } | null;
   };
@@ -413,6 +417,7 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
         excerpt: n.excerpt,
         featuredImage: n.featuredImage,
         categorie: n.categories?.nodes?.[0]?.name || null,
+        minutes: readingMinutes(n.content),
       }));
   } catch (error) {
     logWpError('articles', error);
@@ -704,6 +709,12 @@ export function decodeEntities(s: string | null | undefined): string {
 export function stripHtml(html: string | null | undefined): string {
   if (!html) return '';
   return decodeEntities(html.replace(/<[^>]*>/g, '')).trim();
+}
+
+// Temps de lecture estimé depuis le contenu WP (~200 mots/minute, minimum 1).
+export function readingMinutes(html: string | null | undefined): number {
+  const words = stripHtml(html).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
 }
 
 export function formatDateFr(iso: string): string {
@@ -1371,6 +1382,10 @@ export type HomeContent = {
   newsEyebrow: string | null;
   newsTitle: string | null;
   newsSeeAll: string | null;
+  // Carte marine « Ne manquez aucune actualité » (à côté des articles).
+  newsPromoTitle: string | null;
+  newsPromoText: string | null;
+  newsPromoCta: string | null;
   // Bandeau certifications / groupe Altarea
   certBannerCertTitle: string | null;
   certBannerCertSub: string | null;
@@ -1457,6 +1472,12 @@ const HOME_FIELDS_LINKEDIN = `
   linkedinUrl
   linkedinPosts { texte url date image { node { sourceUrl } } }
 `;
+// Carte marine « Ne manquez aucune actualité » (plus récent que LinkedIn).
+const HOME_FIELDS_NEWSPROMO = `
+  newsPromoTitle
+  newsPromoText
+  newsPromoCta
+`;
 
 const homeQuery = (selection: string) => gql`
   query HomeContent($language: LanguageCodeFilterEnum) {
@@ -1491,6 +1512,7 @@ const homeTranslationsQuery = (selection: string) => gql`
 
 // Paliers de sélection, du plus complet au plus ancien schéma WP.
 const HOME_SELECTION_TIERS = [
+  HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN + HOME_FIELDS_NEWSPROMO,
   HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN,
   HOME_FIELDS_SELECTION + HOME_FIELDS_GROW,
   HOME_FIELDS_SELECTION,
@@ -1552,6 +1574,9 @@ type WpHomeFields = {
   newsEyebrow: string | null;
   newsTitle: string | null;
   newsSeeAll: string | null;
+  newsPromoTitle?: string | null;
+  newsPromoText?: string | null;
+  newsPromoCta?: string | null;
   certBannerCertTitle: string | null;
   certBannerCertSub: string | null;
   certBannerCertUrl: string | null;
@@ -1646,6 +1671,9 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     newsEyebrow: f.newsEyebrow || null,
     newsTitle: f.newsTitle || null,
     newsSeeAll: f.newsSeeAll || null,
+    newsPromoTitle: f.newsPromoTitle || null,
+    newsPromoText: f.newsPromoText || null,
+    newsPromoCta: f.newsPromoCta || null,
     certBannerCertTitle: f.certBannerCertTitle || null,
     certBannerCertSub: f.certBannerCertSub || null,
     certBannerCertUrl: f.certBannerCertUrl || null,
