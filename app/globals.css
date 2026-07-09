@@ -3855,6 +3855,59 @@ select:focus-visible,
 .vdc-title { font-size: 15px; font-weight: 600; color: var(--heading); line-height: 1.35; }
 .vdc-card:hover .vdc-title { color: var(--turquoise-700); }
 
+/* ---------- Bloc « Sur LinkedIn » (section Actualités de la home) ---------- */
+.li-block { margin-top: 44px; padding-top: 32px; border-top: 1px solid var(--line); }
+.li-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+.li-title { display: inline-flex; align-items: center; gap: 11px; font-size: 19px; font-weight: 700; color: var(--heading); margin: 0; }
+/* Pastille LinkedIn : bleu officiel de la marque, seul écart à la palette */
+.li-badge {
+  display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: var(--radius-sm); background: #0a66c2; color: #fff;
+}
+.li-follow {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border: 1.5px solid var(--line); border-radius: var(--radius-pill);
+  font-size: 13.5px; font-weight: 600; color: var(--marine);
+  transition: border-color var(--t-base) ease, background var(--t-base) ease, color var(--t-base) ease;
+}
+.li-follow:hover { background: #0a66c2; border-color: #0a66c2; color: #fff; }
+.li-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.li-card {
+  display: flex; flex-direction: column;
+  padding: 20px 22px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--t-base) ease, box-shadow var(--t-base) ease;
+}
+.li-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.li-card-top { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
+.li-avatar {
+  display: grid; place-items: center; width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(150deg, var(--marine) 0%, var(--marine-800) 100%);
+  color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em;
+}
+.li-card-who { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.li-card-who strong { font-size: 14px; color: var(--heading); line-height: 1.2; }
+.li-card-who span { font-size: 12px; color: var(--muted); }
+.li-card-mark { margin-left: auto; color: #0a66c2; flex-shrink: 0; }
+.li-card-text {
+  color: var(--ink); font-size: 14px; line-height: 1.55; margin: 0 0 14px;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.li-card-media {
+  display: block; aspect-ratio: 16 / 9; border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 14px; background: var(--surface-alt);
+}
+.li-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.li-card-cta {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: auto;
+  font-size: 13.5px; font-weight: 600; color: var(--turquoise-700);
+  transition: gap var(--t-base) ease;
+}
+.li-card:hover .li-card-cta { gap: 11px; }
+@media (max-width: 900px) { .li-grid { grid-template-columns: 1fr; } .li-head { flex-wrap: wrap; } }
+
 /* ---------- Bandeau visite (page Nos data centers) ---------- */
 /* Bandeau pleine largeur (bord à bord) : carte du réseau à gauche,
    texte compact + CTA « Demander une visite » à droite */

@@ -473,6 +473,54 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               )}
             </div>
           )}
+
+          {/* ── Sur LinkedIn — posts gérés dans WP (bloc masqué si vide) ── */}
+          {(wp?.linkedinPosts?.length ?? 0) > 0 && (
+            <div className="li-block">
+              <div className="li-head">
+                <h3 className="li-title">
+                  <span className="li-badge" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 102.5 6 2.5 2.5 0 004.98 3.5zM3 8.98h4v12H3zM9 8.98h3.8v1.64h.05a4.17 4.17 0 013.75-2.06c4 0 4.75 2.64 4.75 6.07v6.35h-4v-5.63c0-1.34 0-3.07-1.87-3.07s-2.16 1.46-2.16 2.97v5.73H9z"/></svg>
+                  </span>
+                  {wp?.linkedinTitle || t.linkedinTitle}
+                </h3>
+                {wp?.linkedinUrl && (
+                  <a className="li-follow" href={wp.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                    {t.linkedinFollow}
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M7 17L17 7M9 7h8v8" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+              <div className="li-grid">
+                {wp!.linkedinPosts.slice(0, 3).map((p, i) => (
+                  <a className="li-card" key={`${p.url}-${i}`} href={p.url} target="_blank" rel="noopener noreferrer">
+                    <div className="li-card-top">
+                      <span className="li-avatar" aria-hidden="true">N|D|C</span>
+                      <span className="li-card-who">
+                        <strong>Nation Data Center</strong>
+                        {p.date && <span>{p.date}</span>}
+                      </span>
+                      <svg className="li-card-mark" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 102.5 6 2.5 2.5 0 004.98 3.5zM3 8.98h4v12H3zM9 8.98h3.8v1.64h.05a4.17 4.17 0 013.75-2.06c4 0 4.75 2.64 4.75 6.07v6.35h-4v-5.63c0-1.34 0-3.07-1.87-3.07s-2.16 1.46-2.16 2.97v5.73H9z"/></svg>
+                    </div>
+                    <p className="li-card-text">{p.texte}</p>
+                    {p.image && (
+                      <span className="li-card-media">
+                        <img src={p.image} alt="" loading="lazy" />
+                      </span>
+                    )}
+                    <span className="li-card-cta">
+                      {t.linkedinRead}
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </main>

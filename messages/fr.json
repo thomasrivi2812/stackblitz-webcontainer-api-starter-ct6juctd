@@ -113,7 +113,10 @@
     "growNumber": "15",
     "growNumberLabel": "sites visés",
     "growText": "Un maillage territorial complet du réseau souverain à l'horizon 2030.",
-    "growCta": "Découvrir le réseau"
+    "growCta": "Découvrir le réseau",
+    "linkedinTitle": "Sur LinkedIn",
+    "linkedinFollow": "Suivre Nation Data Center",
+    "linkedinRead": "Voir le post"
   },
   "services": {
     "eyebrow": "Nos services",

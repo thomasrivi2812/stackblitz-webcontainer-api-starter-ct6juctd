@@ -113,7 +113,10 @@
     "growNumber": "15",
     "growNumberLabel": "target sites",
     "growText": "Complete territorial coverage of the sovereign network by 2030.",
-    "growCta": "Discover the network"
+    "growCta": "Discover the network",
+    "linkedinTitle": "On LinkedIn",
+    "linkedinFollow": "Follow Nation Data Center",
+    "linkedinRead": "View the post"
   },
   "services": {
     "eyebrow": "Our services",

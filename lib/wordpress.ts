@@ -1298,6 +1298,10 @@ export type HomeContent = {
   growNumberLabel: string | null;
   growText: string | null;
   growCta: string | null;
+  // Bloc LinkedIn de la section Actualités (masqué si aucun post).
+  linkedinTitle: string | null;
+  linkedinUrl: string | null;
+  linkedinPosts: { texte: string; url: string; date: string | null; image: string | null }[];
   // Section « Nos services »
   servicesEyebrow: string | null;
   servicesTitle1: string | null;
@@ -1404,15 +1408,21 @@ const HOME_FIELDS_SELECTION = `
   brochure { node { mediaItemUrl } }
 `;
 
-// Champs les plus récents (carte « Le réseau grandit ») isolés de la sélection
-// principale : si le WP n'a pas encore ces champs dans son schéma, la requête
-// complète échoue et on retente SANS eux — le reste de la home reste éditable.
+// Champs les plus récents isolés de la sélection principale : si le WP n'a
+// pas encore ces champs dans son schéma, la requête complète échoue et on
+// retente avec une sélection réduite — le reste de la home reste éditable.
 const HOME_FIELDS_GROW = `
   growEyebrow
   growNumber
   growNumberLabel
   growText
   growCta
+`;
+// Bloc LinkedIn de la section Actualités (plus récent que grow).
+const HOME_FIELDS_LINKEDIN = `
+  linkedinTitle
+  linkedinUrl
+  linkedinPosts { texte url date image { node { sourceUrl } } }
 `;
 
 const homeQuery = (selection: string) => gql`
@@ -1446,10 +1456,12 @@ const homeTranslationsQuery = (selection: string) => gql`
   }
 `;
 
-const HOME_QUERY = homeQuery(HOME_FIELDS_SELECTION + HOME_FIELDS_GROW);
-const HOME_QUERY_LEGACY = homeQuery(HOME_FIELDS_SELECTION);
-const HOME_TRANSLATIONS_QUERY = homeTranslationsQuery(HOME_FIELDS_SELECTION + HOME_FIELDS_GROW);
-const HOME_TRANSLATIONS_QUERY_LEGACY = homeTranslationsQuery(HOME_FIELDS_SELECTION);
+// Paliers de sélection, du plus complet au plus ancien schéma WP.
+const HOME_SELECTION_TIERS = [
+  HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN,
+  HOME_FIELDS_SELECTION + HOME_FIELDS_GROW,
+  HOME_FIELDS_SELECTION,
+];
 
 type WpHomeFields = {
   heroEyebrow: string | null;
@@ -1473,6 +1485,9 @@ type WpHomeFields = {
   growNumberLabel?: string | null;
   growText?: string | null;
   growCta?: string | null;
+  linkedinTitle?: string | null;
+  linkedinUrl?: string | null;
+  linkedinPosts?: ({ texte: string | null; url: string | null; date: string | null; image: { node: { sourceUrl: string | null } | null } | null } | null)[] | null;
   servicesEyebrow: string | null;
   servicesTitle1: string | null;
   servicesTitle2: string | null;
@@ -1541,6 +1556,16 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
     growNumberLabel: f.growNumberLabel || null,
     growText: f.growText || null,
     growCta: f.growCta || null,
+    linkedinTitle: f.linkedinTitle || null,
+    linkedinUrl: f.linkedinUrl || null,
+    linkedinPosts: (f.linkedinPosts ?? [])
+      .filter((p): p is NonNullable<typeof p> => !!p && !!p.url && !!p.texte)
+      .map((p) => ({
+        texte: p.texte as string,
+        url: p.url as string,
+        date: p.date || null,
+        image: p.image?.node?.sourceUrl || null,
+      })),
     servicesEyebrow: f.servicesEyebrow || null,
     servicesTitle1: f.servicesTitle1 || null,
     servicesTitle2: f.servicesTitle2 || null,
@@ -1617,14 +1642,19 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
   //    repli traduction (étape 2), qui ramène le bon contenu traduit.
   try {
     type HomeData = { pages: { nodes: { language: { code: string | null } | null; homeFields: WpHomeFields }[] } };
-    let data: HomeData;
-    try {
-      data = await client.request<HomeData>(HOME_QUERY, { language: wpLang(locale) });
-    } catch {
-      // Champs « grow » absents du schéma WP → on retente sans eux.
-      data = await client.request<HomeData>(HOME_QUERY_LEGACY, { language: wpLang(locale) });
+    let data: HomeData | null = null;
+    // Dégrade la sélection tant que le schéma WP ne connaît pas les champs
+    // les plus récents (linkedin, puis grow) ; la dernière tentative relance
+    // l'erreur pour être journalisée par le catch englobant.
+    for (let i = 0; i < HOME_SELECTION_TIERS.length; i++) {
+      try {
+        data = await client.request<HomeData>(homeQuery(HOME_SELECTION_TIERS[i]), { language: wpLang(locale) });
+        break;
+      } catch (e) {
+        if (i === HOME_SELECTION_TIERS.length - 1) throw e;
+      }
     }
-    const node = data.pages?.nodes?.[0];
+    const node = data?.pages?.nodes?.[0];
     const code = (node?.language?.code ?? '').toUpperCase();
     // Accepte si la langue correspond, OU si le schéma n'expose pas `language`
     // (code vide) → on ne casse pas le comportement pour un schéma sans Polylang.
@@ -1647,13 +1677,16 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
         translations: ({ language: { code: string | null } | null; homeFields: WpHomeFields } | null)[] | null;
       }[] };
     };
-    let data: HomeTrData;
-    try {
-      data = await client.request<HomeTrData>(HOME_TRANSLATIONS_QUERY, {});
-    } catch {
-      data = await client.request<HomeTrData>(HOME_TRANSLATIONS_QUERY_LEGACY, {});
+    let data: HomeTrData | null = null;
+    for (let i = 0; i < HOME_SELECTION_TIERS.length; i++) {
+      try {
+        data = await client.request<HomeTrData>(homeTranslationsQuery(HOME_SELECTION_TIERS[i]), {});
+        break;
+      } catch (e) {
+        if (i === HOME_SELECTION_TIERS.length - 1) throw e;
+      }
     }
-    const node = data.pages?.nodes?.[0];
+    const node = data?.pages?.nodes?.[0];
     const want = wpLang(locale);
     const tr = node?.translations?.find(
       (t) => (t?.language?.code ?? '').toUpperCase() === want,
