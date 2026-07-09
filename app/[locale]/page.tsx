@@ -436,7 +436,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                 </div>
                 <div className="news-feat-body">
                   <div className="news-meta-v2">
-                    <span className="news-cat">{t.newsCatReseau}</span>
+                    <span className="news-cat">{posts[0].categorie || t.newsCatReseau}</span>
                     <span className="news-date-v2">{fmtDate(posts[0].date)}</span>
                   </div>
                   <h3>{posts[0].title}</h3>
@@ -462,7 +462,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                       </div>
                       <div className="news-sm-body">
                         <div className="news-meta-v2">
-                          <span className="news-cat alt">{t.newsCatActu}</span>
+                          <span className="news-cat alt">{p.categorie || t.newsCatActu}</span>
                           <span className="news-date-v2">{fmtDate(p.date)}</span>
                         </div>
                         <h3>{p.title}</h3>

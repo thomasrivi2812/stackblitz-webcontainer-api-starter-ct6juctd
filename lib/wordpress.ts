@@ -121,6 +121,8 @@ export type Post = {
   date: string;
   excerpt: string | null;
   featuredImage?: { node: { sourceUrl: string; altText: string } } | null;
+  // Première catégorie WP de l'article (pastille) ; null = libellé par défaut.
+  categorie?: string | null;
 };
 
 // Type article complet (page listing + page article individuelle)
@@ -213,15 +215,20 @@ const DATACENTER_BY_SLUG_QUERY = gql`
 `;
 
 // --- Requêtes Articles (accueil) -------------------------------------------
-const RECENT_POSTS_QUERY = gql`
+// Sélection en deux variantes : avec le champ ACF « Ordre sur l'accueil »
+// (actuFields.homeOrdre) et sans lui — un WP pas encore à jour ferait
+// échouer toute la requête. La catégorie (pastille) est native WP.
+const recentPostsQuery = (withOrdre: boolean) => gql`
   query RecentPosts($language: LanguageCodeFilterEnum) {
-    posts(first: 5, where: { language: $language, orderby: { field: DATE, order: DESC } }) {
+    posts(first: 12, where: { language: $language, orderby: { field: DATE, order: DESC } }) {
       nodes {
         title
         slug
         date
         excerpt
         featuredImage { node { sourceUrl altText } }
+        categories(first: 1) { nodes { name } }
+        ${withOrdre ? 'actuFields { homeOrdre }' : ''}
       }
     }
   }
@@ -375,12 +382,38 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
     const { samplePosts } = await import('./sample-data');
     return samplePosts;
   }
+  type Node = Post & {
+    categories?: { nodes: ({ name: string | null } | null)[] | null } | null;
+    actuFields?: { homeOrdre: number | null } | null;
+  };
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await wpList<{ posts: { nodes: Post[] } }>(
-      client, RECENT_POSTS_QUERY, locale, (d) => d.posts.nodes,
-    );
-    return data.posts.nodes.map((n) => ({ ...n, title: decodeEntities(n.title) }));
+    let data: { posts: { nodes: Node[] } } | null = null;
+    // Repli sans le champ « Ordre sur l'accueil » si le schéma WP n'est pas à jour.
+    for (const withOrdre of [true, false]) {
+      try {
+        data = await wpList<{ posts: { nodes: Node[] } }>(
+          client, recentPostsQuery(withOrdre), locale, (d) => d.posts.nodes,
+        );
+        break;
+      } catch (e) {
+        if (!withOrdre) throw e;
+      }
+    }
+    const nodes = data?.posts.nodes ?? [];
+    // Les articles avec un « Ordre sur l'accueil » passent devant (croissant),
+    // les autres suivent en ordre chronologique (tri stable).
+    const ordre = (n: Node) => n.actuFields?.homeOrdre ?? Number.POSITIVE_INFINITY;
+    return [...nodes]
+      .sort((a, b) => ordre(a) - ordre(b))
+      .map((n) => ({
+        title: decodeEntities(n.title),
+        slug: n.slug,
+        date: n.date,
+        excerpt: n.excerpt,
+        featuredImage: n.featuredImage,
+        categorie: n.categories?.nodes?.[0]?.name || null,
+      }));
   } catch (error) {
     logWpError('articles', error);
     const { samplePosts } = await import('./sample-data');
