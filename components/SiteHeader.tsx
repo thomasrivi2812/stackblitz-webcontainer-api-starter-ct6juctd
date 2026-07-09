@@ -429,9 +429,6 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                   {c.ville ? ` — ${c.ville}` : ''}
                 </Link>
               ))}
-              <Link href="/contact" onClick={close}>
-                {t('visitePromo')}
-              </Link>
             </div>
           </div>
 
@@ -455,9 +452,6 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                   {c.label}
                 </Link>
               ))}
-              <Link href="/#engagements" onClick={close}>
-                {t('engagementsPromo')}
-              </Link>
             </div>
           </div>
 
@@ -481,9 +475,6 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                   {c.label}
                 </Link>
               ))}
-              <Link href="/equipes" onClick={close}>
-                {t('equipePromo')}
-              </Link>
             </div>
           </div>
 
