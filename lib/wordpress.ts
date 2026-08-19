@@ -599,7 +599,7 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
 // --- Helpers ---------------------------------------------------------------
 const STATUT_LABELS: Record<string, string> = {
   livre: 'Opérationnel',
-  construction: 'En cours',
+  construction: 'En construction',
   avenir: 'À venir',
 };
 
@@ -1025,7 +1025,7 @@ const CERTIF_CATEGORIE_LABELS: Record<string, string> = {
 };
 const CERTIF_STATUT_LABELS: Record<string, string> = {
   conforme: 'Conforme',
-  'en-cours': 'En cours',
+  'en-cours': 'En construction',
   vise: 'Visé',
 };
 export function certifCategorieLabel(key: string): string {
