@@ -37,8 +37,8 @@ export function MapClient({
   points,
   // Cadrage par défaut : la France métropolitaine (zoom 6), plutôt que
   // l'Europe de l'Ouest entière — le réseau est 100 % français.
-  center = [46.8, 2.4],
-  zoom = 6,
+  center = [48.5, 1.3],
+  zoom = 7,
 }: {
   points: MapPoint[];
   center?: [number, number];

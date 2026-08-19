@@ -37,7 +37,7 @@ export function MapClient({
   points,
   // Cadrage par défaut : la France métropolitaine (zoom 6), plutôt que
   // l'Europe de l'Ouest entière — le réseau est 100 % français.
-  center = [46.8, 2.4],
+  center = [48.5, 1.3],
   zoom = 6,
 }: {
   points: MapPoint[];
@@ -59,7 +59,7 @@ export function MapClient({
           dans l'esprit du reste du site — remplace les tuiles OSM par défaut. */}
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
         subdomains="abcd"
         maxZoom={20}
       />
