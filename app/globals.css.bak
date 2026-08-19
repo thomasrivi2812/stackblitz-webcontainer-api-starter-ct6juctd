@@ -398,11 +398,9 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface-alt); color: var(--heading); margin-bottom: 18px;
 }
 .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gris); }
-/* Statuts harmonisés avec le menu réseau et la carte : opérationnel = vert,
-   en construction = jaune, à venir = bleu. */
-.badge.livre .dot { background: var(--vert); }
-.badge.construction .dot { background: var(--jaune); }
-.badge.avenir .dot { background: var(--turquoise); }
+.badge.livre .dot { background: var(--turquoise); }
+.badge.construction .dot { background: var(--muted-2); }
+.badge.avenir .dot { background: #c2cddd; }
 
 /* ---------- Footer ---------- */
 .site-footer { background: var(--surface-dark); color: var(--on-dark-muted); padding: 54px 0 40px; }
