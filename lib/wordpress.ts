@@ -1942,7 +1942,7 @@ async function getPageFields<F>(
 }
 
 // --- Page Groupe Altarea -----------------------------------------------------
-export type GroupeMetier = { titre: string; desc: string };
+export type GroupeMetier = { titre: string; desc: string; image?: { sourceUrl: string; altText: string } | null };
 export type GroupeContent = {
   heroEyebrow: string | null;
   heroTitle: string | null;
@@ -2020,7 +2020,7 @@ type WpGroupeFields = {
   metiersEyebrow: string | null;
   metiersTitle: string | null;
   metiersLead: string | null;
-  metiers: { titre: string | null; desc: string | null }[] | null;
+  metiers: { titre: string | null; desc: string | null; image?: { node: { sourceUrl: string; altText: string } | null } | null }[] | null;
   engEyebrow: string | null;
   engTitle: string | null;
   engLead: string | null;
@@ -2033,12 +2033,24 @@ type WpGroupeFields = {
   finalCtaUrl: string | null;
 };
 
+// Variante avec l'image des métiers : tentée en premier, avec repli sur la
+// sélection sans image tant que le sous-champ ACF « image » n'existe pas encore.
+const GROUPE_FIELDS_SELECTION_IMG = GROUPE_FIELDS_SELECTION.replace(
+  'metiers { titre desc }',
+  'metiers { titre desc image { node { sourceUrl altText } } }',
+);
+
 export async function getGroupe(locale: WpLocale = 'fr'): Promise<GroupeContent | null> {
-  const f = await getPageFields<WpGroupeFields>('groupe', 'groupeFields', GROUPE_FIELDS_SELECTION, locale);
+  let f = await getPageFields<WpGroupeFields>('groupe', 'groupeFields', GROUPE_FIELDS_SELECTION_IMG, locale);
+  if (!f) f = await getPageFields<WpGroupeFields>('groupe', 'groupeFields', GROUPE_FIELDS_SELECTION, locale);
   if (!f) return null;
-  const cards = (list: { titre: string | null; desc: string | null }[] | null) =>
+  const cards = (list: { titre: string | null; desc: string | null; image?: { node: { sourceUrl: string; altText: string } | null } | null }[] | null) =>
     (list ?? [])
-      .map((m) => ({ titre: m.titre ?? '', desc: m.desc ?? '' }))
+      .map((m) => ({
+        titre: m.titre ?? '',
+        desc: m.desc ?? '',
+        image: m.image?.node ? { sourceUrl: m.image.node.sourceUrl, altText: m.image.node.altText ?? '' } : null,
+      }))
       .filter((m) => m.titre || m.desc);
   return {
     heroEyebrow: f.heroEyebrow || null,

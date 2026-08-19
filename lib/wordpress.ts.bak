@@ -599,7 +599,7 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
 // --- Helpers ---------------------------------------------------------------
 const STATUT_LABELS: Record<string, string> = {
   livre: 'Opérationnel',
-  construction: 'En cours',
+  construction: 'En construction',
   avenir: 'À venir',
 };
 
@@ -1942,7 +1942,7 @@ async function getPageFields<F>(
 }
 
 // --- Page Groupe Altarea -----------------------------------------------------
-export type GroupeMetier = { titre: string; desc: string };
+export type GroupeMetier = { titre: string; desc: string; image?: { sourceUrl: string; altText: string } | null };
 export type GroupeContent = {
   heroEyebrow: string | null;
   heroTitle: string | null;
@@ -2020,7 +2020,7 @@ type WpGroupeFields = {
   metiersEyebrow: string | null;
   metiersTitle: string | null;
   metiersLead: string | null;
-  metiers: { titre: string | null; desc: string | null }[] | null;
+  metiers: { titre: string | null; desc: string | null; image?: { node: { sourceUrl: string; altText: string } | null } | null }[] | null;
   engEyebrow: string | null;
   engTitle: string | null;
   engLead: string | null;
