@@ -201,7 +201,7 @@
     "benefices": "Site benefits",
     "notFound": "Data center not found",
     "statutLivre": "Operational",
-    "statutConstruction": "Under construction",
+    "statutConstruction": "In progress",
     "statutAvenir": "Coming soon",
     "statutInconnu": "Unknown status",
     "caracSecurite": "Security",
@@ -454,7 +454,7 @@
     "loading": "Loading map…",
     "voir": "View site →",
     "statutLivre": "Operational",
-    "statutConstruction": "Under construction",
+    "statutConstruction": "In progress",
     "statutAvenir": "Upcoming"
   },
   "documentation": {
