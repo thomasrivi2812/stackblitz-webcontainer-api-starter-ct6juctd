@@ -403,6 +403,22 @@
     "altareaTitle": "Découvrir le groupe Altarea",
     "altareaSub": "(une marque du Groupe Altarea)"
   },
+  "plaquette": {
+    "trigger": "Télécharger la plaquette",
+    "eyebrow": "Ressource",
+    "title": "Télécharger la plaquette",
+    "text": "Renseignez votre e-mail professionnel pour accéder à la plaquette du site.",
+    "emailLabel": "E-mail professionnel",
+    "emailPlaceholder": "prenom.nom@entreprise.fr",
+    "consent": "J'accepte d'être recontacté par Nation Data Center et la conservation de mes données conformément à la politique de confidentialité.",
+    "errEmail": "Merci de saisir une adresse e-mail valide.",
+    "errConsent": "Merci d'accepter d'être recontacté pour télécharger la plaquette.",
+    "submit": "Recevoir la plaquette",
+    "doneTitle": "Merci !",
+    "doneText": "Votre téléchargement a démarré. S'il ne se lance pas,",
+    "doneLink": "cliquez ici",
+    "close": "Fermer"
+  },
   "brochure": {
     "trigger": "Télécharger notre brochure",
     "eyebrow": "Ressource",

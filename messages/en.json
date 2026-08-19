@@ -403,6 +403,22 @@
     "altareaTitle": "Discover the Altarea Group",
     "altareaSub": "(an Altarea Group brand)"
   },
+  "plaquette": {
+    "trigger": "Download the brochure",
+    "eyebrow": "Resource",
+    "title": "Download the brochure",
+    "text": "Enter your work email to access the site brochure.",
+    "emailLabel": "Work email",
+    "emailPlaceholder": "first.last@company.com",
+    "consent": "I agree to be contacted by Nation Data Center and to the storage of my data in accordance with the privacy policy.",
+    "errEmail": "Please enter a valid email address.",
+    "errConsent": "Please agree to be contacted in order to download the brochure.",
+    "submit": "Get the brochure",
+    "doneTitle": "Thank you!",
+    "doneText": "Your download has started. If it doesn't,",
+    "doneLink": "click here",
+    "close": "Close"
+  },
   "brochure": {
     "trigger": "Download our brochure",
     "eyebrow": "Resource",

@@ -64,10 +64,10 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
     }
     setError('');
     // Enregistre le lead (sans bloquer le téléchargement si l'API est indisponible).
-    void sendLead({ type: 'brochure', email, ressource: downloadName });
+    void sendLead({ type: 'brochure', email, ressource: 'Brochure NDC' });
     const a = document.createElement('a');
     a.href = PDF_URL;
-    a.download = `${downloadName}.pdf`;
+    a.download = 'Brochure-Nation-Data-Center.pdf';
     document.body.appendChild(a);
     a.click();
     a.remove();
