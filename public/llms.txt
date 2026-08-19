@@ -1,0 +1,38 @@
+# Nation Data Center (NDC)
+
+> Nation Data Center (NDC) est un réseau de data centers français, souverains et écoresponsables, opérés en propre sur le territoire national. NDC est une marque du Groupe Altarea. Le réseau vise 15 sites à horizon 2030 (Rennes, Rouen, Paris/Vélizy…), avec une conception bas carbone (Tier III, réutilisation de la chaleur fatale, sobriété énergétique et hydrique) au service de l'hébergement critique des entreprises et des enjeux de souveraineté numérique.
+
+## Pages principales
+
+- [Accueil](https://www.nationdc.fr/): présentation du réseau, chiffres clés, engagements et raison d'être.
+- [Nos data centers](https://www.nationdc.fr/datacenters): carte et liste des sites du réseau (statut opérationnel / en construction / à venir), avec fiche détaillée par site.
+- [Nos offres](https://www.nationdc.fr/offres): offres d'hébergement et de colocation adaptées par profil client.
+- [Nos services](https://www.nationdc.fr/services): infrastructure et équipes d'exploitation (sécurité, supervision, accompagnement).
+- [Certifications](https://www.nationdc.fr/certifications): certifications et référentiels (sécurité de l'information, santé, souveraineté, énergie/environnement, qualité, conception/Tier).
+- [Notre équipe](https://www.nationdc.fr/equipes): présentation des pôles et des membres de NDC.
+- [Le groupe Altarea](https://www.nationdc.fr/groupe): NDC au sein du Groupe Altarea (modèle multi-métiers, engagement bas carbone).
+- [Actualités](https://www.nationdc.fr/actualites): nouvelles du réseau (nouveaux sites, innovations, RSE, événements).
+- [Documentation](https://www.nationdc.fr/documentation): livrets et brochures téléchargeables.
+- [Contact](https://www.nationdc.fr/contact): prise de contact et demande de visite.
+
+## Thématiques couvertes
+
+- Data center souverain et hébergement de données en France.
+- Colocation et infrastructure numérique critique.
+- Écoresponsabilité : conception Tier III, PUE maîtrisé, réutilisation de la chaleur fatale, sobriété énergétique et hydrique.
+- Souveraineté numérique et hébergement national (SecNumCloud, HDS et référentiels associés).
+- Réseau territorial de proximité opéré par les équipes NDC.
+
+## Langues
+
+- Français (par défaut) : https://www.nationdc.fr/
+- Anglais : https://www.nationdc.fr/en/
+
+## Ressources techniques
+
+- Plan du site (XML): https://www.nationdc.fr/sitemap.xml
+- Robots: https://www.nationdc.fr/robots.txt
+
+## À propos
+
+Nation Data Center — une marque du Groupe Altarea. Réseau de data centers 100 % français, souverains et écoresponsables.

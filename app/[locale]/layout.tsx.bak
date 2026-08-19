@@ -100,50 +100,18 @@ export default async function LocaleLayout({
         {/* CMP Didomi (bannière cookies) — inactive tant que la clé API
             NEXT_PUBLIC_DIDOMI_API_KEY n'est pas configurée. */}
         <DidomiConsent locale={locale} />
-        {/* Données structurées Organization (rich results / knowledge panel,
-            compréhension par les moteurs IA). */}
+        {/* Données structurées Organization (rich results / knowledge panel). */}
         <JsonLd
           data={{
             '@context': 'https://schema.org',
             '@type': 'Organization',
-            '@id': `${SITE_URL}/#organization`,
             name: 'Nation Data Center',
-            alternateName: 'NDC',
             url: SITE_URL,
             logo: `${SITE_URL}/favicon.svg`,
             description:
-              'Réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
+              'Réseau de data centers français, souverains et écoresponsables.',
             parentOrganization: { '@type': 'Organization', name: 'Altarea' },
-            address: { '@type': 'PostalAddress', addressCountry: 'FR' },
-            areaServed: { '@type': 'Country', name: 'France' },
-            knowsAbout: [
-              'Data center',
-              'Hébergement souverain',
-              'Colocation',
-              'Cloud souverain',
-              'Infrastructure numérique',
-              'Écoresponsabilité',
-            ],
-            contactPoint: {
-              '@type': 'ContactPoint',
-              contactType: 'customer support',
-              url: `${SITE_URL}/contact`,
-              availableLanguage: ['French', 'English'],
-            },
             // sameAs (LinkedIn…) : à ajouter quand les URLs officielles seront actives.
-          }}
-        />
-        {/* Données structurées WebSite : ancre l'entité « site » dans le
-            knowledge graph et pour les moteurs de réponse IA. */}
-        <JsonLd
-          data={{
-            '@context': 'https://schema.org',
-            '@type': 'WebSite',
-            '@id': `${SITE_URL}/#website`,
-            name: 'Nation Data Center',
-            url: SITE_URL,
-            inLanguage: ['fr-FR', 'en-GB'],
-            publisher: { '@id': `${SITE_URL}/#organization` },
           }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
