@@ -131,15 +131,17 @@ export default async function GroupePage({ params: { locale } }: { params: { loc
           </div>
           <div className="eng-grid-v2">
             {metiers.map((m, i) => (
-              <article className="eng-card-v2" key={m.titre}>
+              <article className={`eng-card-v2${m.image ? ' has-media' : ''}`} key={m.titre}>
                 {m.image && (
                   <div className="eng-card-media">
-                    <img src={m.image.sourceUrl} alt={m.image.altText || m.titre} loading="lazy" />
+                    <img src={m.image.sourceUrl} alt={m.image.altText || m.titre} loading="lazy" decoding="async" />
                   </div>
                 )}
-                <span className="eng-num" style={{ color: ALTAREA }}>{String(i + 1).padStart(2, '0')}</span>
-                <h3>{m.titre}</h3>
-                <p>{m.desc}</p>
+                <div className="eng-card-body">
+                  <span className="eng-num" style={{ color: ALTAREA }}>{String(i + 1).padStart(2, '0')}</span>
+                  <h3>{m.titre}</h3>
+                  <p>{m.desc}</p>
+                </div>
               </article>
             ))}
           </div>
