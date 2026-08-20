@@ -23,8 +23,6 @@ export function DcPhoto({
   return (
     <div className="dc-photo">
       <img
-        fetchPriority="high"
-        decoding="async"
         src={src}
         alt={`Data center ${title}`}
         onError={() => {

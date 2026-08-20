@@ -246,7 +246,7 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
             <div className="dc-gallery">
               {photos.map((p, i) => (
                 <figure className="dc-gallery-item" key={i}>
-                  <img src={p.sourceUrl} alt={p.altText || `${dc.title} — ${i + 1}`} loading="lazy" />
+                  <img src={p.sourceUrl} alt={p.altText || `${dc.title} — photo ${i + 1} du data center`} loading="lazy" />
                 </figure>
               ))}
             </div>

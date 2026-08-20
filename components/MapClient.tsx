@@ -7,9 +7,11 @@ import 'leaflet/dist/leaflet.css';
 import type { MapPoint } from '@/lib/wordpress';
 
 const STATUT_COLOR: Record<string, string> = {
-  livre: '#39b184',
-  construction: '#e8c04e',
-  avenir: '#2dafe6',
+  // Charte sobre, lisible sur le fond clair : opérationnel = turquoise,
+  // en construction = gris ardoise, à venir = gris-bleu (plus de vert/jaune).
+  livre: '#1c8cbd',
+  construction: '#5d6b85',
+  avenir: '#8593af',
 };
 
 // Clés i18n des libellés de statut (traduits FR/EN via messages/*.json → « map »).

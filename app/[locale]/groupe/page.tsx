@@ -89,7 +89,7 @@ export default async function GroupePage({ params: { locale } }: { params: { loc
           <div className="hero-visual">
             {wp?.heroImage ? (
               <div className="hero-frame">
-                <img className="hero-img" src={wp.heroImage.sourceUrl} alt={wp.heroImage.altText || (wp?.heroTitle || t.heroTitle)} />
+                <img className="hero-img" fetchPriority="high" decoding="async" src={wp.heroImage.sourceUrl} alt={wp.heroImage.altText || (wp?.heroTitle || t.heroTitle)} />
                 <div className="hero-frame-corner tl" aria-hidden="true" />
                 <div className="hero-frame-corner br" aria-hidden="true" />
               </div>

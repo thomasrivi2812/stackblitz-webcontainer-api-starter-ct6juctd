@@ -57,7 +57,7 @@ export function Services() {
 
         <div className="services-feature">
           <div className="services-feature-media">
-            <img loading="lazy" decoding="async" src="/services-proximite.jpg" alt="Intervention de proximité sur les serveurs dans un data center NDC" />
+            <img src="/services-proximite.jpg" alt="Intervention de proximité sur les serveurs dans un data center NDC" />
           </div>
           <div className="services-feature-text">
             <span className="eyebrow"><span className="eyebrow-dot" />Services de proximité</span>

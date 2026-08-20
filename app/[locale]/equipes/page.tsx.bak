@@ -78,7 +78,7 @@ export default async function EquipesPage({ params: { locale } }: { params: { lo
                 <article className="team-card" key={m.nom + m.poste}>
                   <div className="team-photo">
                     {m.photo ? (
-                      <img loading="lazy" decoding="async" src={m.photo.sourceUrl} alt={m.photo.altText || m.nom} />
+                      <img src={m.photo.sourceUrl} alt={m.photo.altText || m.nom} />
                     ) : (
                       <span className="team-initials">{initials(m.nom)}</span>
                     )}

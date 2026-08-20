@@ -233,7 +233,7 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
 
             {/* Plaquette du site à télécharger (repli : brochure NDC générale) */}
             <BrochureButton className="btn btn-ghost dc-aside-cta" pdfUrl={f.document?.url ?? null} label={t.plaquette} ns="plaquette" downloadName={f.document?.titre || 'Plaquette-NDC'} />
-            <Link className="btn btn-primary dc-aside-cta" href="/offres">{t.ctaOffres}</Link>
+            <Link className="btn btn-primary dc-aside-cta" href="/offres" style={{ marginTop: 14 }}>{t.ctaOffres}</Link>
           </aside>
         </div>
       </section>

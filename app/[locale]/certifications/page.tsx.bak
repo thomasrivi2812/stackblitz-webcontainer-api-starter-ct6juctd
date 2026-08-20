@@ -68,7 +68,7 @@ export default async function CertificationsPage({ params: { locale } }: { param
                       <div className="certif-card-top">
                         <div className="certif-badge">
                           {c.logo ? (
-                            <img loading="lazy" decoding="async" src={c.logo.sourceUrl} alt={c.logo.altText || c.nom} />
+                            <img src={c.logo.sourceUrl} alt={c.logo.altText || c.nom} />
                           ) : (
                             <ShieldIcon />
                           )}

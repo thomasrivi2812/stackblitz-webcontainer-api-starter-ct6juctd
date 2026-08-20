@@ -17,8 +17,6 @@ export function HeroVisual({ src }: { src: string }) {
       ) : (
         <img
           className="hero-img"
-          fetchPriority="high"
-          decoding="async"
           src={src}
           alt="Data center Nation Data Center"
           onError={() => setFailed(true)}

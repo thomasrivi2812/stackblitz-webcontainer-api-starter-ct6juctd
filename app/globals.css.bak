@@ -60,10 +60,8 @@
   --t-slow: 0.3s;
 }
 
-/* ===================== MODE NUIT — DÉSACTIVÉ =====================
-   Le mode nuit automatique est désactivé : la condition « and (max-width: 0px) »
-   n'est jamais vraie, donc tous les blocs ci-dessous restent inactifs.
-   Pour le réactiver, retirez « and (max-width: 0px) » sur chaque @media. */
+/* Mode nuit automatique désactivé : le site est en thème clair (color-scheme: light).
+   Les anciens blocs @media prefers-color-scheme neutralisés ont été retirés. */
 @media (prefers-color-scheme: dark) and (max-width: 0px) {
   :root {
     /* On éclaircit les accents pour le contraste sur fond sombre (style "tech") */
@@ -398,11 +396,11 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface-alt); color: var(--heading); margin-bottom: 18px;
 }
 .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gris); }
-/* Statuts harmonisés avec le menu réseau et la carte : opérationnel = vert,
-   en construction = jaune, à venir = bleu. */
-.badge.livre .dot { background: var(--vert); }
-.badge.construction .dot { background: var(--jaune); }
-.badge.avenir .dot { background: var(--turquoise); }
+/* Statuts (charte sobre) : opérationnel = turquoise, en construction = gris,
+   à venir = gris clair — cohérent avec le menu réseau. Pas de vert/jaune. */
+.badge.livre .dot { background: var(--turquoise); }
+.badge.construction .dot { background: var(--muted-2); }
+.badge.avenir .dot { background: #c2cddd; }
 
 /* ---------- Footer ---------- */
 .site-footer { background: var(--surface-dark); color: var(--on-dark-muted); padding: 54px 0 40px; }
@@ -4180,9 +4178,11 @@ select:focus-visible,
   vertical-align: 1.5px;
   white-space: nowrap;
 }
-.nav-dd-status.livre { background: rgba(57, 177, 132, 0.13); color: #25835f; }
-.nav-dd-status.construction { background: rgba(232, 192, 78, 0.18); color: #96741a; }
-.nav-dd-status.avenir { background: rgba(45, 175, 230, 0.13); color: #1c7fae; }
+/* Charte sobre : opérationnel = turquoise, en construction = gris, à venir =
+   gris clair (plus de vert/jaune, aligné sur les pastilles du site). */
+.nav-dd-status.livre { background: rgba(45, 175, 230, 0.13); color: #1c7fae; }
+.nav-dd-status.construction { background: rgba(93, 107, 133, 0.14); color: #5d6b85; }
+.nav-dd-status.avenir { background: rgba(133, 147, 175, 0.16); color: #8593af; }
 
 /* Petits menus (Ressources, À propos) : mêmes respirations que les grands */
 .nav-dd-menu { min-width: 280px; padding: 10px; }

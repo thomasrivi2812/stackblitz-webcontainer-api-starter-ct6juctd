@@ -456,7 +456,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                   <Link className="news-card3" key={p.slug} href={`/actualites/${p.slug}`}>
                     <div className="news-card3-media">
                       {p.featuredImage?.node?.sourceUrl
-                        ? <img loading="lazy" decoding="async" src={p.featuredImage.node.sourceUrl} alt={p.featuredImage.node.altText || p.title} />
+                        ? <img src={p.featuredImage.node.sourceUrl} alt={p.featuredImage.node.altText || p.title} />
                         : <span className="news-ph"><Icon name="building" /></span>}
                     </div>
                     <div className="news-card3-body">

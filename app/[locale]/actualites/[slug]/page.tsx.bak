@@ -295,8 +295,6 @@ export default async function ArticlePage({ params }: Props) {
                         <div className="article-related-media">
                           {r.featuredImage?.node?.sourceUrl ? (
                             <img
-                              loading="lazy"
-                              decoding="async"
                               src={r.featuredImage.node.sourceUrl}
                               alt={r.featuredImage.node.altText || r.title}
                             />

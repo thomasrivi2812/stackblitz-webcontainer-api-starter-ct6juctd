@@ -50,7 +50,7 @@ export default async function DocumentationPage({ params: { locale } }: { params
           <div className="doc-hero">
             <div className="doc-hero-cover">
               {head?.brochureImage ? (
-                <img loading="lazy" decoding="async" src={head.brochureImage.sourceUrl} alt={head.brochureImage.altText || ''} />
+                <img src={head.brochureImage.sourceUrl} alt={head.brochureImage.altText || ''} />
               ) : (
                 <span className="doc-hero-ph" aria-hidden="true">
                   <span className="doc-hero-ph-mark">N|D|C</span>

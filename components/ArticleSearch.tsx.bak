@@ -130,8 +130,6 @@ export function ArticleSearch({ posts, categories }: Props) {
               <div className="actu-card-media">
                 {p.featuredImage?.node?.sourceUrl ? (
                   <img
-                    loading="lazy"
-                    decoding="async"
                     src={p.featuredImage.node.sourceUrl}
                     alt={p.featuredImage.node.altText || p.title}
                   />

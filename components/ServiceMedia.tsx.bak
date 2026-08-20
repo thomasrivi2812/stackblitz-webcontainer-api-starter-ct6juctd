@@ -5,7 +5,7 @@ import type { Service } from '@/lib/wordpress';
 
 export function ServiceMedia({ service }: { service: Service }) {
   if (service.image?.sourceUrl) {
-    return <img loading="lazy" decoding="async" src={service.image.sourceUrl} alt={service.image.altText || service.titre} />;
+    return <img src={service.image.sourceUrl} alt={service.image.altText || service.titre} />;
   }
   return (
     <div className="svc-media-ph" aria-hidden="true">

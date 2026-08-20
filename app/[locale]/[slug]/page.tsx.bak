@@ -44,7 +44,6 @@ export default async function CustomPage({ params }: { params: { locale: WpLocal
         <div className="container page-section">
           {page.image && (
             <img
-              decoding="async"
               src={page.image.sourceUrl}
               alt={page.image.altText || page.title}
               style={{ width: '100%', height: 'auto', borderRadius: 12, marginBottom: '2rem' }}

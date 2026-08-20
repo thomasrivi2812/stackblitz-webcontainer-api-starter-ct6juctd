@@ -23,8 +23,6 @@ export function DcTileImage({
 
   return (
     <img
-      loading="lazy"
-      decoding="async"
       src={src}
       alt={`Data center ${title}`}
       onError={() => { if (src !== GENERIC) setSrc(GENERIC); }}
