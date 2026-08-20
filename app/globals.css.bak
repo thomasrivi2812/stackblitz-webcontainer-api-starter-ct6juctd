@@ -2248,18 +2248,24 @@ select:focus-visible,
   background: var(--red);
   opacity: 0.85;
 }
-/* Visuel optionnel des cartes métiers (page Groupe) — image éditable dans WP. */
+/* Visuel des cartes métiers (page Groupe) — image pleine largeur, éditable WP. */
 .eng-card-media {
-  border-radius: var(--radius);
   overflow: hidden;
-  aspect-ratio: 16 / 10;
-  margin-bottom: 18px;
+  aspect-ratio: 16 / 9;
   background: var(--surface-alt);
 }
 .eng-card-media img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
+  transition: transform var(--t-slow) ease;
 }
+.eng-card-v2:hover .eng-card-media img { transform: scale(1.04); }
+/* Carte AVEC visuel : image à fleur des bords (sous le liseré rouge),
+   contenu réuni dans un bloc padded → cartes équilibrées et de même hauteur. */
+.eng-card-v2.has-media { padding: 0; }
+.eng-card-body { display: flex; flex-direction: column; flex: 1 1 auto; }
+.eng-card-v2.has-media .eng-card-body { padding: 24px 24px 26px; }
+@media (max-width: 700px) { .eng-card-v2.has-media .eng-card-body { padding: 20px 20px 22px; } }
 .eng-num {
   font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
   color: var(--muted-2);
