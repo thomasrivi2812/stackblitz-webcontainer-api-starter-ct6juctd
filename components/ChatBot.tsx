@@ -21,6 +21,7 @@ type Msg =
   | { from: 'bot' | 'user'; kind: 'text'; text: string }
   | { from: 'bot'; kind: 'chips'; chips: { id: string; label: string }[] }
   | { from: 'bot'; kind: 'link'; label: string; href: string }
+  | { from: 'bot'; kind: 'typing' }
   | { from: 'bot'; kind: 'email' };
 
 /** Normalise pour le matching : minuscules, accents et ponctuation retirés. */
@@ -131,8 +132,16 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
   const [emailErr, setEmailErr] = useState('');
   const [pendingQuestion, setPendingQuestion] = useState('');
   const [emailDone, setEmailDone] = useState(false);
+  // Vrai entre le clic sur « Autre question » et la saisie de la question :
+  // on recueille D'ABORD la question, l'e-mail seulement ensuite.
+  const [awaitingQuestion, setAwaitingQuestion] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLButtonElement>(null);
+  // Les réponses différées ne doivent pas surgir après une fermeture.
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Suggestions : les sujets à forte valeur d'abord (réseau, services,
   // certifications, contact), pas les quatre premières entrées venues.
@@ -156,22 +165,70 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Auto-scroll en bas à chaque message.
+  // Auto-scroll en bas à chaque message (l'indicateur de saisie compte).
   useEffect(() => {
     const el = bodyRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [msgs]);
+  }, [msgs, thinking]);
+
+  // Fermeture au clic en dehors du panneau, et à la touche Échap.
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current?.contains(target) || bubbleRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    // `mousedown` plutôt que `click` : la fermeture suit le geste, sans
+    // attendre le relâchement, et sans intercepter les clics du panneau.
+    document.addEventListener('mousedown', onPointer);
+    document.addEventListener('touchstart', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onPointer);
+      document.removeEventListener('touchstart', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  // Purge des réponses différées au démontage.
+  useEffect(() => () => { timers.current.forEach(clearTimeout); }, []);
 
   const push = (...m: Msg[]) => setMsgs((prev) => [...prev, ...m]);
+
+  /**
+   * Diffère une réponse derrière un indicateur de saisie. Une réponse
+   * instantanée donne l'impression d'un formulaire, pas d'une conversation —
+   * et ne laisse pas le temps de lire ce qu'on vient d'envoyer. Le délai suit
+   * la longueur de la réponse, entre 500 ms et 1,4 s.
+   */
+  function reply(...m: Msg[]) {
+    const chars = m.reduce((n, x) => n + (x.kind === 'text' ? x.text.length : 0), 0);
+    const delay = Math.min(1400, 500 + chars * 2.2);
+    setThinking(true);
+    const id = setTimeout(() => {
+      setThinking(false);
+      push(...m);
+    }, delay);
+    timers.current.push(id);
+  }
 
   const emailMode = msgs.some((m) => m.kind === 'email') && !emailDone;
 
   function askEmail(question: string) {
     setPendingQuestion(question);
-    push(
+    reply(
       { from: 'bot', kind: 'text', text: t('noAnswer') },
       { from: 'bot', kind: 'email' },
     );
+  }
+
+  /** « Autre question » : on demande la question, pas l'e-mail. */
+  function askQuestion() {
+    setAwaitingQuestion(true);
+    reply({ from: 'bot', kind: 'text', text: t('askQuestion') });
+    setTimeout(() => inputRef.current?.focus(), 200);
   }
 
   function answerEntry(entry: KnowledgeEntry) {
@@ -185,14 +242,14 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
       { from: 'bot', kind: 'text', text: t('anythingElse') },
       { from: 'bot', kind: 'chips', chips: chipsFor(entry.id) },
     );
-    push(...out);
+    reply(...out);
   }
 
   function onChip(id: string, label: string) {
-    if (emailMode) return;
+    if (emailMode || thinking) return;
     push({ from: 'user', kind: 'text', text: label });
     if (id === 'other') {
-      askEmail('');
+      askQuestion();
       return;
     }
     const entry = entries.find((e) => e.id === id);
@@ -201,9 +258,17 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
 
   function onSend() {
     const q = input.trim();
-    if (!q || emailMode) return;
+    if (!q || emailMode || thinking) return;
     setInput('');
     push({ from: 'user', kind: 'text', text: q });
+
+    // Question saisie après « Autre question » : on la garde et on demande
+    // l'e-mail. Le lead partira donc AVEC la question, pas seulement l'adresse.
+    if (awaitingQuestion) {
+      setAwaitingQuestion(false);
+      askEmail(q);
+      return;
+    }
 
     const toks = tokens(q);
     let best: { entry: KnowledgeEntry; score: number } | null = null;
@@ -224,6 +289,17 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     }
   }
 
+  /** Refuser de laisser son e-mail ne doit pas condamner la conversation. */
+  function onDeclineEmail() {
+    setEmailDone(true);
+    setEmailErr('');
+    setPendingQuestion('');
+    reply(
+      { from: 'bot', kind: 'text', text: t('emailSkipped') },
+      { from: 'bot', kind: 'chips', chips: chipsFor() },
+    );
+  }
+
   async function onSubmitEmail() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailErr(t('errEmail')); return; }
     if (!consent) { setEmailErr(t('errConsent')); return; }
@@ -232,8 +308,8 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     void sendLead({
       type: 'question',
       email,
-      objet: 'Chatbot du site',
-      message: pendingQuestion || t('chipOther'),
+      objet: 'Assistant du site',
+      message: pendingQuestion,
     });
     push(
       { from: 'user', kind: 'text', text: email },
@@ -245,6 +321,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     <>
       {/* Bulle flottante */}
       <button
+        ref={bubbleRef}
         type="button"
         className={`ndcb-bubble${open ? ' is-open' : ''}`}
         aria-expanded={open}
@@ -263,7 +340,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
 
       {/* Panneau */}
       {open && (
-        <div className="ndcb-panel" role="dialog" aria-label={t('title')}>
+        <div ref={panelRef} className="ndcb-panel" role="dialog" aria-modal="false" aria-label={t('title')}>
           <div className="ndcb-head">
             <span className="ndcb-head-dot" aria-hidden="true" />
             <div className="ndcb-head-text">
@@ -315,17 +392,27 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
                     <span>{t('consent')}</span>
                   </label>
                   {emailErr && <p className="ndcb-err">{emailErr}</p>}
-                  <button type="button" className="ndcb-submit" onClick={onSubmitEmail}>{t('emailSubmit')}</button>
+                  <div className="ndcb-emailactions">
+                    <button type="button" className="ndcb-submit" onClick={onSubmitEmail}>{t('emailSubmit')}</button>
+                    <button type="button" className="ndcb-decline" onClick={onDeclineEmail}>{t('emailSkip')}</button>
+                  </div>
                 </div>
               );
             })}
+            {thinking && (
+              <div className="ndcb-typing" aria-live="polite" aria-label={t('typing')}>
+                <span /><span /><span />
+              </div>
+            )}
           </div>
 
           <div className="ndcb-foot">
             <input
               ref={inputRef}
               type="text"
-              placeholder={emailMode ? t('inputDisabled') : t('inputPlaceholder')}
+              placeholder={
+                emailMode ? t('inputDisabled') : awaitingQuestion ? t('askQuestionPlaceholder') : t('inputPlaceholder')
+              }
               value={input}
               disabled={emailMode}
               onChange={(e) => setInput(e.target.value)}
@@ -360,6 +447,13 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
         .ndcb-msg.bot{align-self:flex-start;background:var(--surface,#fff);border:1px solid var(--line,#e2e8f1);color:var(--ink,#1b3360);border-bottom-left-radius:4px}
         .ndcb-msg.user{align-self:flex-end;background:var(--marine,#1b3360);color:#fff;border-bottom-right-radius:4px}
 
+        .ndcb-typing{align-self:flex-start;display:flex;gap:4px;align-items:center;padding:12px 14px;background:var(--surface,#fff);border:1px solid var(--line,#e2e8f1);border-radius:12px;border-bottom-left-radius:4px}
+        .ndcb-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted,#5d6b85);opacity:.4;animation:ndcb-dot 1.1s infinite ease-in-out}
+        .ndcb-typing span:nth-child(2){animation-delay:.16s}
+        .ndcb-typing span:nth-child(3){animation-delay:.32s}
+        @keyframes ndcb-dot{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:.85;transform:translateY(-3px)}}
+        @media (prefers-reduced-motion: reduce){.ndcb-typing span{animation:none;opacity:.5}}
+
         .ndcb-link{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;background:var(--marine,#1b3360);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s ease,transform .15s ease}
         .ndcb-link:hover{background:var(--marine-800,#102240);transform:translateX(2px)}
 
@@ -376,6 +470,11 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
         .ndcb-err{color:var(--red,#ff0000);font-size:12.5px;margin:0;font-weight:500}
         .ndcb-submit{position:relative;padding:11px 16px;border:1.5px solid var(--marine,#1b3360);border-radius:8px;font:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--marine,#1b3360);cursor:pointer;transition:background .15s ease}
         .ndcb-submit:hover{background:var(--marine-800,#102240)}
+
+        .ndcb-emailactions{display:flex;align-items:center;gap:10px}
+        .ndcb-emailactions .ndcb-submit{flex:1}
+        .ndcb-decline{border:none;background:none;font:inherit;font-size:12.5px;color:var(--muted,#5d6b85);cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:2px}
+        .ndcb-decline:hover{color:var(--ink,#1b3360)}
 
         .ndcb-foot{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line,#e2e8f1);background:var(--surface,#fff)}
         .ndcb-foot input{flex:1;padding:11px 13px;border:1.5px solid var(--line,#e2e8f1);border-radius:10px;font:inherit;font-size:14px;color:var(--ink,#1b3360);background:var(--bg,#fff)}

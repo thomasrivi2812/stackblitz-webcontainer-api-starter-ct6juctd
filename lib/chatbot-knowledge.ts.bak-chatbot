@@ -10,15 +10,7 @@
 // qui fait la différence entre un assistant qui comprend « vous êtes où ? » et
 // un assistant qui exige la formulation exacte de la FAQ.
 
-import type {
-  Certification,
-  Datacenter,
-  Faq,
-  HomeContent,
-  Livret,
-  Service,
-} from './wordpress';
-import type { Persona } from './personas';
+import type { Certification, Datacenter, Faq, Service } from './wordpress';
 import { certifStatutInfo, statutInfo, stripHtml } from './wordpress';
 
 export type KnowledgeEntry = {
@@ -32,19 +24,6 @@ export type KnowledgeEntry = {
   link?: { label: string; href: string };
   /** Plus le nombre est petit, plus l'entrée est proposée tôt en suggestion. */
   priority?: number;
-};
-
-/**
- * Le strict nécessaire pour indexer un article. Accepte aussi bien `Post`
- * (liste d'accueil) que `WPPost` (page Actualités), dont les formes
- * diffèrent sur des champs dont l'assistant n'a que faire.
- */
-export type ArticleLike = {
-  title: string;
-  slug: string;
-  excerpt?: string | null;
-  categories?: { nodes: { name: string }[] } | null;
-  categorie?: string | null;
 };
 
 type Locale = 'fr' | 'en';
@@ -233,157 +212,6 @@ function certificationEntries(certifications: Certification[], locale: Locale): 
 }
 
 /* ------------------------------------------------------------------ *
- *  Actualités — « quoi de neuf ? », ou une question sur un sujet traité
- *  dans un article (PUE, Tier III, refroidissement…).
- * ------------------------------------------------------------------ */
-
-function postEntries(posts: ArticleLike[], locale: Locale): KnowledgeEntry[] {
-  if (!posts.length) return [];
-  const recent = posts.slice(0, 8);
-  const entries: KnowledgeEntry[] = [
-    {
-      id: 'actus',
-      question: isEn(locale) ? 'What is new at NDC?' : 'Quelles sont vos dernières actualités ?',
-      answer:
-        (isEn(locale) ? 'Our latest articles:\n' : 'Nos derniers articles :\n') +
-        recent.slice(0, 5).map((a) => `• ${a.title}`).join('\n'),
-      keywords: [
-        'quoi de neuf', 'derniere actualite', 'dernieres actualites', 'des nouvelles',
-        'what is new', 'latest news',
-        'actualite', 'actualites', 'article', 'articles', 'news', 'blog', 'nouveautes',
-        'publication', 'publications', 'presse',
-      ],
-      link: { label: isEn(locale) ? 'All news' : 'Toutes les actualités', href: path(locale, '/actualites') },
-      priority: 8,
-    },
-  ];
-
-  // Un article = un sujet traité. Son titre porte les mots-clés du sujet,
-  // ce qui permet de répondre « on en parle ici » plutôt que « je ne sais pas ».
-  for (const a of recent) {
-    entries.push({
-      id: `actu-${a.slug}`,
-      question: a.title,
-      answer: clip(a.excerpt || a.title, 260),
-      keywords: [a.title, a.categorie ?? '', ...(a.categories?.nodes ?? []).map((c) => c.name)].filter(Boolean),
-      link: {
-        label: isEn(locale) ? 'Read the article' : "Lire l'article",
-        href: path(locale, `/actualites/${a.slug}`),
-      },
-    });
-  }
-  return entries;
-}
-
-/* ------------------------------------------------------------------ *
- *  Profils (personas) — « je suis DSI », « pour une collectivité »
- * ------------------------------------------------------------------ */
-
-function personaEntries(personas: Persona[], locale: Locale): KnowledgeEntry[] {
-  return personas.map((pa) => ({
-    id: `persona-${pa.id}`,
-    question: isEn(locale) ? `Offer for ${pa.label}` : `L'offre pour ${pa.label}`,
-    answer: clip([pa.lead, pa.proofs?.slice(0, 3).join(' · ')].filter(Boolean).join('\n\n'), 340),
-    keywords: [pa.label, pa.tag, ...pa.label.split(/[\s/]+/)].filter(Boolean),
-    link: {
-      label: isEn(locale) ? 'See this offer' : 'Voir cette offre',
-      href: path(locale, `/offres#${pa.id}`),
-    },
-  }));
-}
-
-/* ------------------------------------------------------------------ *
- *  Documents téléchargeables
- * ------------------------------------------------------------------ */
-
-function livretEntries(livrets: Livret[], locale: Locale): KnowledgeEntry[] {
-  if (!livrets.length) return [];
-  return [
-    {
-      id: 'livrets',
-      question: isEn(locale) ? 'Which documents can I download?' : 'Quels documents puis-je télécharger ?',
-      answer:
-        (isEn(locale) ? 'Available documents:\n' : 'Documents disponibles :\n') +
-        livrets.map((l) => `• ${l.titre}${l.meta ? ` (${l.meta})` : ''}`).join('\n'),
-      keywords: [
-        'quels documents', 'documents disponibles', 'que puis je telecharger',
-        'livret', 'livrets', 'fiche technique', 'fiches techniques', 'dossier',
-        'booklet', 'booklets',
-      ],
-      link: { label: isEn(locale) ? 'Documentation' : 'Voir la documentation', href: path(locale, '/documentation') },
-    },
-  ];
-}
-
-/* ------------------------------------------------------------------ *
- *  Contenu éditorial de l'accueil : engagements et raison d'être.
- *  C'est le discours de fond de l'entreprise — souvent ce que cherche
- *  un visiteur qui demande « pourquoi vous ? » ou « et l'écologie ? ».
- * ------------------------------------------------------------------ */
-
-function homeEntries(home: HomeContent | null, locale: Locale): KnowledgeEntry[] {
-  if (!home) return [];
-  const entries: KnowledgeEntry[] = [];
-
-  if (home.engagements?.length) {
-    entries.push({
-      id: 'engagements',
-      question: isEn(locale) ? 'What are your commitments?' : 'Quels sont vos engagements ?',
-      answer:
-        (isEn(locale) ? 'Our commitments:\n' : 'Nos engagements :\n') +
-        home.engagements
-          .map((e) => `• ${e.titre}${e.desc ? ` — ${clip(e.desc, 110)}` : ''}`)
-          .join('\n'),
-      keywords: [
-        'pourquoi vous', 'pourquoi choisir', 'vos engagements', 'chaleur fatale',
-        'why choose you', 'your commitments',
-        'engagement', 'engagements', 'ecologie', 'ecologique', 'ecoresponsable',
-        'environnement', 'environnemental', 'rse', 'carbone', 'decarbonation',
-        'sobriete', 'energie', 'eau', 'durable', 'vert', 'green', 'sustainability',
-        'commitment', 'commitments', 'carbon',
-      ],
-      priority: 9,
-    });
-  }
-
-  const raison = [
-    home.ambitionTitle && `${home.ambitionTitle} — ${home.ambitionText ?? ''}`,
-    home.missionTitle && `${home.missionTitle} — ${home.missionText ?? ''}`,
-    home.visionTitle && `${home.visionTitle} — ${home.visionText ?? ''}`,
-  ].filter(Boolean) as string[];
-
-  if (raison.length) {
-    entries.push({
-      id: 'raison-etre',
-      question: isEn(locale) ? 'What is your purpose?' : "Quelle est votre raison d'être ?",
-      answer: raison.map((r) => `• ${clip(r, 200)}`).join('\n'),
-      keywords: [
-        'raison d etre', 'votre mission', 'votre vision', 'votre ambition',
-        'your purpose', 'your mission',
-        'mission', 'vision', 'ambition', 'purpose', 'valeurs', 'philosophie',
-      ],
-    });
-  }
-
-  if (home.kpis?.length) {
-    entries.push({
-      id: 'chiffres',
-      question: isEn(locale) ? 'Your key figures?' : 'Vos chiffres clés ?',
-      answer: home.kpis
-        .map((k) => `• ${k.valeur}${k.unite ? ` ${k.unite}` : ''} — ${k.label}`)
-        .join('\n'),
-      keywords: [
-        'chiffres cles', 'en chiffres', 'key figures', 'combien',
-        'chiffre', 'chiffres', 'kpi', 'statistiques', 'capacite', 'puissance',
-        'megawatt', 'mw', 'figures', 'stats', 'capacity',
-      ],
-    });
-  }
-
-  return entries;
-}
-
-/* ------------------------------------------------------------------ *
  *  Entrées permanentes : contact, visite, documentation, offres, groupe.
  *  Ce sont les intentions à forte valeur commerciale — celles qui doivent
  *  mener quelque part, pas seulement informer.
@@ -487,10 +315,6 @@ export type KnowledgeInput = {
   datacenters?: Datacenter[];
   services?: Service[];
   certifications?: Certification[];
-  posts?: ArticleLike[];
-  personas?: Persona[];
-  livrets?: Livret[];
-  home?: HomeContent | null;
 };
 
 /**
@@ -499,16 +323,7 @@ export type KnowledgeInput = {
  * expressément pour répondre aux visiteurs.
  */
 export function buildKnowledge(
-  {
-    faqs = [],
-    datacenters = [],
-    services = [],
-    certifications = [],
-    posts = [],
-    personas = [],
-    livrets = [],
-    home = null,
-  }: KnowledgeInput,
+  { faqs = [], datacenters = [], services = [], certifications = [] }: KnowledgeInput,
   locale: Locale = 'fr',
 ): KnowledgeEntry[] {
   const faqEntries: KnowledgeEntry[] = faqs
@@ -526,10 +341,6 @@ export function buildKnowledge(
     ...datacenterEntries(datacenters, locale),
     ...serviceEntries(services, locale),
     ...certificationEntries(certifications, locale),
-    ...homeEntries(home, locale),
-    ...personaEntries(personas, locale),
-    ...postEntries(posts, locale),
-    ...livretEntries(livrets, locale),
     ...staticEntries(locale),
   ];
 }

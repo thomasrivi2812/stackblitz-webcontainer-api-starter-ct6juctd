@@ -16,6 +16,9 @@ import {
   getSiteBranding,
   getFaqs,
   getCertifications,
+  getAllPosts,
+  getLivrets,
+  getHome,
 } from '@/lib/wordpress';
 import { SITE_URL } from '@/lib/seo';
 import { routing, type Locale } from '@/i18n/routing';
@@ -93,7 +96,8 @@ export default async function LocaleLayout({
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,
   // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
-  const [personas, datacenters, services, branding, faqs, certifications] = await Promise.all([
+  const [personas, datacenters, services, branding, faqs, certifications, posts, livrets, home] =
+    await Promise.all([
     getPersonas(locale as Locale),
     getDatacenters(locale as Locale),
     // Liste des services pour le menu déroulant « Nos services » (ancres).
@@ -105,12 +109,18 @@ export default async function LocaleLayout({
     // mémoïsées, donc gratuites pour les pages qui les réutilisent).
     getFaqs(locale as Locale),
     getCertifications(locale as Locale),
+    // Contenus éditoriaux : articles, livrets et discours de l'accueil
+    // (engagements, raison d'être, chiffres clés) — l'assistant doit aussi
+    // savoir répondre sur le contenu du site, pas seulement sur ses fiches.
+    getAllPosts(locale as Locale),
+    getLivrets(locale as Locale),
+    getHome(locale as Locale),
   ]);
 
   // Base de connaissances de l'assistant, construite à partir des contenus
   // réels du site : une fiche ajoutée dans WordPress l'enrichit sans code.
   const chatbotEntries = buildKnowledge(
-    { faqs, datacenters, services, certifications },
+    { faqs, datacenters, services, certifications, posts, personas, livrets, home },
     locale as Locale,
   );
 
