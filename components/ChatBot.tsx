@@ -18,8 +18,7 @@ import { starterEntries, type KnowledgeEntry } from '@/lib/chatbot-knowledge';
 // Styles encapsulés dans le composant (aucune dépendance à globals.css).
 
 type Msg =
-  | { from: 'bot' | 'user'; kind: 'text'; text: string }
-  | { from: 'bot'; kind: 'chips'; chips: { id: string; label: string }[] }
+  | { from: 'bot' | 'user'; kind: 'text'; text: string; anchor?: boolean }
   | { from: 'bot'; kind: 'link'; label: string; href: string }
   | { from: 'bot'; kind: 'typing' }
   | { from: 'bot'; kind: 'email' };
@@ -136,6 +135,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
   // on recueille D'ABORD la question, l'e-mail seulement ensuite.
   const [awaitingQuestion, setAwaitingQuestion] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const [lastAnswered, setLastAnswered] = useState('');
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -143,32 +143,36 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
   // Les réponses différées ne doivent pas surgir après une fermeture.
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Suggestions : les sujets à forte valeur d'abord (réseau, services,
-  // certifications, contact), pas les quatre premières entrées venues.
-  const chipsFor = (excludeId?: string) => {
-    const list = starterEntries(entries, 5)
-      .filter((e) => e.id !== excludeId)
-      .slice(0, 4)
-      .map((e) => ({ id: e.id, label: e.question }));
-    return [...list, { id: 'other', label: t('chipOther') }];
-  };
+  // Sujets proposés en permanence sous le fil : les entrées à forte valeur
+  // (réseau, services, certifications, contact), moins celle qu'on vient de
+  // traiter. Elles vivent dans une barre fixe et non dans la conversation :
+  // republiées après chaque réponse, elles chassaient celle-ci hors de l'écran.
+  const suggestions = starterEntries(entries, 5)
+    .filter((e) => e.id !== lastAnswered)
+    .slice(0, 4);
 
   // Message d'accueil à la première ouverture.
   useEffect(() => {
     if (open && msgs.length === 0) {
-      setMsgs([
-        { from: 'bot', kind: 'text', text: t('hello') },
-        { from: 'bot', kind: 'chips', chips: chipsFor() },
-      ]);
+      setMsgs([{ from: 'bot', kind: 'text', text: t('hello') }]);
     }
     if (open) setTimeout(() => inputRef.current?.focus(), 150);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Auto-scroll en bas à chaque message (l'indicateur de saisie compte).
+  // Défilement : on amène le DÉBUT de la dernière réponse en haut du cadre,
+  // au lieu de coller au bas du fil. Une réponse longue restait sinon coupée,
+  // seule sa fin étant visible.
   useEffect(() => {
     const el = bodyRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    const anchors = el.querySelectorAll<HTMLElement>('[data-anchor="1"]');
+    const last = anchors[anchors.length - 1];
+    if (last) {
+      el.scrollTo({ top: Math.max(0, last.offsetTop - el.offsetTop - 8), behavior: 'smooth' });
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [msgs, thinking]);
 
   // Fermeture au clic en dehors du panneau, et à la touche Échap.
@@ -206,10 +210,12 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
   function reply(...m: Msg[]) {
     const chars = m.reduce((n, x) => n + (x.kind === 'text' ? x.text.length : 0), 0);
     const delay = Math.min(1400, 500 + chars * 2.2);
+    // Le premier message de la réponse sert de point d'ancrage au défilement.
+    const marked = m.map((x, i) => (i === 0 && x.kind === 'text' ? { ...x, anchor: true } : x));
     setThinking(true);
     const id = setTimeout(() => {
       setThinking(false);
-      push(...m);
+      push(...marked);
     }, delay);
     timers.current.push(id);
   }
@@ -238,10 +244,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     if (entry.link) {
       out.push({ from: 'bot', kind: 'link', label: entry.link.label, href: entry.link.href });
     }
-    out.push(
-      { from: 'bot', kind: 'text', text: t('anythingElse') },
-      { from: 'bot', kind: 'chips', chips: chipsFor(entry.id) },
-    );
+    setLastAnswered(entry.id);
     reply(...out);
   }
 
@@ -294,10 +297,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     setEmailDone(true);
     setEmailErr('');
     setPendingQuestion('');
-    reply(
-      { from: 'bot', kind: 'text', text: t('emailSkipped') },
-      { from: 'bot', kind: 'chips', chips: chipsFor() },
-    );
+    reply({ from: 'bot', kind: 'text', text: t('emailSkipped') });
   }
 
   async function onSubmitEmail() {
@@ -352,7 +352,11 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
           <div className="ndcb-body" ref={bodyRef}>
             {msgs.map((m, i) => {
               if (m.kind === 'text') {
-                return <div key={i} className={`ndcb-msg ${m.from}`}>{m.text}</div>;
+                return (
+                  <div key={i} className={`ndcb-msg ${m.from}`} data-anchor={m.anchor ? '1' : undefined}>
+                    {m.text}
+                  </div>
+                );
               }
               if (m.kind === 'link') {
                 return (
@@ -362,18 +366,6 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
                       <path d="M5 12h14M13 6l6 6-6 6" />
                     </svg>
                   </a>
-                );
-              }
-              if (m.kind === 'chips') {
-                const isLast = i === msgs.length - 1;
-                return (
-                  <div key={i} className={`ndcb-chips${isLast ? '' : ' done'}`}>
-                    {m.chips.map((c) => (
-                      <button key={c.id + c.label} type="button" onClick={() => isLast && onChip(c.id, c.label)}>
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
                 );
               }
               // Formulaire e-mail dans le fil
@@ -405,6 +397,19 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
               </div>
             )}
           </div>
+
+          {!emailMode && !awaitingQuestion && (
+            <div className="ndcb-suggest" aria-label={t('suggestions')}>
+              {suggestions.map((e) => (
+                <button key={e.id} type="button" disabled={thinking} onClick={() => onChip(e.id, e.question)}>
+                  {e.question}
+                </button>
+              ))}
+              <button type="button" disabled={thinking} onClick={() => onChip('other', t('chipOther'))}>
+                {t('chipOther')}
+              </button>
+            </div>
+          )}
 
           <div className="ndcb-foot">
             <input
@@ -457,10 +462,11 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
         .ndcb-link{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;background:var(--marine,#1b3360);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s ease,transform .15s ease}
         .ndcb-link:hover{background:var(--marine-800,#102240);transform:translateX(2px)}
 
-        .ndcb-chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0}
-        .ndcb-chips button{border:1.5px solid var(--marine,#1b3360);background:transparent;color:var(--marine,#1b3360);font:inherit;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;text-align:left;transition:background .14s ease,color .14s ease}
-        .ndcb-chips button:hover{background:var(--marine,#1b3360);color:#fff}
-        .ndcb-chips.done{display:none}
+        .ndcb-suggest{display:flex;gap:7px;padding:10px 12px 0;overflow-x:auto;scrollbar-width:none;background:var(--surface,#fff)}
+        .ndcb-suggest::-webkit-scrollbar{display:none}
+        .ndcb-suggest button{flex:0 0 auto;border:1.5px solid var(--line,#e2e8f1);background:var(--surface-alt,#f6f9fc);color:var(--marine,#1b3360);font:inherit;font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:border-color .14s ease,background .14s ease}
+        .ndcb-suggest button:hover:not(:disabled){border-color:var(--marine,#1b3360);background:var(--marine,#1b3360);color:#fff}
+        .ndcb-suggest button:disabled{opacity:.5;cursor:default}
 
         .ndcb-emailform{align-self:stretch;background:var(--surface,#fff);border:1px solid var(--line,#e2e8f1);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
         .ndcb-emailform input[type=email]{width:100%;padding:10px 12px;border:1.5px solid var(--line,#e2e8f1);border-radius:8px;font:inherit;font-size:14px;color:var(--ink,#1b3360);background:var(--bg,#fff)}
