@@ -3,24 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
-import { starterEntries, type KnowledgeEntry } from '@/lib/chatbot-knowledge';
+import type { Faq } from '@/lib/wordpress';
 
 // Assistant du site — bulle en bas à droite.
-// 1) Répond à partir de la base de connaissances (lib/chatbot-knowledge.ts) :
-//    FAQ, data centers, services, certifications et intentions permanentes
-//    (contact, visite, documentation…). Matching lexical, sans dépendance
-//    externe ni appel réseau.
-// 2) Chaque réponse peut orienter vers la page concernée : l'assistant est un
-//    aiguilleur autant qu'un répondeur.
-// 3) Pour toute demande hors périmètre : capture l'e-mail dans le fil
-//    (lead type « question » → WP > Leads du site) et prévient que l'équipe
-//    recontactera.
+// 1) Répond aux questions déjà couvertes par la FAQ (chips + texte libre,
+//    matching lexical sans dépendance externe).
+// 2) Pour toute autre demande : capture l'e-mail dans le fil de discussion
+//    (lead type « question » → visible dans WP > Leads du site) et prévient
+//    que l'équipe recontactera.
 // Styles encapsulés dans le composant (aucune dépendance à globals.css).
 
 type Msg =
   | { from: 'bot' | 'user'; kind: 'text'; text: string }
   | { from: 'bot'; kind: 'chips'; chips: { id: string; label: string }[] }
-  | { from: 'bot'; kind: 'link'; label: string; href: string }
   | { from: 'bot'; kind: 'email' };
 
 /** Normalise pour le matching : minuscules, accents et ponctuation retirés. */
@@ -46,63 +41,7 @@ function tokens(s: string): string[] {
   return norm(s).split(' ').filter((w) => w.length > 1 && !STOPWORDS.has(w));
 }
 
-/**
- * Score sur les mots-déclencheurs d'une entrée. Une expression de plusieurs
- * mots présente telle quelle dans la question vaut une correspondance pleine :
- * « secteur public » ou « combien de sites » doivent l'emporter sur un simple
- * recouvrement de mots isolés.
- */
-function scoreKeywords(query: string, queryToks: string[], keywords: string[]): number {
-  if (!keywords.length || !queryToks.length) return 0;
-  const q = norm(query);
-  const bag = new Set<string>();
-
-  for (const k of keywords) {
-    const nk = norm(k);
-    if (!nk) continue;
-    if (nk.includes(' ')) {
-      // Une expression ne vaut QUE comme expression : présente telle quelle,
-      // elle emporte la décision ; sinon elle est ignorée. Sans cette règle,
-      // « qui êtes-vous » céderait le mot « êtes » à toutes les questions
-      // commençant par « vous êtes… ».
-      if (q.includes(nk)) return 1;
-      continue;
-    }
-    bag.add(nk);
-  }
-  if (!bag.size) return 0;
-
-  let hits = 0;
-  let specific = false;
-  for (const qt of queryToks) {
-    let matched = '';
-    if (bag.has(qt)) {
-      matched = qt;
-    } else {
-      // Même tolérance aux pluriels et déclinaisons que scoreMatch :
-      // « coûte » doit retrouver « cout », « certifiés » → « certification ».
-      for (const b of bag) {
-        if (qt.length >= 4 && b.length >= 4 && (b.startsWith(qt.slice(0, 4)) || qt.startsWith(b.slice(0, 4)))) {
-          matched = b;
-          break;
-        }
-      }
-    }
-    if (!matched) continue;
-    hits += 1;
-    // Un mot long est discriminant (« certification », « altarea »,
-    // « colocation ») ; un mot court peut être un simple mot de liaison.
-    if (matched.length >= 5) specific = true;
-  }
-  if (!hits) return 0;
-
-  const ratio = hits / queryToks.length;
-  // Un déclencheur vraiment spécifique suffit à identifier l'intention,
-  // même noyé dans une longue phrase.
-  return specific ? Math.max(ratio, 0.5) : ratio;
-}
-
-/** Score de similarité question ↔ texte : recouvrement de tokens + bonus racine. */
+/** Score de similarité question ↔ FAQ : recouvrement de tokens + bonus racine. */
 function scoreMatch(queryToks: string[], faqText: string): number {
   if (!queryToks.length) return 0;
   const faqToks = new Set(tokens(faqText));
@@ -121,7 +60,7 @@ function scoreMatch(queryToks: string[], faqText: string): number {
   return hits / queryToks.length;
 }
 
-export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
+export function ChatBot({ faqs = [] }: { faqs?: Faq[] }) {
   const t = useTranslations('chatbot');
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -134,13 +73,11 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Suggestions : les sujets à forte valeur d'abord (réseau, services,
-  // certifications, contact), pas les quatre premières entrées venues.
-  const chipsFor = (excludeId?: string) => {
-    const list = starterEntries(entries, 5)
-      .filter((e) => e.id !== excludeId)
-      .slice(0, 4)
-      .map((e) => ({ id: e.id, label: e.question }));
+  const chipsFor = (exclude?: string) => {
+    const list = faqs
+      .map((f, i) => ({ id: String(i), label: f.question }))
+      .filter((c) => c.label !== exclude)
+      .slice(0, 4);
     return [...list, { id: 'other', label: t('chipOther') }];
   };
 
@@ -174,18 +111,12 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     );
   }
 
-  function answerEntry(entry: KnowledgeEntry) {
-    const out: Msg[] = [{ from: 'bot', kind: 'text', text: entry.answer }];
-    // La réponse oriente vers la page concernée : l'assistant sert aussi
-    // à faire circuler le visiteur vers le contenu qui convertit.
-    if (entry.link) {
-      out.push({ from: 'bot', kind: 'link', label: entry.link.label, href: entry.link.href });
-    }
-    out.push(
+  function answerFaq(faq: Faq) {
+    push(
+      { from: 'bot', kind: 'text', text: faq.reponse },
       { from: 'bot', kind: 'text', text: t('anythingElse') },
-      { from: 'bot', kind: 'chips', chips: chipsFor(entry.id) },
+      { from: 'bot', kind: 'chips', chips: chipsFor(faq.question) },
     );
-    push(...out);
   }
 
   function onChip(id: string, label: string) {
@@ -195,8 +126,8 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
       askEmail('');
       return;
     }
-    const entry = entries.find((e) => e.id === id);
-    if (entry) answerEntry(entry);
+    const faq = faqs[Number(id)];
+    if (faq) answerFaq(faq);
   }
 
   function onSend() {
@@ -206,19 +137,13 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
     push({ from: 'user', kind: 'text', text: q });
 
     const toks = tokens(q);
-    let best: { entry: KnowledgeEntry; score: number } | null = null;
-    for (const e of entries) {
-      const score = Math.max(
-        scoreKeywords(q, toks, e.keywords) * 1.4,
-        scoreMatch(toks, e.question) * 1.25,
-        scoreMatch(toks, `${e.question} ${e.answer}`),
-      );
-      if (!best || score > best.score) best = { entry: e, score };
+    let best: { faq: Faq; score: number } | null = null;
+    for (const f of faqs) {
+      const s = Math.max(scoreMatch(toks, f.question) * 1.25, scoreMatch(toks, f.question + ' ' + f.reponse));
+      if (!best || s > best.score) best = { faq: f, score: s };
     }
-    // Seuil abaissé à 0,45 : avec des mots-déclencheurs explicites, une
-    // correspondance faible reste plus utile qu'un « je ne sais pas ».
-    if (best && best.score >= 0.45) {
-      answerEntry(best.entry);
+    if (best && best.score >= 0.5) {
+      answerFaq(best.faq);
     } else {
       askEmail(q);
     }
@@ -276,16 +201,6 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
             {msgs.map((m, i) => {
               if (m.kind === 'text') {
                 return <div key={i} className={`ndcb-msg ${m.from}`}>{m.text}</div>;
-              }
-              if (m.kind === 'link') {
-                return (
-                  <a key={i} className="ndcb-link" href={m.href}>
-                    {m.label}
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </a>
-                );
               }
               if (m.kind === 'chips') {
                 const isLast = i === msgs.length - 1;
@@ -359,9 +274,6 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
         .ndcb-msg{max-width:85%;padding:10px 13px;border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-line}
         .ndcb-msg.bot{align-self:flex-start;background:var(--surface,#fff);border:1px solid var(--line,#e2e8f1);color:var(--ink,#1b3360);border-bottom-left-radius:4px}
         .ndcb-msg.user{align-self:flex-end;background:var(--marine,#1b3360);color:#fff;border-bottom-right-radius:4px}
-
-        .ndcb-link{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;background:var(--marine,#1b3360);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s ease,transform .15s ease}
-        .ndcb-link:hover{background:var(--marine-800,#102240);transform:translateX(2px)}
 
         .ndcb-chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 0}
         .ndcb-chips button{border:1.5px solid var(--marine,#1b3360);background:transparent;color:var(--marine,#1b3360);font:inherit;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;text-align:left;transition:background .14s ease,color .14s ease}

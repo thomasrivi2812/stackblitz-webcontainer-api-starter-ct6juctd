@@ -549,7 +549,7 @@ export async function getCategories(locale: WpLocale = 'fr'): Promise<WPCategory
 }
 
 // --- Accès aux données : FAQ ← NOUVEAU -------------------------------------
-async function _getFaqs(locale: WpLocale = 'fr'): Promise<Faq[]> {
+export async function getFaqs(locale: WpLocale = 'fr'): Promise<Faq[]> {
   if (!endpoint) {
     const { sampleFaqs } = await import('./sample-data');
     return sampleFaqs;
@@ -977,7 +977,7 @@ type WpCertificationNode = {
   } | null;
 };
 
-async function _getCertifications(locale: WpLocale = 'fr'): Promise<Certification[]> {
+export async function getCertifications(locale: WpLocale = 'fr'): Promise<Certification[]> {
   if (!endpoint) {
     const { sampleCertifications } = await import('./sample-data');
     return sampleCertifications;
@@ -2513,7 +2513,3 @@ export const getPostBySlug = cache(_getPostBySlug);
 export const getAllPosts = cache(_getAllPosts);
 export const getHome = cache(_getHome);
 export const getServices = cache(_getServices);
-// Appelés par le layout (assistant du site) ET par les pages : la
-// mémoïsation évite de refetcher WordPress deux fois par rendu.
-export const getFaqs = cache(_getFaqs);
-export const getCertifications = cache(_getCertifications);
