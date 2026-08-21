@@ -472,9 +472,7 @@
     "voir": "Voir le site →",
     "statutLivre": "Opérationnel",
     "statutConstruction": "En construction",
-    "statutAvenir": "À venir",
-    "zoomIn": "Zoomer",
-    "zoomOut": "Dézoomer"
+    "statutAvenir": "À venir"
   },
   "documentation": {
     "eyebrow": "Ressources",
