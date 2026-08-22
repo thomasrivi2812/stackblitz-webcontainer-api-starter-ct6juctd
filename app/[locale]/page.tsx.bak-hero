@@ -1,6 +1,4 @@
 import { ServicesCarousel } from '@/components/ServicesCarousel';
-import { HeroSlideshow } from '@/components/HeroSlideshow';
-import { HomeBanner } from '@/components/HomeBanner';
 import { DcTileImage } from '@/components/DcTileImage';
 import { KpiBand } from '@/components/KpiBand';
 import { CertBanner } from '@/components/CertBanner';
@@ -8,6 +6,7 @@ import { BrochureButton } from '@/components/BrochureButton';
 import { FaqSection } from '@/components/FaqSection';
 import { NetworkMap } from '@/components/NetworkMap';
 import { Link } from '@/i18n/routing';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 
@@ -130,12 +129,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
   const preview = datacenters.slice(0, 3);
   const kpis = wp?.kpis?.length ? wp.kpis : networkKpis(datacenters);
   const carouselServices = homeServices(services, 5);
-  // Diaporama du hero : les vues viennent de WordPress (image principale +
-  // répéteur). Sans WordPress, l'image livrée avec le site fait office de vue
-  // unique — le composant se replie alors sur une image simple, sans script.
-  const heroSlides = wp?.heroSlides?.length
-    ? wp.heroSlides
-    : [{ sourceUrl: '/hero-datacenter.jpg', altText: t.heroImageAlt }];
+  const heroImage = '/hero-datacenter.jpg';
   const fmtDate = (iso: string) => {
     try {
       return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
@@ -181,7 +175,15 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           </div>
           <div className="hero-visual">
             <div className="hero-frame">
-              <HeroSlideshow slides={heroSlides} interval={wp?.heroSlideInterval || 6} />
+              <Image
+                className="hero-img"
+                src={wp?.heroImage?.sourceUrl || heroImage}
+                alt={wp?.heroImage?.altText || t.heroImageAlt}
+                width={1200}
+                height={800}
+                priority
+                sizes="(max-width: 900px) 100vw, 50vw"
+              />
               <div className="hero-frame-corner tl" aria-hidden="true" />
               <div className="hero-frame-corner br" aria-hidden="true" />
             </div>
@@ -195,9 +197,6 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           </div>
         </div>
       </section>
-
-      {/* BANNIÈRE D'ACTUALITÉ — masquée tant qu'elle n'est pas activée dans WP */}
-      {wp?.banner && <HomeBanner banner={wp.banner} locale={locale} />}
 
       {/* BANDEAU KPI RÉSEAU — ANIMÉ */}
       <KpiBand kpis={kpis} title={wp?.kpiTitle || undefined} />

@@ -1314,16 +1314,6 @@ export function homeServices(services: Service[], max = 5): Service[] {
 // bandeau certifications / groupe Altarea.
 // ===========================================================================
 export type HomeKpi = { valeur: string; unite: string; label: string };
-/** Bannière d'actualité affichée sous le hero (onglet WP « Bannière actualité »). */
-export type HomeBanner = {
-  label: string | null;
-  title: string;
-  text: string | null;
-  ctaLabel: string | null;
-  ctaUrl: string | null;
-  image: { sourceUrl: string; altText: string } | null;
-  tone: 'marine' | 'rouge' | 'clair';
-};
 export type HomeEngagement = { icon: string; titre: string; desc: string };
 export type HomeFigure = { valeur: string; label: string };
 export type HomeContent = {
@@ -1336,14 +1326,8 @@ export type HomeContent = {
   heroCtaSecondaryLabel: string | null;
   heroCtaSecondaryUrl: string | null;
   heroImage: { sourceUrl: string; altText: string } | null;
-  // Diaporama du hero : `heroImage` d'abord, puis les images du répéteur
-  // `heroImages`, doublons retirés. Une seule vue = pas de défilement.
-  heroSlides: { sourceUrl: string; altText: string }[];
-  heroSlideInterval: number | null;
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
-  // Bannière d'actualité sous le hero (null si masquée, vide ou périmée)
-  banner: HomeBanner | null;
   // Bandeau KPI
   kpiTitle: string | null;
   kpis: HomeKpi[];
@@ -1494,24 +1478,6 @@ const HOME_FIELDS_NEWSPROMO = `
   newsPromoText
   newsPromoCta
 `;
-// Diaporama du hero + bannière d'actualité (les plus récents). Isolés dans
-// leur propre palier : tant que le snippet WordPress n'a pas été mis à jour,
-// ces champs n'existent pas dans le schéma et la requête complète échoue —
-// on retombe alors sur la sélection précédente et le reste de la home
-// continue de vivre.
-const HOME_FIELDS_HEROBANNER = `
-  heroImages { image { node { sourceUrl altText } } }
-  heroSlideInterval
-  bannerActive
-  bannerLabel
-  bannerTitle
-  bannerText
-  bannerCtaLabel
-  bannerCtaUrl
-  bannerImage { node { sourceUrl altText } }
-  bannerTone
-  bannerUntil
-`;
 
 const homeQuery = (selection: string) => gql`
   query HomeContent($language: LanguageCodeFilterEnum) {
@@ -1546,7 +1512,6 @@ const homeTranslationsQuery = (selection: string) => gql`
 
 // Paliers de sélection, du plus complet au plus ancien schéma WP.
 const HOME_SELECTION_TIERS = [
-  HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN + HOME_FIELDS_NEWSPROMO + HOME_FIELDS_HEROBANNER,
   HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN + HOME_FIELDS_NEWSPROMO,
   HOME_FIELDS_SELECTION + HOME_FIELDS_GROW + HOME_FIELDS_LINKEDIN,
   HOME_FIELDS_SELECTION + HOME_FIELDS_GROW,
@@ -1562,19 +1527,8 @@ type WpHomeFields = {
   heroCtaSecondaryLabel: string | null;
   heroCtaSecondaryUrl: string | null;
   heroImage: { node: { sourceUrl: string; altText: string } | null } | null;
-  heroImages?: ({ image: { node: { sourceUrl: string | null; altText: string | null } | null } | null } | null)[] | null;
-  heroSlideInterval?: string | number | null;
   heroCaptionTitle: string | null;
   heroCaptionSub: string | null;
-  bannerActive?: boolean | null;
-  bannerLabel?: string | null;
-  bannerTitle?: string | null;
-  bannerText?: string | null;
-  bannerCtaLabel?: string | null;
-  bannerCtaUrl?: string | null;
-  bannerImage?: { node: { sourceUrl: string; altText: string } | null } | null;
-  bannerTone?: string | string[] | null;
-  bannerUntil?: string | null;
   kpiTitle: string | null;
   kpis: { valeur: string | null; unite: string | null; label: string | null }[] | null;
   dcEyebrow: string | null;
@@ -1632,65 +1586,6 @@ type WpHomeFields = {
   brochure: { node: { mediaItemUrl: string | null } | null } | null;
 } | null;
 
-/**
- * Vues du diaporama du hero : l'image principale d'abord, puis celles du
- * répéteur. Les doublons d'URL sont retirés — un éditeur qui recopie l'image
- * principale dans la liste ne doit pas obtenir un fondu sur elle-même.
- */
-function heroSlides(f: NonNullable<WpHomeFields>): { sourceUrl: string; altText: string }[] {
-  const out: { sourceUrl: string; altText: string }[] = [];
-  const seen = new Set<string>();
-  const add = (sourceUrl?: string | null, altText?: string | null) => {
-    if (!sourceUrl || seen.has(sourceUrl)) return;
-    seen.add(sourceUrl);
-    out.push({ sourceUrl, altText: altText ?? '' });
-  };
-  add(f.heroImage?.node?.sourceUrl, f.heroImage?.node?.altText);
-  for (const row of f.heroImages ?? []) add(row?.image?.node?.sourceUrl, row?.image?.node?.altText);
-  return out;
-}
-
-/** Durée d'affichage d'une vue, bornée entre 3 et 20 s. */
-function slideInterval(raw: string | number | null | undefined): number | null {
-  const n = typeof raw === 'string' ? Number(raw) : raw;
-  if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return null;
-  return Math.min(20, Math.max(3, Math.round(n)));
-}
-
-/**
- * Bannière d'actualité. Renvoie null — donc rien n'est rendu — dès que l'un
- * des trois verrous se ferme : interrupteur sur « non », titre vide, ou date
- * de fin dépassée. La comparaison de date se fait ici, côté serveur, à chaque
- * régénération ISR : aucune divergence d'hydratation possible.
- */
-function homeBanner(f: NonNullable<WpHomeFields>): HomeBanner | null {
-  if (f.bannerActive !== true) return null;
-  const title = (f.bannerTitle || '').trim();
-  if (!title) return null;
-
-  const until = (f.bannerUntil || '').trim();
-  if (until) {
-    // ACF renvoie « AAAA-MM-JJ » ; la bannière reste visible tout le jour dit.
-    const end = Date.parse(until + 'T23:59:59');
-    if (Number.isFinite(end) && Date.now() > end) return null;
-  }
-
-  const rawTone = Array.isArray(f.bannerTone) ? f.bannerTone[0] : f.bannerTone;
-  const tone: HomeBanner['tone'] = rawTone === 'rouge' || rawTone === 'clair' ? rawTone : 'marine';
-
-  return {
-    label: (f.bannerLabel || '').trim() || null,
-    title,
-    text: (f.bannerText || '').trim() || null,
-    ctaLabel: (f.bannerCtaLabel || '').trim() || null,
-    ctaUrl: (f.bannerCtaUrl || '').trim() || null,
-    image: f.bannerImage?.node
-      ? { sourceUrl: f.bannerImage.node.sourceUrl, altText: f.bannerImage.node.altText ?? '' }
-      : null,
-    tone,
-  };
-}
-
 /** Convertit les champs WordPress bruts (`homeFields`) en contenu normalisé. */
 function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
   return {
@@ -1705,10 +1600,7 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
       ? { sourceUrl: f.heroImage.node.sourceUrl, altText: f.heroImage.node.altText ?? '' }
       : null,
     heroCaptionTitle: f.heroCaptionTitle || null,
-    heroSlides: heroSlides(f),
-    heroSlideInterval: slideInterval(f.heroSlideInterval),
     heroCaptionSub: f.heroCaptionSub || null,
-    banner: homeBanner(f),
     kpiTitle: f.kpiTitle || null,
     kpis: (f.kpis ?? [])
       .map((k) => ({ valeur: k.valeur ?? '', unite: k.unite ?? '', label: k.label ?? '' }))

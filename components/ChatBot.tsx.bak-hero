@@ -432,13 +432,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
         </div>
       )}
 
-      {/* `dangerouslySetInnerHTML` et non un enfant texte : React échappe les
-          apostrophes d'un enfant texte en `&#x27;` dans le HTML du serveur.
-          Or les entités ne sont pas décodées à l'intérieur d'une balise
-          <style> — les règles `content: ''` arrivaient donc cassées, et le
-          texte du nœud différait de celui attendu par le client : erreur
-          d'hydratation à chaque page, tout l'arbre re-rendu côté client. */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style>{`
         .ndcb-bubble{position:fixed;right:22px;bottom:22px;z-index:960;width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;background:var(--marine,#1b3360);color:#fff;box-shadow:0 12px 34px -10px rgba(10,20,36,.5);transition:transform .16s ease,background .16s ease}
         .ndcb-bubble:hover{transform:translateY(-2px);background:var(--marine-800,#102240)}
         .ndcb-bubble::after{content:'';position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:var(--red,#ff0000);border:2px solid var(--marine,#1b3360)}
@@ -501,7 +495,7 @@ export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
           .ndcb-panel{right:14px;bottom:78px}
         }
         @media print{.ndcb-bubble,.ndcb-panel{display:none}}
-      ` }} />
+      `}</style>
     </>
   );
 }
