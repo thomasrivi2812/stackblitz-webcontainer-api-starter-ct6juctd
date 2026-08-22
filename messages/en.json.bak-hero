@@ -543,17 +543,5 @@
     "inputLabel": "Your question",
     "inputPlaceholder": "Ask your question…",
     "send": "Send message"
-  },
-  "heroSlider": {
-    "label": "Data centre images",
-    "roleDescription": "carousel",
-    "play": "Resume slideshow",
-    "pause": "Pause slideshow",
-    "goTo": "Show image {index} of {total}",
-    "position": "Image {index} of {total}"
-  },
-  "homeBanner": {
-    "label": "Headline",
-    "cta": "Read more"
   }
 }

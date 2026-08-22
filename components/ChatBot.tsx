@@ -40,7 +40,24 @@ const STORE_TTL = 30 * 60 * 1000; // 30 min d'inactivité
 type Stored = { msgs: Msg[]; open: boolean; declined: boolean; ts: number };
 
 export function ChatBot({ entries = [] }: { entries?: KnowledgeEntry[] }) {
-  const t = useTranslations('chatbot');
+  // On passe par le namespace RACINE avec des clés pointées, et non par
+  // `useTranslations('chatbot')`. La différence est cruciale : quand le
+  // namespace demandé est absent du dictionnaire, next-intl lève une
+  // exception dès la création du traducteur — ce qui ferait échouer le rendu
+  // de TOUTES les pages, l'assistant étant monté dans le layout. Depuis la
+  // racine, une clé manquante retombe sur son propre chemin : un libellé
+  // bizarre, visible, corrigeable — mais le site reste debout.
+  const root = useTranslations();
+  const t = useCallback(
+    (key: string) => {
+      try {
+        return root(`chatbot.${key}` as never);
+      } catch {
+        return key;
+      }
+    },
+    [root],
+  );
   const pathname = usePathname();
 
   const [open, setOpen] = useState(false);

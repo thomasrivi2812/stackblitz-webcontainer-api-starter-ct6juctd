@@ -2,44 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export type HeroSlide = { sourceUrl: string; altText: string };
-
-/**
- * Libellés du diaporama. Ils arrivent en PROPS, résolus par la page serveur
- * depuis messages/<locale>.json — comme le fait déjà tout le reste du site.
- * `useTranslations` a été retiré : il lève une exception quand le namespace
- * manque, et fait donc échouer le rendu de la page entière pour un libellé
- * d'infobulle. Un dictionnaire incomplet doit dégrader, pas casser.
- */
-export type SliderLabels = Partial<{
-  label: string;
-  roleDescription: string;
-  play: string;
-  pause: string;
-  /** Accepte les repères {index} et {total}. */
-  goTo: string;
-  position: string;
-}>;
-
-const FALLBACK: Record<string, Required<SliderLabels>> = {
-  fr: {
-    label: 'Images du data center',
-    roleDescription: 'carrousel',
-    play: 'Reprendre le défilement',
-    pause: 'Arrêter le défilement',
-    goTo: "Afficher l'image {index} sur {total}",
-    position: 'Image {index} sur {total}',
-  },
-  en: {
-    label: 'Data centre images',
-    roleDescription: 'carousel',
-    play: 'Resume slideshow',
-    pause: 'Pause slideshow',
-    goTo: 'Show image {index} of {total}',
-    position: 'Image {index} of {total}',
-  },
-};
 
 /**
  * Diaporama du hero de l'accueil : plusieurs images en fondu enchaîné.
@@ -55,12 +20,6 @@ const FALLBACK: Record<string, Required<SliderLabels>> = {
  * 2. Aucun décalage de mise en page. Les vues sont empilées dans la même
  *    cellule de grille ; la hauteur reste celle que `.hero-frame img` fixe
  *    déjà à chaque point de rupture (480 / 380 / 320 / 280 px).
- *    L'empilement est posé EN STYLE EN LIGNE, pas dans app/globals.css :
- *    c'est la seule chose qui, si elle manque, casse la page — les vues
- *    s'empilent alors verticalement et le cadre double de hauteur. Une mise
- *    en page qui dépend d'un fichier CSS correctement rapiécé est fragile.
- *    Le reste (pastille des commandes, points, couleurs) vit dans la feuille
- *    globale : son absence est laide, pas cassante.
  * 3. WCAG 2.2.2. Un contenu qui défile seul doit pouvoir être arrêté :
  *    pause au survol, au focus, quand l'onglet passe en arrière-plan, bouton
  *    d'arrêt explicite, et défilement désactivé si le visiteur a demandé de
@@ -69,23 +28,11 @@ const FALLBACK: Record<string, Required<SliderLabels>> = {
 export function HeroSlideshow({
   slides,
   interval = 6,
-  labels,
-  locale = 'fr',
 }: {
   slides: HeroSlide[];
   interval?: number;
-  labels?: SliderLabels;
-  locale?: string;
 }) {
-  // Le dictionnaire complète les libellés intégrés ; une clé absente ou vide
-  // retombe sur le texte codé, jamais sur une exception.
-  const base = FALLBACK[locale] ?? FALLBACK.fr;
-  const t = (key: keyof Required<SliderLabels>, vars?: Record<string, number>) => {
-    const raw = labels?.[key] || base[key];
-    return vars
-      ? Object.entries(vars).reduce((acc, [k, v]) => acc.split(`{${k}}`).join(String(v)), raw)
-      : raw;
-  };
+  const t = useTranslations('heroSlider');
   const n = slides.length;
 
   const [index, setIndex] = useState(0);
@@ -168,7 +115,6 @@ export function HeroSlideshow({
   return (
     <div
       className="hero-slides"
-      style={{ position: 'relative', display: 'grid' }}
       role="group"
       aria-roledescription={t('roleDescription')}
       aria-label={t('label')}
@@ -182,11 +128,6 @@ export function HeroSlideshow({
         <Image
           key={s.sourceUrl + i}
           className={`hero-img hero-slide${i === index ? ' is-active' : ''}`}
-          style={{
-            gridArea: '1 / 1',
-            opacity: i === index ? 1 : 0,
-            transition: reduced ? 'none' : 'opacity 0.9s ease',
-          }}
           src={s.sourceUrl}
           alt={i === index ? s.altText : ''}
           aria-hidden={i === index ? undefined : true}
@@ -197,10 +138,7 @@ export function HeroSlideshow({
         />
       ))}
 
-      {/* `position: absolute` en ligne : sans lui, les commandes retombent
-          dans le flux et rallongent le cadre. Le placement fin (haut sur
-          mobile, bas ailleurs) et l'habillage restent dans la feuille. */}
-      <div className="hero-slides-ui" style={{ position: 'absolute', right: 10, zIndex: 2 }}>
+      <div className="hero-slides-ui">
         <button
           type="button"
           className="hero-slides-toggle"

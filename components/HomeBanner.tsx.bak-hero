@@ -19,14 +19,10 @@ function ArrowIcon() {
 }
 
 export async function HomeBanner({ banner, locale = 'fr' }: { banner: Banner; locale?: WpLocale }) {
-  // `?? {}` : si le namespace manque du dictionnaire, on veut une bannière aux
-  // libellés par défaut, pas une page qui ne se rend plus.
-  const dict = (await import(`../messages/${locale}.json`)).default as Record<string, unknown>;
-  const t = (dict.homeBanner ?? {}) as Record<string, string | undefined>;
-  const en = locale === 'en';
+  const t = (await import(`../messages/${locale}.json`)).default.homeBanner as Record<string, string>;
 
-  const label = banner.label || t.label || (en ? 'Headline' : 'À la une');
-  const ctaLabel = banner.ctaLabel || t.cta || (en ? 'Read more' : 'Lire la suite');
+  const label = banner.label || t.label;
+  const ctaLabel = banner.ctaLabel || t.cta;
   const href = banner.ctaUrl || null;
 
   const inner = (

@@ -118,7 +118,11 @@ function Icon({ name }: { name: string }) {
 
 export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
-  const t = (await import(`../../messages/${locale}.json`)).default.home as Record<string, string>;
+  const dict = (await import(`../../messages/${locale}.json`)).default as Record<string, unknown>;
+  const t = dict.home as Record<string, string>;
+  // Libellés du diaporama passés en props : le composant porte ses propres
+  // textes de repli, un namespace absent ne fait donc rien échouer.
+  const sliderLabels = (dict.heroSlider ?? {}) as Record<string, string>;
   // Fetchs indépendants lancés en parallèle (au lieu d'un waterfall séquentiel).
   const [wp, datacenters, posts, services] = await Promise.all([
     getHome(locale),
@@ -181,7 +185,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
           </div>
           <div className="hero-visual">
             <div className="hero-frame">
-              <HeroSlideshow slides={heroSlides} interval={wp?.heroSlideInterval || 6} />
+              <HeroSlideshow slides={heroSlides} interval={wp?.heroSlideInterval || 6} labels={sliderLabels} locale={locale} />
               <div className="hero-frame-corner tl" aria-hidden="true" />
               <div className="hero-frame-corner br" aria-hidden="true" />
             </div>

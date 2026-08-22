@@ -543,17 +543,5 @@
     "inputLabel": "Votre question",
     "inputPlaceholder": "Posez votre question…",
     "send": "Envoyer le message"
-  },
-  "heroSlider": {
-    "label": "Images du data center",
-    "roleDescription": "carrousel",
-    "play": "Reprendre le défilement",
-    "pause": "Arrêter le défilement",
-    "goTo": "Afficher l'image {index} sur {total}",
-    "position": "Image {index} sur {total}"
-  },
-  "homeBanner": {
-    "label": "À la une",
-    "cta": "Lire la suite"
   }
 }
