@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Jost } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
@@ -29,17 +29,6 @@ const jost = Jost({
   weight: ['400', '500', '600', '700'],
   variable: '--font-jost',
 });
-
-// « interactiveWidget: resizes-content » : sans cette déclaration, le clavier
-// virtuel d'Android recouvre le bas de l'écran sans que l'unité dvh en tienne
-// compte — le champ de saisie de l'assistant, en pied de panneau plein écran,
-// passait alors sous le clavier. Avec elle, le viewport de mise en page suit
-// l'ouverture du clavier et le champ reste visible.
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  interactiveWidget: 'resizes-content',
-};
 
 // Metadata dépendant de la locale (og:locale correct sur /en). Les mots-clés
 // meta ont été retirés : ignorés par tous les moteurs depuis des années.

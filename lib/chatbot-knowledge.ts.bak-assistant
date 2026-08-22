@@ -32,13 +32,6 @@ export type KnowledgeEntry = {
   link?: { label: string; href: string };
   /** Plus le nombre est petit, plus l'entrée est proposée tôt en suggestion. */
   priority?: number;
-  /**
-   * Multiplicateur appliqué au score de pertinence. Réservé aux contenus
-   * écrits expressément pour répondre aux visiteurs — la FAQ du site et les
-   * FAQ par profil — qui doivent l'emporter à égalité de recouvrement sur
-   * une fiche descriptive.
-   */
-  boost?: number;
 };
 
 /**
@@ -58,36 +51,9 @@ type Locale = 'fr' | 'en';
 
 const isEn = (l: Locale) => l === 'en';
 
-/**
- * Chemin d'une entrée, SANS préfixe de langue.
- * L'assistant rend ses liens avec le `Link` de `@/i18n/routing`, qui ajoute
- * lui-même « /en » quand il le faut. Préfixer ici aussi produisait
- * « /en/en/datacenters ». Le paramètre `locale` est conservé pour la
- * lisibilité des appels et pour le jour où une page n'existerait que dans
- * une langue.
- */
-function path(_locale: Locale, p: string): string {
-  return p;
-}
-
-/**
- * Identifiant technique : accents retirés, un seul tiret de séparation.
- * `nom.toLowerCase().replace(...)` laissait passer les accents — « HDS —
- * Hébergement de données de santé » donnait « hds-h-bergement-de-donn-es-de-
- * sant- », illisible et exposé aux collisions.
- */
-function slugId(prefix: string, raw: string, taken: Set<string>): string {
-  const base = String(raw || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '') || 'x';
-  let id = `${prefix}-${base}`;
-  let n = 2;
-  while (taken.has(id)) id = `${prefix}-${base}-${n++}`;
-  taken.add(id);
-  return id;
+/** Chemin localisé : le français est à la racine, l'anglais sous /en. */
+function path(locale: Locale, p: string): string {
+  return isEn(locale) ? `/en${p}` : p;
 }
 
 /** Coupe un texte trop long sans casser un mot. */
@@ -98,35 +64,9 @@ function clip(text: string, max = 320): string {
   return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
 }
 
-/**
- * Libellés de statut traduits pour l'assistant.
- * `statutInfo` / `certifStatutInfo` de lib/wordpress.ts renvoient un libellé
- * codé en dur en français — c'est un choix global du site, hors du périmètre
- * de l'assistant. Mais laisser « Status: Opérationnel » au milieu d'une phrase
- * anglaise donnait un assistant en franglais sur /en : on traduit ici, à la
- * sortie, sans toucher au reste du site.
- */
-const STATUT_EN: Record<string, string> = {
-  livre: 'Live',
-  construction: 'Under construction',
-  avenir: 'Planned',
-};
-const CERTIF_STATUT_EN: Record<string, string> = {
-  conforme: 'Compliant',
-  'en-cours': 'In progress',
-  vise: 'Targeted',
-};
-
 /** Statut d'un data center en clair (le champ peut arriver en tableau). */
-function statutLabel(statut: Datacenter['datacenterFields']['statut'], locale: Locale = 'fr'): string {
-  const info = statutInfo(statut);
-  return isEn(locale) ? STATUT_EN[info.key] ?? info.label : info.label;
-}
-
-/** Statut d'une certification en clair, dans la langue de la page. */
-function certifLabel(statut: string, locale: Locale = 'fr'): string {
-  const info = certifStatutInfo(statut);
-  return isEn(locale) ? CERTIF_STATUT_EN[info.key] ?? info.label : info.label;
+function statutLabel(statut: Datacenter['datacenterFields']['statut']): string {
+  return statutInfo(statut).label;
 }
 
 /* ------------------------------------------------------------------ *
@@ -142,7 +82,7 @@ function datacenterEntries(datacenters: Datacenter[], locale: Locale): Knowledge
     .map((d) => {
       const f = d.datacenterFields;
       const lieu = f.ville ? ` (${f.ville})` : '';
-      return `• ${d.title}${lieu} — ${statutLabel(f.statut, locale)}${f.puissance ? ` · ${f.puissance}` : ''}`;
+      return `• ${d.title}${lieu} — ${statutLabel(f.statut)}${f.puissance ? ` · ${f.puissance}` : ''}`;
     })
     .join('\n');
 
@@ -171,40 +111,13 @@ function datacenterEntries(datacenters: Datacenter[], locale: Locale): Knowledge
     priority: 1,
   });
 
-  // Le visiteur cherche « près de Paris », pas « à Vélizy-Villacoublay ».
-  // Sans passerelle, aucun mot commun entre la question et la fiche. La table
-  // est volontairement courte : une ville absente n'ajoute simplement rien.
-  const NEARBY: Record<string, string[]> = {
-    velizy: ['paris', 'region parisienne', 'ile de france', 'versailles', 'saclay', 'hauts de seine', 'yvelines'],
-    'velizy-villacoublay': ['paris', 'region parisienne', 'ile de france', 'versailles', 'saclay', 'yvelines'],
-    paris: ['region parisienne', 'ile de france'],
-    rennes: ['bretagne', 'ille et vilaine', 'ouest'],
-    rouen: ['normandie', 'seine maritime', 'le havre'],
-    lyon: ['rhone', 'auvergne rhone alpes', 'sud est'],
-    marseille: ['bouches du rhone', 'provence', 'sud'],
-    bordeaux: ['gironde', 'nouvelle aquitaine', 'sud ouest'],
-    lille: ['nord', 'hauts de france'],
-    nantes: ['loire atlantique', 'pays de la loire', 'ouest'],
-    toulouse: ['haute garonne', 'occitanie', 'sud ouest'],
-    strasbourg: ['bas rhin', 'grand est', 'alsace'],
-  };
-  const nearbyOf = (ville?: string | null): string[] => {
-    const k = String(ville || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    return NEARBY[k] ?? NEARBY[k.split('-')[0]] ?? [];
-  };
-
   // Une entrée par site : le visiteur cite souvent une ville directement.
   for (const d of datacenters) {
     const f = d.datacenterFields;
     const details: string[] = [];
     if (f.ville) details.push(isEn(locale) ? `Location: ${f.ville}` : `Localisation : ${f.ville}`);
     if (f.puissance) details.push(isEn(locale) ? `Capacity: ${f.puissance}` : `Puissance : ${f.puissance}`);
-    details.push(isEn(locale) ? `Status: ${statutLabel(f.statut, locale)}` : `Statut : ${statutLabel(f.statut, locale)}`);
+    details.push(isEn(locale) ? `Status: ${statutLabel(f.statut)}` : `Statut : ${statutLabel(f.statut)}`);
     for (const k of (f.kpis ?? []).slice(0, 3)) {
       if (k?.label && k?.valeur) details.push(`${k.label} : ${k.valeur}${k.unite ? ` ${k.unite}` : ''}`);
     }
@@ -219,7 +132,6 @@ function datacenterEntries(datacenters: Datacenter[], locale: Locale): Knowledge
         f.ville ?? '',
         f.region ?? '',
         ...d.title.split(/\s+/),
-        ...nearbyOf(f.ville),
       ].filter(Boolean),
       link: {
         label: isEn(locale) ? `See ${d.title}` : `Voir ${d.title}`,
@@ -284,7 +196,7 @@ function certificationEntries(certifications: Certification[], locale: Locale): 
     answer:
       (isEn(locale) ? 'Our certifications and standards:\n' : 'Nos certifications et référentiels :\n') +
       certifications
-        .map((c) => `• ${c.nom} — ${certifLabel(c.statut, locale)}`)
+        .map((c) => `• ${c.nom} — ${certifStatutInfo(c.statut).label}`)
         .join('\n'),
     keywords: [
       'certification', 'certifications', 'certifie', 'certifiee', 'norme', 'normes',
@@ -298,13 +210,12 @@ function certificationEntries(certifications: Certification[], locale: Locale): 
     priority: 3,
   });
 
-  const taken = new Set<string>();
   for (const c of certifications) {
     entries.push({
-      id: slugId('certif', c.nom, taken),
+      id: `certif-${c.nom.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       question: c.nom,
       answer: [
-        `${c.nom} — ${certifLabel(c.statut, locale)}.`,
+        `${c.nom} — ${certifStatutInfo(c.statut).label}.`,
         c.description && clip(c.description, 220),
         c.garantie && (isEn(locale) ? `What it guarantees: ${c.garantie}` : `Ce que ça garantit : ${c.garantie}`),
       ]
@@ -369,59 +280,16 @@ function postEntries(posts: ArticleLike[], locale: Locale): KnowledgeEntry[] {
  * ------------------------------------------------------------------ */
 
 function personaEntries(personas: Persona[], locale: Locale): KnowledgeEntry[] {
-  const entries: KnowledgeEntry[] = [];
-  const taken = new Set<string>();
-
-  for (const pa of personas) {
-    entries.push({
-      id: `persona-${pa.id}`,
-      question: isEn(locale) ? `Offer for ${pa.label}` : `L'offre pour ${pa.label}`,
-      answer: clip([pa.lead, pa.proofs?.slice(0, 3).join(' · ')].filter(Boolean).join('\n\n'), 340),
-      keywords: [pa.label, pa.tag, ...pa.label.split(/[\s/]+/)].filter(Boolean),
-      link: {
-        label: isEn(locale) ? 'See this offer' : 'Voir cette offre',
-        href: path(locale, `/offres#${pa.id}`),
-      },
-    });
-
-    // Les FAQ par profil sont le contenu le mieux rédigé du site pour
-    // répondre à un visiteur — dix-huit vraies questions/réponses écrites
-    // pour des DSI, des PME, le secteur public et les opérateurs. Elles
-    // n'étaient pas indexées : seul le chapeau de l'offre l'était.
-    for (const qa of pa.faq ?? []) {
-      if (!qa?.q || !qa?.a) continue;
-      entries.push({
-        id: slugId(`pfaq-${pa.id}`, qa.q.slice(0, 40), taken),
-        question: qa.q,
-        answer: clip(qa.a, 420),
-        keywords: [pa.label, pa.tag].filter(Boolean),
-        link: {
-          label: isEn(locale) ? 'See this offer' : 'Voir cette offre',
-          href: path(locale, `/offres#${pa.id}`),
-        },
-        boost: 1.12,
-      });
-    }
-
-    // Les « réponses » d'un profil portent des faits concrets (smart hands,
-    // accès 24/7, carrier-neutral, TCO) que le visiteur cherche par ces
-    // mots-là et qui n'apparaissent nulle part ailleurs dans la base.
-    for (const rep of pa.reponses ?? []) {
-      if (!rep?.titre || !rep?.texte) continue;
-      entries.push({
-        id: slugId(`prep-${pa.id}`, rep.titre, taken),
-        question: rep.titre,
-        answer: clip(rep.texte, 360),
-        keywords: [rep.titre],
-        link: {
-          label: isEn(locale) ? 'See this offer' : 'Voir cette offre',
-          href: path(locale, `/offres#${pa.id}`),
-        },
-      });
-    }
-  }
-
-  return entries;
+  return personas.map((pa) => ({
+    id: `persona-${pa.id}`,
+    question: isEn(locale) ? `Offer for ${pa.label}` : `L'offre pour ${pa.label}`,
+    answer: clip([pa.lead, pa.proofs?.slice(0, 3).join(' · ')].filter(Boolean).join('\n\n'), 340),
+    keywords: [pa.label, pa.tag, ...pa.label.split(/[\s/]+/)].filter(Boolean),
+    link: {
+      label: isEn(locale) ? 'See this offer' : 'Voir cette offre',
+      href: path(locale, `/offres#${pa.id}`),
+    },
+  }));
 }
 
 /* ------------------------------------------------------------------ *
@@ -603,147 +471,9 @@ function staticEntries(locale: Locale): KnowledgeEntry[] {
         : 'Nos sites sont exploités par nos propres équipes — direction technique, opérations, commerce et développement. La page équipe vous dit qui elles sont.',
       keywords: [
         'equipe', 'equipes', 'qui', 'interlocuteur', 'contact technique', 'personne',
-        'collaborateurs', 'metier', 'metiers', 'exploitation', 'exploitants',
-        'techniciens', 'team', 'staff', 'people', 'jobs',
+        'collaborateurs', 'team', 'staff', 'people',
       ],
       link: { label: en ? 'Our team' : 'Notre équipe', href: path(locale, '/equipes') },
-    },
-
-    /* ---- Sujets sans page dédiée, mais que les visiteurs demandent ----
-     * Ces entrées n'inventent aucun fait : elles disent ce que l'assistant
-     * ne peut pas trancher et orientent vers la bonne personne. Un « je ne
-     * sais pas » précis vaut mieux qu'un catalogue servi à côté — c'était
-     * le comportement observé sur ces questions.
-     */
-    {
-      id: 'recrutement',
-      question: en ? 'Are you hiring?' : 'Vous recrutez ?',
-      answer: en
-        ? 'Openings are not listed on this site. Send your application through the contact form, mentioning the role you are after — it reaches the team directly. The team page will tell you how we are organised.'
-        : "Les offres d'emploi ne sont pas publiées sur ce site. Adressez votre candidature via le formulaire de contact en précisant le poste visé : elle arrive directement à l'équipe. La page Notre équipe vous dira comment nous sommes organisés.",
-      keywords: [
-        'recrutement', 'recrutez', 'recrute', 'embauche', 'emploi', 'emplois',
-        'candidature', 'candidater', 'postuler', 'poste', 'offre emploi',
-        'offres emploi', 'stage', 'stagiaire', 'alternance', 'apprentissage',
-        'cv', 'carriere', 'carrieres', 'job', 'jobs', 'hiring', 'careers',
-        'internship', 'apply', 'vacancy', 'rh', 'ressources humaines',
-      ],
-      link: { label: en ? 'Contact us' : 'Nous écrire', href: path(locale, '/contact') },
-    },
-    {
-      id: 'perimetre',
-      question: en ? 'Do you sell cloud or managed servers?' : 'Proposez-vous du cloud ou de l’infogérance ?',
-      answer: en
-        ? 'Nation Data Center operates data centres: we host YOUR equipment and provide the infrastructure around it — power, cooling, connectivity, physical security, on-site hands. We are not a public cloud provider and we do not resell managed servers. If you need one of those, tell us which: the team will point you to the right partner.'
-        : "Nation Data Center exploite des data centers : nous hébergeons VOS équipements et fournissons l'infrastructure autour — énergie, refroidissement, connectivité, sécurité physique, interventions sur site. Nous ne sommes pas un fournisseur de cloud public et nous ne revendons pas de serveurs infogérés. Si c'est ce que vous cherchez, dites-nous lequel : l'équipe vous orientera.",
-      keywords: [
-        'cloud public', 'faites vous du cloud', 'proposez vous du cloud',
-        'infogerance', 'infogere', 'serveur manage', 'serveurs manages',
-        'bare metal', 'vps', 'saas', 'paas', 'iaas', 'hebergement web',
-        'nom de domaine', 'messagerie', 'office 365', 'public cloud',
-        'managed', 'managed servers', 'hosting', 'do you sell cloud',
-      ],
-      link: { label: en ? 'Our services' : 'Nos services', href: path(locale, '/services') },
-    },
-    {
-      id: 'contrat',
-      question: en ? 'What are your contract terms?' : 'Quelles sont vos conditions contractuelles ?',
-      answer: en
-        ? 'Service levels, response and repair times, penalties, term and notice period are all set in the contract, and they depend on the site and the footprint. They are not published: ask the team and you will get the actual terms for your case, in writing.'
-        : "Niveaux de service, délais d'intervention et de rétablissement, pénalités, durée d'engagement et préavis figurent au contrat et dépendent du site et du volume. Ils ne sont pas publiés : demandez-les à l'équipe, vous les recevrez par écrit pour votre cas précis.",
-      keywords: [
-        'sla', 'contrat', 'contractuel', 'contractuelle', 'conditions',
-        'cgv', 'engagement', 'duree engagement', 'preavis', 'resiliation',
-        'penalites', 'penalite', 'gtr', 'gti', 'delai intervention',
-        'garantie de temps', 'clause', 'clauses', 'terms', 'notice period',
-        'termination', 'penalty', 'contract',
-      ],
-      link: { label: en ? 'Ask the team' : 'Demander à l’équipe', href: path(locale, '/contact') },
-    },
-    {
-      id: 'delai',
-      question: en ? 'How long before my racks are live?' : 'Quel est le délai de mise en service ?',
-      answer: en
-        ? 'It depends on the site, on how much space and power you need, and on what is available right now. The team gives you a firm date once it knows your requirement — that is a question for a human, not for me.'
-        : "Cela dépend du site, de la surface et de la puissance demandées, et de ce qui est disponible à l'instant T. L'équipe vous donne une date ferme dès qu'elle connaît votre besoin — c'est une question pour un humain, pas pour moi.",
-      keywords: [
-        'delai', 'delais', 'mise en service', 'combien de temps', 'disponible quand',
-        'quand disponible', 'sous quel delai', 'installation', 'emmenagement',
-        'disponibilite baie', 'baies disponibles', 'place disponible', 'stock',
-        'lead time', 'how long', 'availability', 'when available',
-      ],
-      link: { label: en ? 'Ask the team' : 'Demander à l’équipe', href: path(locale, '/contact') },
-    },
-    {
-      id: 'energie-facturation',
-      question: en ? 'How is power billed?' : 'Comment l’énergie est-elle facturée ?',
-      answer: en
-        ? 'Power commitment, actual consumption and how they are billed are part of the commercial terms and vary by site and contract. Ask the team for the model that applies to you — including how it moves with energy prices.'
-        : "L'engagement de puissance, la consommation réelle et leur mode de refacturation font partie des conditions commerciales et varient selon le site et le contrat. Demandez à l'équipe le modèle qui s'applique à vous — indexation sur le prix de l'énergie comprise.",
-      keywords: [
-        'facturation energie', 'refacturation', 'refacture', 'kwh', 'prix kwh',
-        'cout energie', 'consommation electrique', 'engagement de puissance',
-        'indexation', 'facture electricite', 'electricite facturee',
-        'power billing', 'energy cost', 'billed',
-      ],
-      link: { label: en ? 'Ask the team' : 'Demander à l’équipe', href: path(locale, '/contact') },
-    },
-    {
-      id: 'securite-incendie',
-      question: en ? 'Fire safety and physical security?' : 'Sécurité incendie et sûreté du site ?',
-      answer: en
-        ? 'Fire detection and suppression, access control and surveillance are designed to the EN 50600 standard our sites are built against, and audited as part of our certification programme. For the detailed measures on a given site — they differ from one to another — ask the team: this is not something to summarise loosely.'
-        : "Détection et extinction incendie, contrôle d'accès et vidéosurveillance relèvent du référentiel EN 50600 sur lequel nos sites sont conçus, et sont audités dans le cadre de notre démarche de certification. Pour le détail des dispositifs d'un site donné — ils diffèrent d'un site à l'autre — adressez-vous à l'équipe : ce n'est pas un sujet à résumer approximativement.",
-      keywords: [
-        'incendie', 'feu', 'extinction', 'detection incendie', 'sprinkler',
-        'surete', 'securite physique', 'securite du site', 'intrusion',
-        'videosurveillance', 'camera', 'cameras', 'gardiennage', 'controle acces',
-        'badge', 'biometrie', 'fire', 'fire safety', 'physical security',
-        'surveillance', 'access control',
-      ],
-      link: { label: en ? 'Our certifications' : 'Nos certifications', href: path(locale, '/certifications') },
-    },
-    {
-      id: 'riverains',
-      question: en ? 'I live nearby — noise, traffic, water?' : 'Je suis riverain — bruit, trafic, eau ?',
-      answer: en
-        ? 'Questions from neighbours deserve a real answer, site by site: noise, traffic, water use, planning permission, local consultation. Write to us saying which site you live next to and the team will answer you directly. Our commitments page explains the approach that guides the design of every site.'
-        : "Les questions de riverains méritent une réponse précise, site par site : bruit, trafic, usage de l'eau, permis de construire, concertation. Écrivez-nous en indiquant le site concerné, l'équipe vous répond directement. La page de nos engagements explique la démarche qui guide la conception de chaque site.",
-      keywords: [
-        'riverain', 'riverains', 'voisinage', 'voisin', 'nuisance', 'nuisances',
-        'bruit', 'sonore', 'trafic', 'circulation', 'permis de construire',
-        'concertation', 'enquete publique', 'foncier', 'terrain', 'chantier',
-        'consommation eau', 'neighbour', 'noise', 'planning permission',
-      ],
-      link: { label: en ? 'Contact us' : 'Nous écrire', href: path(locale, '/contact') },
-    },
-    {
-      id: 'presse',
-      question: en ? 'Press, corporate figures, partnerships' : 'Presse, chiffres corporate, partenariats',
-      answer: en
-        ? 'Revenue, headcount, investment, local jobs, press enquiries and partnership proposals all go to a human. Write through the contact form saying what you need and by when — press deadlines are taken into account.'
-        : "Chiffre d'affaires, effectifs, montants investis, emplois créés localement, demandes presse et propositions de partenariat passent par un humain. Écrivez via le formulaire de contact en précisant votre besoin et votre échéance — les délais de bouclage sont pris en compte.",
-      keywords: [
-        'presse', 'journaliste', 'interview', 'communique', 'chiffre affaires',
-        'ca', 'effectif', 'effectifs', 'salaries', 'investissement', 'investi',
-        'emplois', 'partenariat', 'partenaire', 'fournisseur', 'appel offres',
-        'press', 'media', 'revenue', 'headcount', 'partnership',
-      ],
-      link: { label: en ? 'Contact us' : 'Nous écrire', href: path(locale, '/contact') },
-    },
-    {
-      id: 'donnees-perso',
-      question: en ? 'Privacy, cookies, legal notice' : 'Données personnelles, cookies, mentions légales',
-      answer: en
-        ? 'The privacy policy, the cookie settings and the legal notice are linked at the foot of every page. To exercise a right over your data — access, rectification, erasure — use the contact form: the request is passed on.'
-        : "La politique de confidentialité, le réglage des cookies et les mentions légales sont accessibles en bas de chaque page. Pour exercer un droit sur vos données — accès, rectification, effacement — passez par le formulaire de contact : la demande est transmise.",
-      keywords: [
-        'rgpd', 'donnees personnelles', 'vie privee', 'confidentialite',
-        'cookies', 'cookie', 'mentions legales', 'politique de confidentialite',
-        'droit acces', 'effacement', 'desinscription', 'dpo',
-        'gdpr', 'privacy', 'legal notice', 'personal data',
-      ],
-      link: { label: en ? 'Contact us' : 'Nous écrire', href: path(locale, '/contact') },
     },
   ];
 }
@@ -787,12 +517,8 @@ export function buildKnowledge(
       id: `faq-${i}`,
       question: f.question,
       answer: stripHtml(f.reponse),
-      // Pas de mots-déclencheurs : la question de la FAQ EST la formulation
-      // canonique. Le boost compense le fait que les autres entrées
-      // disposent, elles, d'une liste de synonymes pondérée plus lourdement.
       keywords: [],
       priority: 10 + i,
-      boost: 1.15,
     }));
 
   return [
