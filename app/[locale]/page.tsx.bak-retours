@@ -518,10 +518,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                 {wp!.linkedinPosts.slice(0, 3).map((p, i) => (
                   <a className="li-card" key={`${p.url}-${i}`} href={p.url} target="_blank" rel="noopener noreferrer">
                     <div className="li-card-top">
-                      {/* L'icône de l'onglet elle-même (public/favicon.svg) : carré
-                          marine, lettres blanches, barres rouges — identique au
-                          picto que le visiteur voit dans son navigateur. */}
-                      <img className="li-avatar" src="/favicon.svg" alt="" width={38} height={38} loading="lazy" decoding="async" />
+                      <span className="li-avatar" aria-hidden="true">N|D|C</span>
                       <span className="li-card-who">
                         <strong>Nation Data Center</strong>
                         {p.date && <span>{p.date}</span>}

@@ -164,8 +164,9 @@
     "subject": "Subject of your request",
     "subjectPlaceholder": "— Select a subject —",
     "objDevis": "Request a quote",
+    "objVisite": "Site visit",
     "objTech": "Technical information",
-    "objPartenariat": "Partnership / Press",
+    "objPartenariat": "Partnership / press",
     "objAutre": "Other",
     "message": "Your message",
     "messagePlaceholder": "Describe your project or your need…",
@@ -182,9 +183,7 @@
     "errEmail": "Invalid email address.",
     "errSubject": "Please select a subject.",
     "errMessage": "Your message must be at least 10 characters.",
-    "errConsent": "Please accept the privacy policy.",
-    "objFournisseurs": "Suppliers",
-    "objRh": "Human resources"
+    "errConsent": "Please accept the privacy policy."
   },
   "datacenters": {
     "bannerLive": "● Live data from your WordPress GraphQL endpoint.",

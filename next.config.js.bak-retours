@@ -17,10 +17,8 @@ function wpHost() {
 }
 const WP_HOST = wpHost();
 
-// Tuiles de la carte (Leaflet) chargées en <img> côté client. Les trois
-// fournisseurs de components/MapClient.tsx sont autorisés : Esri (défaut, sans
-// clé), CARTO (avec clé) et OpenStreetMap.
-const TILE_HOSTS = 'https://server.arcgisonline.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com';
+// Tuiles de la carte (Leaflet / OpenStreetMap) chargées en <img> côté client.
+const TILE_HOSTS = 'https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com';
 
 // En-têtes de sécurité appliqués à toutes les routes.
 const securityHeaders = [

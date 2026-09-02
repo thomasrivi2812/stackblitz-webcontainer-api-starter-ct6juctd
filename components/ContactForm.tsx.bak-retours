@@ -26,32 +26,18 @@ const INITIAL: FormData = {
   consent: false,
 };
 
-// Liste par défaut. La valeur envoyée reste stable (FR) quelle que soit la
-// langue → données de lead inchangées ; seul le libellé affiché est traduit
-// via labelKey. Une liste saisie dans WordPress (prop `objets`) la remplace.
+// La valeur envoyée reste stable (FR) quelle que soit la langue → données de lead
+// inchangées ; seul le libellé affiché est traduit via labelKey.
 const OBJETS: { value: string; labelKey: string }[] = [
   { value: 'Demande de devis', labelKey: 'objDevis' },
+  { value: 'Visite de site', labelKey: 'objVisite' },
   { value: 'Renseignements techniques', labelKey: 'objTech' },
-  { value: 'Fournisseurs', labelKey: 'objFournisseurs' },
-  { value: 'Partenariat / Presse', labelKey: 'objPartenariat' },
-  { value: 'Ressources humaines', labelKey: 'objRh' },
-  { value: 'Autres', labelKey: 'objAutre' },
+  { value: 'Partenariat / presse', labelKey: 'objPartenariat' },
+  { value: 'Autre', labelKey: 'objAutre' },
 ];
 
-export function ContactForm({
-  formNote = null,
-  objets = [],
-}: {
-  formNote?: string | null;
-  /** Objets saisis dans WordPress ; vide = liste par défaut ci-dessus. */
-  objets?: string[];
-}) {
+export function ContactForm({ formNote = null }: { formNote?: string | null }) {
   const t = useTranslations('contactForm');
-  // Avec une liste WordPress, le libellé affiché est aussi la valeur envoyée :
-  // c'est ce que l'équipe a écrit, dans la langue de la page.
-  const options: { value: string; label: string }[] = objets.length
-    ? objets.map((o) => ({ value: o, label: o }))
-    : OBJETS.map((o) => ({ value: o.value, label: t(o.labelKey) }));
   const [form, setForm] = useState<FormData>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
@@ -208,8 +194,8 @@ export function ContactForm({
           onChange={(e) => update('objet', e.target.value)}
         >
           <option value="">{t('subjectPlaceholder')}</option>
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+          {OBJETS.map((o) => (
+            <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
           ))}
         </select>
         {errors.objet && <span className="contact-error">{errors.objet}</span>}

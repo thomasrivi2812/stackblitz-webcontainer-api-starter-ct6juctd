@@ -21,38 +21,6 @@ const STATUT_KEY: Record<string, string> = {
   avenir: 'statutAvenir',
 };
 
-// Fonds de carte.
-// CARTO (« Positron »), utilisé jusqu'ici, exige désormais une clé d'API : sans
-// elle, chaque tuile est barrée d'un filigrane « API KEY REQUIRED ». On passe
-// sur le fond gris clair d'Esri, servi sans clé, dont le rendu est le plus
-// proche de l'ancien ; ses noms de lieux sont un calque séparé, ce qui permet
-// de garder une carte du réseau sans libellés et une fiche de site avec.
-// Le fournisseur reste commutable par variable d'environnement, pour revenir
-// à CARTO avec une clé (NEXT_PUBLIC_CARTO_API_KEY) ou tomber sur OpenStreetMap.
-type Tiles = { base: string; labels?: string; attribution: string; subdomains?: string; maxNativeZoom: number };
-const OSM_CREDIT = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-const PROVIDERS: Record<string, Tiles> = {
-  esri: {
-    base: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-    labels: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, DeLorme, NAVTEQ',
-    maxNativeZoom: 16,
-  },
-  carto: {
-    base: `https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png?api_key=${process.env.NEXT_PUBLIC_CARTO_API_KEY ?? ''}`,
-    labels: `https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png?api_key=${process.env.NEXT_PUBLIC_CARTO_API_KEY ?? ''}`,
-    attribution: `${OSM_CREDIT} &copy; <a href="https://carto.com/attributions">CARTO</a>`,
-    subdomains: 'abcd',
-    maxNativeZoom: 20,
-  },
-  osm: {
-    base: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: OSM_CREDIT,
-    maxNativeZoom: 19,
-  },
-};
-const TILES = PROVIDERS[process.env.NEXT_PUBLIC_MAP_TILES ?? ''] ?? PROVIDERS.esri;
-
 // Marqueur sur mesure (pas d'image externe → pas de souci de chemin avec le bundler).
 function pin(color: string) {
   return L.divIcon({
@@ -98,15 +66,17 @@ export function MapClient({
       zoomControl={false}
     >
       <ZoomControl position="topleft" zoomInTitle={t('zoomIn')} zoomOutTitle={t('zoomOut')} />
-      {/* Fond gris clair, puis — sur les fiches de site seulement — le calque
-          des noms de lieux par-dessus. Les noms sont ceux de la langue du pays,
-          donc en français sur le territoire national. Au-delà du zoom natif,
-          Leaflet agrandit la dernière tuile disponible au lieu d'en demander
-          une qui n'existe pas. */}
-      <TileLayer attribution={TILES.attribution} url={TILES.base} subdomains={TILES.subdomains ?? 'abc'} maxZoom={20} maxNativeZoom={TILES.maxNativeZoom} />
-      {labels && TILES.labels && (
-        <TileLayer url={TILES.labels} subdomains={TILES.subdomains ?? 'abc'} maxZoom={20} maxNativeZoom={TILES.maxNativeZoom} pane="overlayPane" />
-      )}
+      {/* Fond de carte épuré (CARTO « Positron ») : gris clair, peu de calques,
+          dans l'esprit du reste du site — remplace les tuiles OSM par défaut.
+          La variante « light_all » ajoute les noms de lieux ; CARTO s'appuyant
+          sur OpenStreetMap, ces noms sont ceux de la langue du pays, donc en
+          français sur le territoire national. */}
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url={`https://{s}.basemaps.cartocdn.com/${labels ? 'light_all' : 'light_nolabels'}/{z}/{x}/{y}{r}.png`}
+        subdomains="abcd"
+        maxZoom={20}
+      />
       {points.map((p) => (
         <Marker key={p.slug} position={[p.lat, p.lng]} icon={pin(STATUT_COLOR[p.statut] ?? '#1b3360')}>
           <Popup>

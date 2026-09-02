@@ -2611,19 +2611,6 @@ export async function getContact(locale: WpLocale = 'fr'): Promise<ContactConten
 }
 
 
-// --- Formulaire de contact : objets de la demande -----------------------------
-// Liste déroulante « Objet de votre demande », éditable dans WP : page
-// « contact », groupe « Contact — Formulaire » (contactFormFields.objets).
-// Tant que ce groupe n'existe pas dans WordPress, getPageFields renvoie null et
-// le formulaire garde sa liste par défaut (messages/*.json) : rien ne casse.
-export async function getContactObjets(locale: WpLocale = 'fr'): Promise<string[]> {
-  type F = { objets?: ({ libelle: string | null } | null)[] | null };
-  const f = await getPageFields<F>('contact', 'contactFormFields', 'objets { libelle }', locale);
-  return (f?.objets ?? [])
-    .map((o) => (o?.libelle ?? '').trim())
-    .filter((s) => s !== '');
-}
-
 // Déduplication par rendu (React.cache) : layout + page + generateMetadata
 // partagent le même résultat dans une même requête, au lieu de refetcher WP.
 export const getDatacenters = cache(_getDatacenters);

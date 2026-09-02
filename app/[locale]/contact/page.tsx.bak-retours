@@ -1,5 +1,5 @@
 import { ContactForm } from '@/components/ContactForm';
-import { getContact, getContactObjets, type WpLocale } from '@/lib/wordpress';
+import { getContact, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 
@@ -75,12 +75,13 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
   const t = (await import(`../../../messages/${locale}.json`)).default.contact as Record<string, string>;
   // Contenu éditable dans WP (page « contact », groupe « Contact — page ») ;
   // chaque champ vide retombe sur le texte par défaut du site.
-  const [c, objets] = await Promise.all([getContact(locale), getContactObjets(locale)]);
+  const c = await getContact(locale);
 
   const email = c?.email || 'contact@nationdatacenter.com';
   const telephone = c?.telephone || '+33 1 00 00 00 00';
   // Adresse multi-ligne : chaque ligne du champ WP devient une ligne affichée.
   const adresse = (c?.adresse || '87 rue de Richelieu\n75002 Paris, France').split('\n');
+  const whys = c?.whys?.length ? c.whys : [t.why1, t.why2, t.why3, t.why4];
 
   return (
     <main>
@@ -99,7 +100,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
           <div className="contact-layout">
             {/* Formulaire */}
             <div className="contact-form-wrap">
-              <ContactForm formNote={c?.formNote || null} objets={objets} />
+              <ContactForm formNote={c?.formNote || null} />
             </div>
 
             {/* Sidebar informations */}
@@ -163,9 +164,20 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                 )}
               </div>
 
-              {/* Le bloc « Pourquoi nous contacter ? » a été retiré à la demande
-                  du client. Les champs WordPress correspondants (whyTitle,
-                  why1…why4) restent sans effet, sans rien casser. */}
+              {/* Carte réassurance */}
+              <div className="contact-reassurance">
+                <h4>{c?.whyTitle || t.whyTitle}</h4>
+                <ul>
+                  {whys.map((why, i) => (
+                    <li key={i}>
+                      <span className="contact-check">
+                        <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
+                      </span>
+                      {why}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </aside>
           </div>
         </div>

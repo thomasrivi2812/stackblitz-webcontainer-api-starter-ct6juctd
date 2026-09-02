@@ -164,9 +164,10 @@
     "subject": "Objet de votre demande",
     "subjectPlaceholder": "— Sélectionnez un objet —",
     "objDevis": "Demande de devis",
+    "objVisite": "Visite de site",
     "objTech": "Renseignements techniques",
-    "objPartenariat": "Partenariat / Presse",
-    "objAutre": "Autres",
+    "objPartenariat": "Partenariat / presse",
+    "objAutre": "Autre",
     "message": "Votre message",
     "messagePlaceholder": "Décrivez votre projet ou votre besoin…",
     "consent1": "J'accepte que mes données soient traitées par Nation Data Center pour répondre à ma demande, conformément à la",
@@ -182,9 +183,7 @@
     "errEmail": "Adresse e-mail invalide.",
     "errSubject": "Veuillez sélectionner un objet.",
     "errMessage": "Votre message doit contenir au moins 10 caractères.",
-    "errConsent": "Veuillez accepter la politique de confidentialité.",
-    "objFournisseurs": "Fournisseurs",
-    "objRh": "Ressources humaines"
+    "errConsent": "Veuillez accepter la politique de confidentialité."
   },
   "datacenters": {
     "bannerLive": "● Données en direct depuis votre endpoint WordPress GraphQL.",
