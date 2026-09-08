@@ -9,22 +9,10 @@ const MapClient = dynamic(() => import('./MapClient').then((m) => m.MapClient), 
   loading: () => <div className="map-loading" aria-hidden="true" />,
 });
 
-// `labels` affiche les noms de lieux (page « Notre réseau ») ; la carte de
-// l'accueil reste sans libellés. `center`/`zoom` facultatifs : cadrage France.
-export function NetworkMap({
-  points,
-  labels = false,
-  center,
-  zoom,
-}: {
-  points: MapPoint[];
-  labels?: boolean;
-  center?: [number, number];
-  zoom?: number;
-}) {
+export function NetworkMap({ points }: { points: MapPoint[] }) {
   return (
     <div className="map-shell">
-      <MapClient points={points} labels={labels} center={center} zoom={zoom} />
+      <MapClient points={points} />
     </div>
   );
 }

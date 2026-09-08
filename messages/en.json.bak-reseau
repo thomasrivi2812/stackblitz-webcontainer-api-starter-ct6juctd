@@ -217,14 +217,7 @@
     "visitText": "Nothing beats an on-site visit. Our teams welcome you to discover the NDC network infrastructure, security measures and environmental commitments, anywhere in France.",
     "visitCta": "Request a visit",
     "readMore": "Learn more",
-    "puissanceLabel": "Power",
-    "specPuissance": "Power",
-    "specRegion": "Region",
-    "liveLivre": "Site in operation",
-    "liveConstruction": "Under construction",
-    "liveAvenir": "Upcoming project",
-    "liveDelivery": "Delivery planned {annee}",
-    "liveSince": "In service since {annee}"
+    "puissanceLabel": "Power"
   },
   "offres": {
     "youAre": "You are?",

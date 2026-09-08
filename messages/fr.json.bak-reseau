@@ -217,14 +217,7 @@
     "visitText": "Rien ne remplace une visite sur site. Nos équipes vous accueillent pour découvrir les infrastructures, les dispositifs de sécurité et les engagements environnementaux du réseau NDC, partout en France.",
     "visitCta": "Demander une visite",
     "readMore": "En savoir plus",
-    "puissanceLabel": "Puissance",
-    "specPuissance": "Puissance",
-    "specRegion": "Région",
-    "liveLivre": "Site opérationnel",
-    "liveConstruction": "Chantier en cours",
-    "liveAvenir": "Projet à venir",
-    "liveDelivery": "Livraison prévue {annee}",
-    "liveSince": "En service depuis {annee}"
+    "puissanceLabel": "Puissance"
   },
   "offres": {
     "youAre": "Vous êtes ?",
