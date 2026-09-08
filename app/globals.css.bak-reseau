@@ -4227,23 +4227,30 @@ select:focus-visible,
 }
 
 /* --- Page /services : lignes alternées aérées --- */
-.svc-page { display: flex; flex-direction: column; gap: 88px; }
+/* Mise en page volontairement « classique » : flux de blocs pour la liste,
+   flex en ligne pour chaque service, ratio de l'image par padding. Aucune
+   grille ni aspect-ratio : certains navigateurs calculaient la hauteur des
+   lignes avant le retour à la ligne du texte et le dernier service
+   débordait sous la section « Un besoin spécifique ? ». */
+.svc-page { display: block; }
+.svc-row + .svc-row { margin-top: 88px; }
 
 .svc-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 56px;
-  align-items: center;
+  display: flex; align-items: center; gap: 56px;
   scroll-margin-top: 96px; /* compense le header sticky pour les ancres */
 }
+.svc-row > * { flex: 1 1 0; min-width: 0; }
 .svc-row-media {
+  position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
   border: 1px solid var(--line);
   box-shadow: var(--shadow-lg);
 }
-.svc-row-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.svc-row-media::before { content: ""; display: block; padding-top: 75%; } /* 4:3 */
+.svc-row-media img,
+.svc-row-media .svc-media-ph { position: absolute; inset: 0; width: 100%; height: 100%; }
+.svc-row-media img { object-fit: cover; display: block; }
 
 .svc-row.reverse .svc-row-media { order: 2; }
 
@@ -4265,8 +4272,9 @@ select:focus-visible,
 .svc-row-text .svc-benefit { max-width: 48ch; }
 
 @media (max-width: 860px) {
-  .svc-page { gap: 56px; }
-  .svc-row { grid-template-columns: 1fr; gap: 24px; }
+  .svc-row + .svc-row { margin-top: 56px; }
+  .svc-row { flex-direction: column; align-items: stretch; gap: 24px; }
+  .svc-row > * { flex: none; }
   .svc-row.reverse .svc-row-media { order: 0; }
 }
 
@@ -4728,3 +4736,134 @@ select:focus-visible,
 }
 @media print { .hbn-glow, .hbn-motif, .hero-slides-ui { display: none; } }
 /* ---- fin du bloc « diaporama du hero + bannière d'actualité » ---- */
+
+/* =====================================================================
+   RÉSEAU — fiche datacenter (en-tête en deux colonnes) et page « Notre
+   réseau » (liste des sites en regard de la carte). Retour au design
+   texte à gauche / photo pleine hauteur à droite, sans surimpression.
+   ===================================================================== */
+
+/* Puce de statut posée dans le flux (la .dc-tile-status est absolue). */
+.dc-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 8px; border-radius: 4px;
+  background: var(--surface-alt); color: var(--heading);
+  font-size: 12.5px; font-weight: 600; line-height: 1;
+}
+.dc-chip .bar { display: inline-block; width: 3px; height: 13px; border-radius: 1px; background: #8593af; }
+.dc-chip.livre .bar { background: #1fa36a; }
+.dc-chip.construction .bar { background: #e9b400; }
+.dc-chip.avenir .bar { background: #8593af; }
+
+/* --- Fiche : en-tête --- */
+.dc-hero-split {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.dc-hero-text {
+  position: relative;
+  padding: 72px clamp(28px, 5vw, 72px) 64px max(28px, calc((100vw - 1160px) / 2 + 28px));
+  display: flex; flex-direction: column; justify-content: center;
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(to right, rgba(27, 51, 96, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(27, 51, 96, 0.045) 1px, transparent 1px);
+  background-size: 68px 68px;
+}
+.dc-hero-text > * { position: relative; }
+.dc-hero-split .dc-hero-top { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
+.dc-hero-split .back-link { margin: 0; font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.dc-hero-split .back-link:hover { color: var(--marine); }
+.dc-hero-split h1 { font-size: clamp(40px, 5.2vw, 66px); line-height: 1; letter-spacing: -0.02em; color: var(--heading); margin: 0 0 14px; }
+.dc-hero-split .dc-city {
+  display: inline-flex; align-items: center; gap: 8px; margin: 0 0 22px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+.dc-hero-split .dc-city svg { color: var(--turquoise); }
+.dc-hero-split .dc-accroche { margin: 0 0 30px; font-size: 18px; line-height: 1.6; color: var(--muted); max-width: 52ch; }
+.dc-hero-split .dc-hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin: 0; }
+
+.dc-hero-figures {
+  list-style: none; margin: 40px 0 0; padding: 26px 0 0;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; row-gap: 18px;
+}
+.dc-hero-figures li { display: flex; flex-direction: column; gap: 6px; padding-right: 30px; }
+.dc-hero-figures li + li { padding-left: 30px; border-left: 1px solid var(--line); }
+.dc-hero-figures strong { font-size: 26px; line-height: 1; font-weight: 700; color: var(--heading); font-variant-numeric: tabular-nums; }
+.dc-hero-figures strong span { margin-left: 6px; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.dc-hero-figures .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+.dc-hero-media { position: relative; min-height: 600px; background: var(--surface-alt); overflow: visible; }
+.dc-hero-media .dc-photo { position: absolute; inset: 0; margin: 0; border-radius: 0; box-shadow: none; aspect-ratio: auto; overflow: hidden; }
+.dc-hero-media .dc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dc-hero-corner { position: absolute; width: 22px; height: 22px; border: 2px solid var(--red); pointer-events: none; }
+.dc-hero-corner.tl { top: 22px; left: 22px; border-right: 0; border-bottom: 0; }
+.dc-hero-corner.br { bottom: 22px; right: 22px; border-left: 0; border-top: 0; }
+.dc-hero-live {
+  position: absolute; left: -16px; bottom: 40px; z-index: 2;
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 26px 16px 18px; border-radius: 10px;
+  background: var(--surface); color: var(--heading);
+  box-shadow: 0 22px 48px -22px rgba(20, 40, 73, 0.5);
+}
+.dc-hero-live div { display: flex; flex-direction: column; gap: 3px; }
+.dc-hero-live strong { font-size: 15.5px; font-weight: 700; }
+.dc-hero-live span:not(.dc-live-dot) { font-size: 13px; color: var(--muted); }
+.dc-live-dot { width: 10px; height: 10px; border-radius: 50%; background: #8593af; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(133, 147, 175, 0.18); }
+.dc-live-dot.livre { background: #1fa36a; box-shadow: 0 0 0 4px rgba(31, 163, 106, 0.18); }
+.dc-live-dot.construction { background: #e9b400; box-shadow: 0 0 0 4px rgba(233, 180, 0, 0.2); }
+
+@media (max-width: 900px) {
+  .dc-hero-split { grid-template-columns: 1fr; }
+  .dc-hero-media { order: -1; min-height: 0; aspect-ratio: 16 / 10; }
+  .dc-hero-live { left: 16px; bottom: 16px; padding: 12px 18px 12px 14px; }
+  .dc-hero-text { padding: 40px 24px 48px; }
+  .dc-hero-split h1 { font-size: clamp(34px, 9vw, 48px); }
+}
+@media (max-width: 520px) {
+  .dc-hero-figures li { padding-right: 18px; }
+  .dc-hero-figures li + li { padding-left: 18px; }
+  .dc-hero-figures strong { font-size: 22px; }
+}
+
+/* --- Page « Notre réseau » : liste + carte --- */
+.dc-net-section .section-head-v2 { margin-bottom: 40px; }
+.dc-net {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  background: var(--surface); box-shadow: 0 24px 56px -32px rgba(20, 40, 73, 0.35);
+}
+.dc-net-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.dc-net-list > li + li { border-top: 1px solid var(--line); }
+.dc-net-row { display: block; padding: 30px 34px 28px; color: inherit; text-decoration: none; transition: background var(--t-fast) ease; }
+.dc-net-row:hover { background: var(--surface-alt); }
+.dc-net-row-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.dc-net-ville { font-size: 11.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.dc-net-row-name { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.dc-net-row-name h2 { font-size: clamp(22px, 2.2vw, 28px); font-weight: 700; color: var(--heading); margin: 0; line-height: 1.1; }
+.dc-net-arrow { color: var(--turquoise); display: inline-flex; transition: transform var(--t-fast) ease; }
+.dc-net-row:hover .dc-net-arrow { transform: translateX(4px); }
+.dc-net-specs {
+  list-style: none; margin: 18px 0 0; padding: 16px 0 0;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; row-gap: 10px;
+}
+.dc-net-specs li { display: flex; flex-direction: column; gap: 5px; padding-right: 22px; }
+.dc-net-specs li + li { padding-left: 22px; border-left: 1px solid var(--line); }
+.dc-net-specs span { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.dc-net-specs strong { font-size: 16px; font-weight: 700; color: var(--heading); font-variant-numeric: tabular-nums; }
+.dc-net-map { position: relative; min-height: 560px; border-left: 1px solid var(--line); }
+.dc-net-map .map-shell { position: absolute; inset: 0; height: auto; border: none; border-radius: 0; box-shadow: none; }
+
+/* Bandeau visite : la carte y est remplacée par la photo d'un site. */
+.dc-visit-media { position: relative; min-height: 380px; background: var(--surface-alt); overflow: hidden; }
+.dc-visit-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (max-width: 900px) {
+  .dc-net { grid-template-columns: 1fr; }
+  .dc-net-map { min-height: 380px; border-left: none; border-top: 1px solid var(--line); }
+  .dc-net-row { padding: 22px 20px; }
+  .dc-visit-media { min-height: 240px; }
+}
+/* ---- fin du bloc « réseau : fiche et liste des sites » ---- */

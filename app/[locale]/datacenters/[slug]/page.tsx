@@ -7,6 +7,7 @@ import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
 import { BrochureButton } from '@/components/BrochureButton';
 import type { Metadata } from 'next';
+import type React from 'react';
 
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
@@ -172,7 +173,7 @@ export default async function DatacenterDetail({ params }: { params: { locale: W
           </div>
 
           {heroStats.length > 0 && (
-            <ul className="dc-hero-figures">
+            <ul className={`dc-hero-figures${heroStats.length === 4 ? ' n4' : ''}`} style={{ ['--n' as string]: heroStats.length } as React.CSSProperties}>
               {heroStats.map((s, i) => (
                 <li key={i}>
                   <strong>
