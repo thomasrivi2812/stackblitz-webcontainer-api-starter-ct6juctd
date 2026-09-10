@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { loadMessages } from '@/lib/messages';
 import { Jost } from 'next/font/google';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
@@ -75,8 +76,12 @@ export async function generateMetadata({
     },
     robots: { index: true, follow: true },
     icons: {
-      icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
-      shortcut: '/favicon.svg',
+      icon: [
+        { url: '/favicon.ico', sizes: '16x16 32x32 48x48 64x64' },
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+      ],
+      shortcut: '/favicon.ico',
+      apple: '/apple-touch-icon.png',
     },
   };
 }
@@ -85,6 +90,10 @@ export async function generateMetadata({
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
+// Tout autre premier segment (/favicon.ico, /image-absente.jpg, /xx) est un
+// 404 immédiat : sans cela, la route [locale] tentait de rendre la page avec
+// un dictionnaire « favicon.ico.json » inexistant → erreur serveur à chaque visite.
+export const dynamicParams = false;
 
 export default async function LocaleLayout({
   children,
@@ -102,7 +111,7 @@ export default async function LocaleLayout({
   // setRequestLocale, qui dépendent du contexte de requête mal propagé sous
   // WebContainer/StackBlitz). On passe locale + messages explicitement au
   // provider : les composants client (header, sélecteur) les lisent du contexte.
-  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = (await loadMessages(locale));
 
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,

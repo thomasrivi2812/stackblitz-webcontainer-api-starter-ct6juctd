@@ -1,4 +1,5 @@
 import { getServices, getServicesPage, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { ServiceMedia } from '@/components/ServiceMedia';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
@@ -11,7 +12,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.servicesTitle,
     description: m.servicesDesc,
@@ -21,7 +22,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 
 export default async function ServicesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.services as Record<string, string>;
+  const t = (await loadMessages(locale)).services as Record<string, string>;
   // En-tête éditable dans WP (page « services ») ; champ vide = texte du site.
   const [services, head] = await Promise.all([getServices(locale), getServicesPage(locale)]);
 

@@ -1,4 +1,5 @@
 import { getMembres, getEquipesHead, POLE_ORDER, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
@@ -10,7 +11,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.equipesTitle,
     description: m.equipesDesc,
@@ -37,7 +38,7 @@ function LinkedInIcon() {
 }
 
 export default async function EquipesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.team as Record<string, string>;
+  const t = (await loadMessages(locale)).team as Record<string, string>;
   const pole = (k: string) => t[`pole${k.charAt(0).toUpperCase()}${k.slice(1)}`] || t.poleFallback;
   // En-tête éditable dans WP (page « equipes ») ; membres gérés dans le CPT
   // « Membres » (nom, poste, pôle, bio, LinkedIn, photo, ordre manuel).

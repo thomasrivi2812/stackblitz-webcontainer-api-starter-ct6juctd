@@ -1,4 +1,5 @@
 import { ContactForm } from '@/components/ContactForm';
+import { loadMessages } from '@/lib/messages';
 import { getContact, getContactObjets, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
@@ -10,7 +11,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.contactTitle,
     description: m.contactDesc,
@@ -72,7 +73,7 @@ function Icon({ name }: { name: string }) {
 }
 
 export default async function ContactPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.contact as Record<string, string>;
+  const t = (await loadMessages(locale)).contact as Record<string, string>;
   // Contenu éditable dans WP (page « contact », groupe « Contact — page ») ;
   // chaque champ vide retombe sur le texte par défaut du site.
   const [c, objets] = await Promise.all([getContact(locale), getContactObjets(locale)]);
@@ -106,7 +107,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
             <aside className="contact-aside">
               {/* Carte coordonnées */}
               <div className="contact-info-card">
-                <h3>Nation Data Center</h3>
+                <h2>Nation Data Center</h2>
                 <p className="contact-info-sub">{c?.subsidiary || t.subsidiary}</p>
 
                 <ul className="contact-info-list">

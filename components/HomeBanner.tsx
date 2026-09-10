@@ -9,6 +9,7 @@
 // d'hydratation. L'objet `banner` vaut déjà null quand la bannière est
 // désactivée, sans titre ou périmée (voir mapHome dans lib/wordpress.ts).
 import type { HomeBanner as Banner, WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 
 function ArrowIcon() {
   return (
@@ -21,7 +22,7 @@ function ArrowIcon() {
 export async function HomeBanner({ banner, locale = 'fr' }: { banner: Banner; locale?: WpLocale }) {
   // `?? {}` : si le namespace manque du dictionnaire, on veut une bannière aux
   // libellés par défaut, pas une page qui ne se rend plus.
-  const dict = (await import(`../messages/${locale}.json`)).default as Record<string, unknown>;
+  const dict = (await loadMessages(locale)) as Record<string, unknown>;
   const t = (dict.homeBanner ?? {}) as Record<string, string | undefined>;
   const en = locale === 'en';
 

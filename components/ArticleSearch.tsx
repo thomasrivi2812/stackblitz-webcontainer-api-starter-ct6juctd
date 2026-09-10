@@ -148,7 +148,7 @@ export function ArticleSearch({ posts, categories }: Props) {
                 <span className="actu-card-meta">
                   {fmtDate(p.date)} · {readingMinutes(p.content)} {t('minRead')}
                 </span>
-                <h3>{p.title}</h3>
+                <h2>{p.title}</h2>
                 <p>{stripHtml(p.excerpt)}</p>
                 <span className="actu-card-link">
                   {t('readArticle')}

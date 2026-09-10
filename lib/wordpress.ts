@@ -380,11 +380,23 @@ async function _getDatacenter(slug: string, locale: WpLocale = 'fr'): Promise<Da
 }
 
 // --- Accès aux données : Articles (accueil) --------------------------------
+// Repli sans WordPress : les mêmes articles que la page Actualités (sinon les
+// cartes de l'accueil pointaient vers des articles d'exemple inexistants).
+async function sampleRecentPosts(): Promise<Post[]> {
+  const { sampleAllPosts } = await import('./sample-data');
+  return sampleAllPosts.slice(0, 5).map((p) => ({
+    title: p.title,
+    slug: p.slug,
+    date: p.date,
+    excerpt: p.excerpt,
+    featuredImage: p.featuredImage?.node ? { node: p.featuredImage.node } : null,
+    categorie: p.categories?.nodes?.[0]?.name ?? null,
+    minutes: readingMinutes(p.content),
+  }));
+}
+
 export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
-  if (!endpoint) {
-    const { samplePosts } = await import('./sample-data');
-    return samplePosts;
-  }
+  if (!endpoint) return sampleRecentPosts();
   type Node = Post & {
     content?: string | null;
     categories?: { nodes: ({ name: string | null } | null)[] | null } | null;
@@ -421,8 +433,7 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
       }));
   } catch (error) {
     logWpError('articles', error);
-    const { samplePosts } = await import('./sample-data');
-    return samplePosts;
+    return sampleRecentPosts();
   }
 }
 

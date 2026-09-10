@@ -1,4 +1,5 @@
 import { getDatacenters, getDatacentersVisit, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { DcTileImage } from '@/components/DcTileImage';
 import { NetworkMap } from '@/components/NetworkMap';
 import type { Metadata } from 'next';
@@ -11,7 +12,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.datacentersTitle,
     description: m.datacentersDesc,
@@ -37,7 +38,7 @@ function ArrowIcon() {
 }
 
 export default async function DatacentersPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.datacenters as Record<string, string>;
+  const t = (await loadMessages(locale)).datacenters as Record<string, string>;
   // En-tête et bandeau visite éditables dans WP (page « datacenters ») ;
   // chaque champ vide retombe sur le texte par défaut du site.
   const [datacenters, visit] = await Promise.all([getDatacenters(locale), getDatacentersVisit(locale)]);

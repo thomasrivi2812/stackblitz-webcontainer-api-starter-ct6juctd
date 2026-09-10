@@ -1,4 +1,5 @@
 import { getDatacenter, getDatacenters, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { notFound, redirect } from 'next/navigation';
 import { LocationMap } from '@/components/LocationMap';
 import { DcPhoto } from '@/components/DcPhoto';
@@ -18,7 +19,7 @@ export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
   const dc = await getDatacenter(params.slug, params.locale);
-  const t = (await import(`../../../../messages/${params.locale}.json`)).default.datacenters as Record<string, string>;
+  const t = (await loadMessages(params.locale)).datacenters as Record<string, string>;
   if (!dc) return { title: t.notFound };
   const f = dc.datacenterFields;
   const ville = f.ville ? ` à ${f.ville}` : '';
@@ -63,7 +64,7 @@ export async function generateStaticParams() {
 }
 
 export default async function DatacenterDetail({ params }: { params: { locale: WpLocale; slug: string } }) {
-  const t = (await import(`../../../../messages/${params.locale}.json`)).default.datacenters as Record<string, string>;
+  const t = (await loadMessages(params.locale)).datacenters as Record<string, string>;
   const dc = await getDatacenter(params.slug, params.locale);
   if (!dc) notFound();
 

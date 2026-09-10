@@ -1,4 +1,5 @@
 import { getLivrets, getDocumentationHead, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { LivretCard } from '@/components/LivretCard';
 import { VideoCard } from '@/components/VideoCard';
 import { BrochureButton } from '@/components/BrochureButton';
@@ -12,7 +13,7 @@ import type { Metadata } from 'next';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.documentationTitle,
     description: m.documentationDesc,
@@ -25,7 +26,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 // documents (livrets, formats portrait/paysage mélangés dans la même grille)
 // et section vidéos (masquée tant qu'aucune vidéo n'est ajoutée dans WP).
 export default async function DocumentationPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.documentation as Record<string, string>;
+  const t = (await loadMessages(locale)).documentation as Record<string, string>;
   const [livrets, head] = await Promise.all([getLivrets(locale), getDocumentationHead(locale)]);
 
   const metas = head?.brochureMetas?.length

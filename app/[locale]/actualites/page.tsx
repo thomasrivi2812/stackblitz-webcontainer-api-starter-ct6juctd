@@ -1,4 +1,5 @@
 import { getAllPosts, getCategories, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { ArticleSearch } from '@/components/ArticleSearch';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
@@ -10,7 +11,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.actualitesTitle,
     description: m.actualitesDesc,
@@ -20,7 +21,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 
 export default async function ActualitesPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.actualites as Record<string, string>;
+  const t = (await loadMessages(locale)).actualites as Record<string, string>;
   const [posts, categories] = await Promise.all([
     getAllPosts(locale),
     getCategories(locale),

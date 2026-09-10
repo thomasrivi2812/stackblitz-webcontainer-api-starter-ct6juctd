@@ -8,3 +8,7 @@ node_modules
 !.env.*.example
 *.tsbuildinfo
 .DS_Store
+
+# Sauvegardes des scripts d'application (jamais à versionner)
+*.bak
+*.bak-*

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import { type Persona } from '@/lib/personas';
 import { AskQuestionButton } from './AskQuestionButton';
 import { OffreIcon } from './OffreIcon';
@@ -95,8 +96,8 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
             <h1 className="fil-rouge">{highlight(persona.h1, persona.accentWord)}</h1>
             <p className="op-lead">{persona.lead}</p>
             <div className="op-cta-row">
-              <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
-              <a className="op-btn-ghost" href="/datacenters">{t('seeSites')}</a>
+              <Link className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</Link>
+              <Link className="op-btn-ghost" href="/datacenters">{t('seeSites')}</Link>
             </div>
             <div className="op-proofs">
               {persona.proofs.map((pr, i) => (
@@ -203,8 +204,8 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
           <h2 className="fil-rouge">{t('finalTitle')}</h2>
           <p className="op-final-lead">{t('finalLead')}</p>
           <div className="op-cta-row">
-            <a className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</a>
-            <a className="op-btn-ghost" href="/datacenters">{t('discoverDc')}</a>
+            <Link className="op-btn-primary" href="/contact">{persona.ctaPrimary} →</Link>
+            <Link className="op-btn-ghost" href="/datacenters">{t('discoverDc')}</Link>
           </div>
         </div>
       </section>

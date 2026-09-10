@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
+import { loadMessages } from '@/lib/messages';
 import {
   getPostBySlug,
   getAllPosts,
@@ -32,7 +33,7 @@ export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug, params.locale);
-  const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
+  const t = (await loadMessages(params.locale)).actualites as Record<string, string>;
   if (!post) return { title: t.notFound };
 
   // hreflang avec les VRAIS slugs par langue (Polylang : chaque traduction a
@@ -135,7 +136,7 @@ function Icon({ name }: { name: string }) {
 }
 
 export default async function ArticlePage({ params }: Props) {
-  const t = (await import(`../../../../messages/${params.locale}.json`)).default.actualites as Record<string, string>;
+  const t = (await loadMessages(params.locale)).actualites as Record<string, string>;
   const post = await getPostBySlug(params.slug, params.locale);
   if (!post) notFound();
 

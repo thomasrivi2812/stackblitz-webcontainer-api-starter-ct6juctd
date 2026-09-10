@@ -1,4 +1,5 @@
 import { getDatacenters, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { Logo } from './Logo';
 import { AltareaLogo } from './AltareaLogo';
 import { CookiePreferencesLink } from './CookiePreferencesLink';
@@ -13,7 +14,7 @@ function lhref(locale: WpLocale, path: string): string {
 
 export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale; logoUrl?: string | null }) {
   // Dictionnaire chargé par import direct (aucune API à portée de requête).
-  const t = (await import(`../messages/${locale}.json`)).default.footer as Record<string, string>;
+  const t = (await loadMessages(locale)).footer as Record<string, string>;
   const datacenters = await getDatacenters(locale);
 
   return (
@@ -32,7 +33,7 @@ export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale;
 
           {/* Data centers */}
           <div className="footer-col">
-            <h4>{t.datacentersTitle}</h4>
+            <h2>{t.datacentersTitle}</h2>
             <ul>
               {datacenters.map((dc) => (
                 <li key={dc.slug}>
@@ -47,7 +48,7 @@ export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale;
 
           {/* Navigation */}
           <div className="footer-col">
-            <h4>{t.siteTitle}</h4>
+            <h2>{t.siteTitle}</h2>
             <ul>
               <li><a href={lhref(locale, '/datacenters')}>{t.reseau}</a></li>
               <li><a href={lhref(locale, '/offres')}>{t.offres}</a></li>
@@ -77,7 +78,7 @@ export async function SiteFooter({ locale, logoUrl = null }: { locale: WpLocale;
 
           {/* Légal */}
           <div className="footer-col">
-            <h4>{t.infosTitle}</h4>
+            <h2>{t.infosTitle}</h2>
             <ul>
               {/* Slugs identiques à l'ancien site (pages WP « Pages ») */}
               <li><a href={lhref(locale, '/mentions-legales')}>{t.mentions}</a></li>

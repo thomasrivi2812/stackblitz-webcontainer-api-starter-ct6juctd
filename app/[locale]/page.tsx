@@ -1,4 +1,5 @@
 import { ServicesCarousel } from '@/components/ServicesCarousel';
+import { loadMessages } from '@/lib/messages';
 import { HeroSlideshow } from '@/components/HeroSlideshow';
 import { HomeBanner } from '@/components/HomeBanner';
 import { DcTileImage } from '@/components/DcTileImage';
@@ -18,7 +19,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     // `absolute` : le titre de l'accueil contient déjà la marque, on court-
     // circuite le template « %s | Nation Data Center » du layout.
@@ -118,7 +119,7 @@ function Icon({ name }: { name: string }) {
 
 export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
-  const dict = (await import(`../../messages/${locale}.json`)).default as Record<string, unknown>;
+  const dict = (await loadMessages(locale)) as Record<string, unknown>;
   const t = dict.home as Record<string, string>;
   // Libellés du diaporama passés en props : le composant porte ses propres
   // textes de repli, un namespace absent ne fait donc rien échouer.
@@ -229,7 +230,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               const dc = preview[0];
               const { key, label } = statutInfo(dc.datacenterFields.statut);
               return (
-                <a className="dc-feature" href={`/datacenters/${dc.slug}`}>
+                <Link className="dc-feature" href={`/datacenters/${dc.slug}`}>
                   <div className="dc-feature-media">
                     <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
                   </div>
@@ -249,7 +250,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                       )}
                     </ul>
                   </div>
-                </a>
+                </Link>
               );
             })()}
 
@@ -257,7 +258,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
               {preview.slice(1, 3).map((dc) => {
                 const { key, label } = statutInfo(dc.datacenterFields.statut);
                 return (
-                  <a className="dc-mini" key={dc.slug} href={`/datacenters/${dc.slug}`}>
+                  <Link className="dc-mini" key={dc.slug} href={`/datacenters/${dc.slug}`}>
                     <div className="dc-mini-media">
                       <DcTileImage slug={dc.slug} title={dc.title} imageUrl={dc.featuredImage?.node?.sourceUrl} />
                     </div>
@@ -273,7 +274,7 @@ export default async function Home({ params: { locale } }: { params: { locale: W
                         {dc.datacenterFields.region}
                       </p>
                     </div>
-                  </a>
+                  </Link>
                 );
               })}
 

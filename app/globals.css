@@ -122,6 +122,9 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Header ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 1000;
+  /* Les menus déroulants (absolus, jusqu'à 880px de large) ne doivent jamais
+     élargir la page : clip horizontal, sans créer de zone de défilement. */
+  overflow-x: clip;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
@@ -598,6 +601,7 @@ a { color: inherit; text-decoration: none; }
 .news-ph { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,0.6); }
 .news-body { padding: 22px; }
 .news-date { font-size: 12.5px; color: var(--turquoise-700); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.news-body h2,
 .news-body h3 { font-size: 19px; margin: 8px 0 10px; line-height: 1.2; }
 .news-body p { color: var(--muted); font-size: 14.5px; }
 
@@ -688,6 +692,7 @@ a { color: inherit; text-decoration: none; }
   padding-bottom: 36px;
 }
 .footer-brand p { color: var(--muted-2); font-size: 14px; margin: 16px 0; max-width: 34ch; }
+.footer-col h2,
 .footer-col h4 {
   color: #fff; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em;
   margin-bottom: 16px;
@@ -1372,6 +1377,7 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(160deg, var(--marine), var(--marine-800));
   border-radius: var(--radius-lg); padding: 30px; color: #fff;
 }
+.contact-info-card h2,
 .contact-info-card h3 { font-size: 22px; color: #fff; margin-bottom: 4px; }
 .contact-info-sub { color: var(--turquoise); font-size: 14px; font-weight: 600; margin-bottom: 24px; }
 
@@ -3320,6 +3326,7 @@ select:focus-visible,
   font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--turquoise-700);
 }
+.certif-card h2,
 .certif-card h3 { font-size: 21px; margin: 6px 0 10px; color: var(--heading); }
 .certif-desc { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
 .certif-garantie {
@@ -3846,7 +3853,10 @@ select:focus-visible,
 /* Menu services : deux colonnes larges + carte « Découvrir notre équipe »
    allongée. Calé sur le bord gauche du bouton ; la largeur se réduit avec
    l'écran pour ne jamais déborder à droite. */
-.nav-dd-split.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: 0; }
+/* Centré sous son entrée de menu : ancré à gauche, il dépassait du bord droit
+   sur la version anglaise (barre de défilement horizontale sur toutes les pages EN). */
+.nav-dd-split.nav-dd-services { min-width: 880px; grid-template-columns: 1fr 330px; padding: 10px; left: 50%; transform: translate(-50%, 10px); }
+.nav-dd-split.nav-dd-services.open { transform: translate(-50%, 8px); }
 /* Menu réseau : sites (nom + pastille de statut + ville) + carte « Demander
    une visite ». Mêmes règles de rétrécissement que le menu services. */
 .nav-dd-split.nav-dd-reseau { min-width: 780px; grid-template-columns: 1fr 300px; padding: 10px; left: 0; }

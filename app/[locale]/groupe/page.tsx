@@ -1,4 +1,5 @@
 import { KpiBand } from '@/components/KpiBand';
+import { loadMessages } from '@/lib/messages';
 import { AltareaLogo, AltareaMark } from '@/components/AltareaLogo';
 import { getGroupe, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
@@ -14,7 +15,7 @@ const ALTAREA = '#6A2C91';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.groupeTitle,
     description: m.groupeDesc,
@@ -25,7 +26,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 // Contenu éditable dans WP (page « groupe ») → pas de cache statique.
 
 export default async function GroupePage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.groupe as Record<string, string>;
+  const t = (await loadMessages(locale)).groupe as Record<string, string>;
   // Page 100 % éditable dans WordPress (champs `groupeFields` de la page
   // « groupe ») : chaque texte lit d'abord WP, puis retombe sur messages/*.json.
   const wp = await getGroupe(locale);

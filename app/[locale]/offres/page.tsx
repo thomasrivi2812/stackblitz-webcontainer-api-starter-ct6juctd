@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { loadMessages } from '@/lib/messages';
 import { OffresPersonas } from '@/components/OffresPersonas';
 import { getPersonas, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
@@ -11,7 +12,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.offresTitle,
     description: m.offresDesc,

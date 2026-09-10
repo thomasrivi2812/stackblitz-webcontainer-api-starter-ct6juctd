@@ -1,4 +1,5 @@
 import { getCertifications, groupCertifications, certifCategorieLabel, certifStatutInfo, type WpLocale } from '@/lib/wordpress';
+import { loadMessages } from '@/lib/messages';
 import { Link } from '@/i18n/routing';
 
 const camel = (k: string) => k.split('-').map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)).join('');
@@ -12,7 +13,7 @@ import { alternatesFor } from '@/lib/seo';
 export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
-  const m = (await import(`../../../messages/${locale}.json`)).default.meta as Record<string, string>;
+  const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.certifsTitle,
     description: m.certifsDesc,
@@ -31,7 +32,7 @@ function ShieldIcon() {
 }
 
 export default async function CertificationsPage({ params: { locale } }: { params: { locale: WpLocale } }) {
-  const t = (await import(`../../../messages/${locale}.json`)).default.certifications as Record<string, string>;
+  const t = (await loadMessages(locale)).certifications as Record<string, string>;
   const certifs = await getCertifications(locale);
   const groups = groupCertifications(certifs);
 
@@ -76,7 +77,7 @@ export default async function CertificationsPage({ params: { locale } }: { param
                         <span className={`certif-statut ${statut.key}`}>{statutLabel(statut.key, statut.label)}</span>
                       </div>
                       <span className="certif-cat">{catLabel(c.categorie)}</span>
-                      <h3>{c.nom}</h3>
+                      <h2>{c.nom}</h2>
                       {c.description && <p className="certif-desc">{c.description}</p>}
                       {c.garantie && (
                         <p className="certif-garantie">

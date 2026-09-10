@@ -2,6 +2,7 @@
 // Textes/liens éditables depuis WordPress (champs `homeFields.certBanner*`), avec
 // repli sur les traductions codées (messages/*.json) si le champ WP est vide.
 import { AltareaMark } from '@/components/AltareaLogo';
+import { loadMessages } from '@/lib/messages';
 import type { HomeContent, WpLocale } from '@/lib/wordpress';
 
 function ShieldIcon() {
@@ -22,7 +23,7 @@ function ArrowIcon() {
 }
 
 export async function CertBanner({ locale = 'fr', wp }: { locale?: WpLocale; wp?: HomeContent | null }) {
-  const t = (await import(`../messages/${locale}.json`)).default.certBanner as Record<string, string>;
+  const t = (await loadMessages(locale)).certBanner as Record<string, string>;
 
   const certTitle = wp?.certBannerCertTitle || t.certTitle;
   const certSub = wp?.certBannerCertSub || t.certSub;
