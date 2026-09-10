@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/routing';
@@ -15,9 +16,15 @@ export function LangSwitcher() {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
+  // Retour visuel pendant la navigation : la page traduite est rendue côté
+  // serveur, ce qui peut prendre une seconde ; sans indicateur, le clic
+  // semblait sans effet. `pending` reste vrai jusqu'à l'arrivée de la page.
+  const [pending, startTransition] = useTransition();
+  const [target, setTarget] = useState<Locale | null>(null);
 
   const switchTo = (locale: Locale) => {
-    if (locale === active) return;
+    if (locale === active || pending) return;
+    setTarget(locale);
     // IMPORTANT : on fixe le cookie de langue AVANT de naviguer. Sans ça,
     // revenir vers le FR (URL sans préfixe avec localePrefix "as-needed")
     // fait re-détecter la langue par le middleware via l'ancien cookie
@@ -33,34 +40,41 @@ export function LangSwitcher() {
       new URLSearchParams(window.location.search).forEach((v, k) => { query[k] = v; });
     }
     // On repasse les params dynamiques (ex. [slug]) pour reconstruire l'URL.
-    router.replace(
-      // @ts-expect-error -- params dynamiques typés de façon générique
-      { pathname, params, query },
-      { locale },
-    );
+    startTransition(() => {
+      router.replace(
+        // @ts-expect-error -- params dynamiques typés de façon générique
+        { pathname, params, query },
+        { locale },
+      );
+    });
   };
+  const loading = (locale: Locale) => pending && target === locale;
 
   return (
-    <div className="ndc-lang" role="group" aria-label={t('label')}>
+    <div className={`ndc-lang${pending ? ' is-busy' : ''}`} role="group" aria-label={t('label')} aria-busy={pending}>
       <button
         type="button"
-        className={`ndc-lang-opt${active === 'fr' ? ' is-active' : ''}`}
+        className={`ndc-lang-opt${active === 'fr' ? ' is-active' : ''}${loading('fr') ? ' is-loading' : ''}`}
         aria-pressed={active === 'fr'}
         lang="fr"
         title={t('frFull')}
+        disabled={pending}
         onClick={() => switchTo('fr')}
       >
-        {t('fr')}
+        <span className="ndc-lang-txt">{t('fr')}</span>
+        <span className="ndc-lang-spin" aria-hidden="true" />
       </button>
       <button
         type="button"
-        className={`ndc-lang-opt${active === 'en' ? ' is-active' : ''}`}
+        className={`ndc-lang-opt${active === 'en' ? ' is-active' : ''}${loading('en') ? ' is-loading' : ''}`}
         aria-pressed={active === 'en'}
         lang="en"
         title={t('enFull')}
+        disabled={pending}
         onClick={() => switchTo('en')}
       >
-        {t('en')}
+        <span className="ndc-lang-txt">{t('en')}</span>
+        <span className="ndc-lang-spin" aria-hidden="true" />
       </button>
 
       <style>{`
@@ -70,6 +84,14 @@ export function LangSwitcher() {
         .ndc-lang-opt:hover{color:var(--heading,#1b3360)}
         .ndc-lang-opt.is-active{background:var(--surface,#fff);color:var(--heading,#1b3360);box-shadow:0 1px 3px rgba(20,40,73,.12)}
         .ndc-lang-opt:focus-visible{outline:2px solid var(--marine,#1b3360);outline-offset:2px}
+        .ndc-lang-opt{position:relative}
+        .ndc-lang-opt:disabled{cursor:progress}
+        .ndc-lang.is-busy .ndc-lang-opt:not(.is-loading){opacity:.55}
+        .ndc-lang-spin{position:absolute;inset:0;margin:auto;width:14px;height:14px;border-radius:50%;border:2px solid rgba(27,51,96,.2);border-top-color:var(--marine,#1b3360);opacity:0;animation:ndc-lang-spin .7s linear infinite}
+        .ndc-lang-opt.is-loading .ndc-lang-txt{visibility:hidden}
+        .ndc-lang-opt.is-loading .ndc-lang-spin{opacity:1}
+        @keyframes ndc-lang-spin{to{transform:rotate(360deg)}}
+        @media (prefers-reduced-motion:reduce){.ndc-lang-spin{animation:none;border-top-color:rgba(27,51,96,.2);border-color:var(--marine,#1b3360)}}
       `}</style>
     </div>
   );
