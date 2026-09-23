@@ -3,14 +3,16 @@ import { loadMessages } from '@/lib/messages';
 import { getContact, getContactObjets, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
+import { setRequestLocale } from 'next-intl/server';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: WpLocale }> }): Promise<Metadata> {
+  const { locale } = await params;
   const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.contactTitle,
@@ -72,7 +74,9 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default async function ContactPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+export default async function ContactPage({ params }: { params: Promise<{ locale: WpLocale }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = (await loadMessages(locale)).contact as Record<string, string>;
   // Contenu éditable dans WP (page « contact », groupe « Contact — page ») ;
   // chaque champ vide retombe sur le texte par défaut du site.

@@ -3,6 +3,7 @@ import { getPage, stripHtml, type WpLocale } from '@/lib/wordpress';
 import { sanitizeWpHtml } from '@/lib/sanitize';
 import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 
 
 // Page « simple » : on lit une Page native de WordPress (Titre + contenu + image
@@ -12,11 +13,12 @@ import type { Metadata } from 'next';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ locale: WpLocale; slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const page = await getPage(params.slug, params.locale);
   if (!page) return {};
   return {
@@ -28,7 +30,9 @@ export async function generateMetadata({ params }: { params: { locale: WpLocale;
   };
 }
 
-export default async function CustomPage({ params }: { params: { locale: WpLocale; slug: string } }) {
+export default async function CustomPage(props: { params: Promise<{ locale: WpLocale; slug: string }> }) {
+  const params = await props.params;
+  setRequestLocale(params.locale);
   const page = await getPage(params.slug, params.locale);
   if (!page) notFound();
 

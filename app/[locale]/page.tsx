@@ -11,14 +11,16 @@ import { NetworkMap } from '@/components/NetworkMap';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
+import { setRequestLocale } from 'next-intl/server';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: WpLocale }> }): Promise<Metadata> {
+  const { locale } = await params;
   const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     // `absolute` : le titre de l'accueil contient déjà la marque, on court-
@@ -117,7 +119,9 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default async function Home({ params: { locale } }: { params: { locale: WpLocale } }) {
+export default async function Home({ params }: { params: Promise<{ locale: WpLocale }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
   const dict = (await loadMessages(locale)) as Record<string, unknown>;
   const t = dict.home as Record<string, string>;

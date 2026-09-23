@@ -9,15 +9,17 @@ import { Link } from '@/i18n/routing';
 import { BrochureButton } from '@/components/BrochureButton';
 import type { Metadata } from 'next';
 import type React from 'react';
+import { setRequestLocale } from 'next-intl/server';
 
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params }: { params: { locale: WpLocale; slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ locale: WpLocale; slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const dc = await getDatacenter(params.slug, params.locale);
   const t = (await loadMessages(params.locale)).datacenters as Record<string, string>;
   if (!dc) return { title: t.notFound };
@@ -63,7 +65,9 @@ export async function generateStaticParams() {
   return dcs.map((d) => ({ slug: d.slug }));
 }
 
-export default async function DatacenterDetail({ params }: { params: { locale: WpLocale; slug: string } }) {
+export default async function DatacenterDetail(props: { params: Promise<{ locale: WpLocale; slug: string }> }) {
+  const params = await props.params;
+  setRequestLocale(params.locale);
   const t = (await loadMessages(params.locale)).datacenters as Record<string, string>;
   const dc = await getDatacenter(params.slug, params.locale);
   if (!dc) notFound();

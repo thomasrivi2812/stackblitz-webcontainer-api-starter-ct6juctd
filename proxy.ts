@@ -1,8 +1,8 @@
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
-// Détecte la locale (préfixe d'URL, sinon Accept-Language / cookie) et réécrit
-// vers le segment [locale] interne. FR reste à la racine, EN passe par /en.
+// Proxy (ex-« middleware », renommé par Next 16). Détecte la locale (préfixe
+// d'URL, sinon Accept-Language / cookie) et réécrit vers le segment [locale] interne. FR reste à la racine, EN passe par /en.
 export default createMiddleware(routing);
 
 export const config = {
