@@ -5,14 +5,16 @@ import { VideoCard } from '@/components/VideoCard';
 import { BrochureButton } from '@/components/BrochureButton';
 import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: WpLocale }> }): Promise<Metadata> {
+  const { locale } = await params;
   const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.documentationTitle,
@@ -25,7 +27,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 // en-tête, bandeau brochure (image, textes, étiquettes, fichier), section
 // documents (livrets, formats portrait/paysage mélangés dans la même grille)
 // et section vidéos (masquée tant qu'aucune vidéo n'est ajoutée dans WP).
-export default async function DocumentationPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+export default async function DocumentationPage({ params }: { params: Promise<{ locale: WpLocale }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = (await loadMessages(locale)).documentation as Record<string, string>;
   const [livrets, head] = await Promise.all([getLivrets(locale), getDocumentationHead(locale)]);
 

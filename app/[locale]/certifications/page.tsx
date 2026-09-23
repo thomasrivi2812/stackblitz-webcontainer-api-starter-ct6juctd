@@ -5,14 +5,16 @@ import { Link } from '@/i18n/routing';
 const camel = (k: string) => k.split('-').map((p, i) => i === 0 ? p.charAt(0).toUpperCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)).join('');
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
+import { setRequestLocale } from 'next-intl/server';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: WpLocale }> }): Promise<Metadata> {
+  const { locale } = await params;
   const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.certifsTitle,
@@ -31,7 +33,9 @@ function ShieldIcon() {
   );
 }
 
-export default async function CertificationsPage({ params: { locale } }: { params: { locale: WpLocale } }) {
+export default async function CertificationsPage({ params }: { params: Promise<{ locale: WpLocale }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = (await loadMessages(locale)).certifications as Record<string, string>;
   const certifs = await getCertifications(locale);
   const groups = groupCertifications(certifs);

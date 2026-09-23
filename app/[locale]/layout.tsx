@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import { loadMessages } from '@/lib/messages';
 import { Jost } from 'next/font/google';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { NextIntlClientProvider } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -45,10 +47,11 @@ export const viewport: Viewport = {
 // Metadata dépendant de la locale (og:locale correct sur /en). Les mots-clés
 // meta ont été retirés : ignorés par tous les moteurs depuis des années.
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
+  const { locale } = await params;
   const isEn = locale === 'en';
   return {
     metadataBase: new URL('https://www.nationdc.fr'),
@@ -97,19 +100,28 @@ export const dynamicParams = false;
 
 export default async function LocaleLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+  // Mode « édition temps réel » (WP_LIVE=1) : aucun cache, chaque requête est
+  // rendue à la volée. Remplace l'ancien `revalidate = WP_LIVE ? 0 : 300` des
+  // pages, que Next 16 refuse (la valeur doit être littérale).
+  if (process.env.WP_LIVE === '1') await connection();
+
   // Locale inconnue → 404 (évite de servir un dictionnaire inexistant).
   if (!routing.locales.includes(locale as Locale)) {
     notFound();
   }
+  // Fixe la locale pour next-intl côté serveur (Link, provider) : sans cela,
+  // next-intl 4 la lit dans les en-têtes de requête, ce qui force un rendu
+  // dynamique et désactive le cache ISR de toutes les pages.
+  setRequestLocale(locale);
 
-  // Dictionnaire d'interface chargé par import direct (pas de getMessages /
-  // setRequestLocale, qui dépendent du contexte de requête mal propagé sous
-  // WebContainer/StackBlitz). On passe locale + messages explicitement au
+  // Dictionnaire d'interface chargé par import direct (pas de getMessages,
+  // qui dépend du contexte de requête mal propagé sous WebContainer/StackBlitz). On passe locale + messages explicitement au
   // provider : les composants client (header, sélecteur) les lisent du contexte.
   const messages = (await loadMessages(locale));
 

@@ -66,10 +66,9 @@ const nextConfig = {
   // Embarque certs/ dans chaque fonction serveur déployée (Vercel) : requis
   // pour NODE_EXTRA_CA_CERTS=/var/task/certs/instawp-ca.pem — le serveur
   // InstaWP n'envoie pas ses certificats intermédiaires, on les fournit à Node.
-  experimental: {
-    outputFileTracingIncludes: {
-      '/**': ['./certs/**'],
-    },
+  // (Option sortie de `experimental` depuis Next 15.)
+  outputFileTracingIncludes: {
+    '/**': ['./certs/**'],
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];

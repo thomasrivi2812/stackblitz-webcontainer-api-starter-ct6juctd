@@ -13,9 +13,10 @@ import { JsonLd } from '@/components/JsonLd';
 import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 
 interface Props {
-  params: { locale: WpLocale; slug: string };
+  params: Promise<{ locale: WpLocale; slug: string }>;
 }
 
 const fmtDate = (iso: string, locale: WpLocale) => {
@@ -27,11 +28,12 @@ const fmtDate = (iso: string, locale: WpLocale) => {
 /* Metadata dynamique */
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const post = await getPostBySlug(params.slug, params.locale);
   const t = (await loadMessages(params.locale)).actualites as Record<string, string>;
   if (!post) return { title: t.notFound };
@@ -135,7 +137,9 @@ function Icon({ name }: { name: string }) {
   }
 }
 
-export default async function ArticlePage({ params }: Props) {
+export default async function ArticlePage(props: Props) {
+  const params = await props.params;
+  setRequestLocale(params.locale);
   const t = (await loadMessages(params.locale)).actualites as Record<string, string>;
   const post = await getPostBySlug(params.slug, params.locale);
   if (!post) notFound();

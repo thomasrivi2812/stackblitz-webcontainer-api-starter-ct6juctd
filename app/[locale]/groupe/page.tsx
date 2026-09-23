@@ -4,17 +4,19 @@ import { AltareaLogo, AltareaMark } from '@/components/AltareaLogo';
 import { getGroupe, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
+import { setRequestLocale } from 'next-intl/server';
 
 // Violet de la marque Altarea (accents de la page Groupe).
 const ALTAREA = '#6A2C91';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
-// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) →
-// revalidate=0 (aucun cache). Sinon cache ISR de 5 min.
-export const revalidate = process.env.WP_LIVE === '1' ? 0 : 300;
+// Temps reel pendant l'edition : poser WP_LIVE=1 dans l'env (Vercel) → rendu
+// dynamique, gere dans le layout (Next 16 exige ici une valeur litterale).
+export const revalidate = 300;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: WpLocale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: WpLocale }> }): Promise<Metadata> {
+  const { locale } = await params;
   const m = (await loadMessages(locale)).meta as Record<string, string>;
   return {
     title: m.groupeTitle,
@@ -25,7 +27,9 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 // Contenu éditable dans WP (page « groupe ») → pas de cache statique.
 
-export default async function GroupePage({ params: { locale } }: { params: { locale: WpLocale } }) {
+export default async function GroupePage({ params }: { params: Promise<{ locale: WpLocale }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = (await loadMessages(locale)).groupe as Record<string, string>;
   // Page 100 % éditable dans WordPress (champs `groupeFields` de la page
   // « groupe ») : chaque texte lit d'abord WP, puis retombe sur messages/*.json.
