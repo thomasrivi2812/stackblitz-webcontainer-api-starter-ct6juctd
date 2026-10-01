@@ -9,7 +9,7 @@ toute l'opération (il sert ses pages depuis son cache).
 
 | Question | Recommandation |
 |---|---|
-| Domaine du WordPress | `cms.nationdatacenter.fr` (HTTPS, certificat Let's Encrypt) |
+| Domaine du WordPress | **`core.nationdatacenter.fr`** (validé ; HTTPS, certificat Let's Encrypt) |
 | Même machine que le site ? | Oui possible ; voir l'**alerte images** au § 6 |
 | Accès public | Médias (`/wp-content/uploads`) **publics** : les PDF/brochures sont liés directement. `/wp-admin` et `/wp-login.php` restreints (IP / VPN) |
 | Versions | PHP 8.2 ou 8.3 (FPM), MariaDB 10.11 ou 11.4 (LTS), même version de WordPress que sur InstaWP |
@@ -53,7 +53,7 @@ Bloc nginx du WordPress (extrait) :
 ```nginx
 server {
   listen 443 ssl http2;
-  server_name cms.nationdatacenter.fr;
+  server_name core.nationdatacenter.fr;
   root /srv/wordpress;
   index index.php;
   client_max_body_size 64m;                 # téléversement des PDF
@@ -104,9 +104,9 @@ chown -R www-data:www-data wp-content/uploads
 ```bash
 wp db import ndc.sql
 # Remplacer l'ancienne adresse partout (gère les données sérialisées ACF) :
-wp search-replace 'https://ndc-site-test.instawp.site' 'https://cms.nationdatacenter.fr' \
+wp search-replace 'https://ndc-site-test.instawp.site' 'https://core.nationdatacenter.fr' \
   --all-tables --precise --skip-columns=guid --dry-run   # vérifier le nombre de remplacements
-wp search-replace 'https://ndc-site-test.instawp.site' 'https://cms.nationdatacenter.fr' \
+wp search-replace 'https://ndc-site-test.instawp.site' 'https://core.nationdatacenter.fr' \
   --all-tables --precise --skip-columns=guid
 wp rewrite flush
 wp plugin list            # tout doit être actif comme sur InstaWP
@@ -116,8 +116,8 @@ wp plugin deactivate <extensions InstaWP> && wp plugin delete <…>
 À ajouter dans `wp-config.php` :
 
 ```php
-define('WP_HOME', 'https://cms.nationdatacenter.fr');
-define('WP_SITEURL', 'https://cms.nationdatacenter.fr');
+define('WP_HOME', 'https://core.nationdatacenter.fr');
+define('WP_SITEURL', 'https://core.nationdatacenter.fr');
 define('FORCE_SSL_ADMIN', true);
 define('DISALLOW_FILE_EDIT', true);          // pas d'édition de code depuis l'admin
 define('WP_ENVIRONMENT_TYPE', 'production');
@@ -139,7 +139,7 @@ Régénérer les clés de sécurité (`wp config shuffle-salts`) et ajouter le c
 ## 5. Contrôles WordPress
 
 ```bash
-curl -s https://cms.nationdatacenter.fr/graphql -H 'content-type: application/json' \
+curl -s https://core.nationdatacenter.fr/graphql -H 'content-type: application/json' \
   -d '{"query":"{ datacenters(first: 3) { nodes { title } } }"}'
 ```
 
@@ -152,7 +152,7 @@ curl -s https://cms.nationdatacenter.fr/graphql -H 'content-type: application/js
 Dans `.env.production` du site :
 
 ```
-WORDPRESS_GRAPHQL_ENDPOINT=https://cms.nationdatacenter.fr/graphql
+WORDPRESS_GRAPHQL_ENDPOINT=https://core.nationdatacenter.fr/graphql
 LEAD_SHARED_SECRET=<nouvelle valeur>
 REVALIDATE_SECRET=<nouvelle valeur>
 ```
@@ -162,8 +162,8 @@ domaine WordPress est intégré à la compilation : CSP, images) :
 `systemctl stop ndc-front && npm run build && systemctl start ndc-front`
 
 ⚠️ **Alerte images (WordPress sur la même machine)** : si, depuis la machine,
-`cms.nationdatacenter.fr` résout vers une IP locale ou privée
-(`getent hosts cms.nationdatacenter.fr` → `127.x`, `10.x`, `192.168.x`,
+`core.nationdatacenter.fr` résout vers une IP locale ou privée
+(`getent hosts core.nationdatacenter.fr` → `127.x`, `10.x`, `192.168.x`,
 `172.16-31.x`), l'optimiseur d'images de Next refuse de les télécharger et
 **toutes les images WordPress disparaissent**. Dans ce cas, ajouter
 `NDC_IMAGES_ALLOW_LOCAL_IP=1` dans `.env.production` et recompiler.
