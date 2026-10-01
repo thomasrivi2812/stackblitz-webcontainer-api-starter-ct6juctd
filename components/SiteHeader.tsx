@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { optimizedImage } from '@/lib/image';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Logo } from '@/components/Logo';
@@ -66,6 +67,11 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
   const [open, setOpen] = useState(false); // tiroir mobile
   const [desktopOpen, setDesktopOpen] = useState<string | null>(null); // dropdown desktop ouvert
   const [mobileSub, setMobileSub] = useState<string | null>(null); // accordéon mobile ouvert
+  // Menus déjà ouverts : leurs visuels de fond ne sont chargés qu'à la
+  // première ouverture (sinon ~1 Mo d'images cachées sur chaque page).
+  const [seen, setSeen] = useState<Record<string, boolean>>({});
+  const promoBg = (key: string, src: string) =>
+    seen[key] ? { backgroundImage: `url('${optimizedImage(src, 640)}')` } : undefined;
 
   // Fermeture différée au survol + retour de focus à Échap.
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,6 +105,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
   const openMenu = (key: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setDesktopOpen(key);
+    setSeen((s) => (s[key] ? s : { ...s, [key]: true }));
   };
   // Fermeture différée (~160 ms) : la traversée en diagonale vers le panneau
   // ne referme plus le menu au premier pixel hors du bloc.
@@ -218,7 +225,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                 <Link
                   href="/contact"
                   className="nav-dd-promo"
-                  style={{ backgroundImage: `url('${reseauImageUrl || '/datacenters/rouen.jpg'}')` }}
+                  style={promoBg('reseau', reseauImageUrl || '/datacenters/rouen.jpg')}
                 >
                   <span className="nav-dd-promo-body">
                     <span className="nav-dd-promo-eyebrow">{t('visitePromoEyebrow')}</span>
@@ -262,7 +269,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                 <Link
                   href="/#engagements"
                   className="nav-dd-promo"
-                  style={{ backgroundImage: `url('${offresImageUrl || '/datacenters/velizy.png'}')` }}
+                  style={promoBg('offres', offresImageUrl || '/datacenters/velizy.png')}
                 >
                   <span className="nav-dd-promo-body">
                     <span className="nav-dd-promo-eyebrow">{t('engagementsPromoEyebrow')}</span>
@@ -308,7 +315,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                 <Link
                   href="/equipes"
                   className="nav-dd-promo"
-                  style={{ backgroundImage: `url('${equipeImageUrl || '/datacenters/rennes-1.png'}')` }}
+                  style={promoBg('services', equipeImageUrl || '/datacenters/rennes-1.png')}
                 >
                   <span className="nav-dd-promo-body">
                     <span className="nav-dd-promo-eyebrow">{t('equipePromoEyebrow')}</span>

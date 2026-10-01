@@ -4,6 +4,7 @@ import { sanitizeWpHtml } from '@/lib/sanitize';
 import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 
 // Page « simple » : on lit une Page native de WordPress (Titre + contenu + image
@@ -49,7 +50,7 @@ export default async function CustomPage(props: { params: Promise<{ locale: WpLo
           {page.image && (
             <img
               decoding="async"
-              src={page.image.sourceUrl}
+              {...imgProps(page.image.sourceUrl, '100vw')}
               alt={page.image.altText || page.title}
               style={{ width: '100%', height: 'auto', borderRadius: 12, marginBottom: '2rem' }}
             />

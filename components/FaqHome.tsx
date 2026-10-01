@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Faq } from '@/lib/wordpress';
+import { imgProps } from '@/lib/image';
 
 // Section FAQ de l'accueil — accordéon, une seule réponse ouverte à la fois.
 // Le contenu vient de WordPress (CPT « faq »), avec repli sur les données d'exemple.
@@ -61,7 +62,7 @@ export function FaqHome({
           </div>
           <div className="faq-media">
             {visuals.map((im, i) => (
-              <img key={i} src={im.sourceUrl} alt={im.altText || ''} loading="lazy" />
+              <img key={i} {...imgProps(im.sourceUrl, '(max-width: 768px) 100vw, 50vw')} alt={im.altText || ''} loading="lazy" />
             ))}
           </div>
         </div>

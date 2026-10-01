@@ -6,6 +6,7 @@ import { BrochureButton } from '@/components/BrochureButton';
 import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -55,7 +56,7 @@ export default async function DocumentationPage({ params }: { params: Promise<{ 
           <div className="doc-hero">
             <div className="doc-hero-cover">
               {head?.brochureImage ? (
-                <img loading="lazy" decoding="async" src={head.brochureImage.sourceUrl} alt={head.brochureImage.altText || ''} />
+                <img loading="lazy" decoding="async" {...imgProps(head.brochureImage.sourceUrl, '(max-width: 768px) 100vw, 50vw')} alt={head.brochureImage.altText || ''} />
               ) : (
                 <span className="doc-hero-ph" aria-hidden="true">
                   <span className="doc-hero-ph-mark">N|D|C</span>

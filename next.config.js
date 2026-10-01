@@ -71,12 +71,16 @@ const nextConfig = {
   // Optimiseur d'images restreint au domaine WordPress (plus de wildcard '**' :
   // empêche l'abus de /_next/image comme proxy d'images ouvert).
   images: {
+    // Plafond du cache disque de l'optimiseur (défaut : 50 % du disque libre).
+    maximumDiskCacheSize: 500 * 1024 * 1024,
     remotePatterns: [
       { protocol: 'https', hostname: WP_HOST },
       // Vignettes YouTube (page Documentation), servies via le site.
       { protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**' },
     ],
   },
+  // Hôtes d'images optimisables côté client (lib/image.ts).
+  env: { NDC_IMAGE_HOSTS: WP_HOST },
   poweredByHeader: false, // masque l'en-tête X-Powered-By: Next.js
   // Embarque certs/ dans chaque fonction serveur déployée (Vercel) : requis
   // pour NODE_EXTRA_CA_CERTS=/var/task/certs/instawp-ca.pem — le serveur

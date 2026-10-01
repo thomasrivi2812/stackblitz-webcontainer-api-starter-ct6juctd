@@ -1,6 +1,7 @@
 // Section « Nos services » — version v2 (grille type tableau, numérotée, bénéfice client).
 // Contenu repris de la maquette NDC : chaque service a un bénéfice client explicite.
 import { BrochureButton } from './BrochureButton';
+import { imgProps } from '@/lib/image';
 
 function ServiceIcon({ name }: { name: string }) {
   const c = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
@@ -57,7 +58,7 @@ export function Services() {
 
         <div className="services-feature">
           <div className="services-feature-media">
-            <img loading="lazy" decoding="async" src="/services-proximite.jpg" alt="Intervention de proximité sur les serveurs dans un data center NDC" />
+            <img loading="lazy" decoding="async" {...imgProps('/services-proximite.jpg', '(max-width: 768px) 100vw, 50vw')} alt="Intervention de proximité sur les serveurs dans un data center NDC" />
           </div>
           <div className="services-feature-text">
             <span className="eyebrow"><span className="eyebrow-dot" />Services de proximité</span>

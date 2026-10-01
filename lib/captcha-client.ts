@@ -7,8 +7,7 @@
 // Pour que le visiteur n'attende pas, la résolution démarre dès qu'il entre
 // dans un champ de saisie ; à l'envoi, la solution est en général déjà prête.
 
-import { solveChallenge, type Challenge, type Solution } from 'altcha-lib';
-import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
+import type { Challenge, Solution } from 'altcha-lib';
 
 const TIMEOUT_MS = 20_000;
 /** Une solution préparée est jetée au-delà (le défi expire à 10 min côté serveur). */
@@ -21,6 +20,11 @@ async function fetchAndSolve(): Promise<string | null> {
     const res = await fetch('/api/altcha', { cache: 'no-store' });
     if (!res.ok) return null;
     const challenge = (await res.json()) as Challenge;
+    // Bibliothèque chargée à la demande : rien sur les pages sans formulaire utilisé.
+    const [{ solveChallenge }, { deriveKey }] = await Promise.all([
+      import('altcha-lib'),
+      import('altcha-lib/algorithms/web/pbkdf2'),
+    ]);
     const solution: Solution | null = await solveChallenge({ challenge, deriveKey, timeout: TIMEOUT_MS });
     if (!solution) return null;
     return btoa(JSON.stringify({ challenge, solution }));

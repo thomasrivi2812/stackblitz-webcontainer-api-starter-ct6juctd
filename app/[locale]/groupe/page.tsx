@@ -5,6 +5,7 @@ import { getGroupe, type WpLocale } from '@/lib/wordpress';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 // Violet de la marque Altarea (accents de la page Groupe).
 const ALTAREA = '#6A2C91';
@@ -94,7 +95,7 @@ export default async function GroupePage({ params }: { params: Promise<{ locale:
           <div className="hero-visual">
             {wp?.heroImage ? (
               <div className="hero-frame">
-                <img className="hero-img" fetchPriority="high" decoding="async" src={wp.heroImage.sourceUrl} alt={wp.heroImage.altText || (wp?.heroTitle || t.heroTitle)} />
+                <img className="hero-img" fetchPriority="high" decoding="async" {...imgProps(wp.heroImage.sourceUrl, '100vw')} alt={wp.heroImage.altText || (wp?.heroTitle || t.heroTitle)} />
                 <div className="hero-frame-corner tl" aria-hidden="true" />
                 <div className="hero-frame-corner br" aria-hidden="true" />
               </div>
@@ -139,7 +140,7 @@ export default async function GroupePage({ params }: { params: Promise<{ locale:
               <article className={`eng-card-v2${m.image ? ' has-media' : ''}`} key={m.titre}>
                 {m.image && (
                   <div className="eng-card-media">
-                    <img src={m.image.sourceUrl} alt={m.image.altText || m.titre} loading="lazy" decoding="async" />
+                    <img {...imgProps(m.image.sourceUrl, '(max-width: 768px) 100vw, 33vw')} alt={m.image.altText || m.titre} loading="lazy" decoding="async" />
                   </div>
                 )}
                 <div className="eng-card-body">

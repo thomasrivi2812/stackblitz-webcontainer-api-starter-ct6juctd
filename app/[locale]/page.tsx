@@ -43,6 +43,7 @@ import {
   stripHtml,
   type WpLocale,
 } from '@/lib/wordpress';
+import { imgProps } from '@/lib/image';
 
 
 /* ------------------------------- Icônes ------------------------------- */
@@ -353,7 +354,7 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
             </div>
             {wp?.engImage && (
               <div className="eng-illustration">
-                <img loading="lazy" decoding="async" src={wp.engImage.sourceUrl} alt={wp.engImage.altText || (wp?.engTitle || t.engTitle)} />
+                <img loading="lazy" decoding="async" {...imgProps(wp.engImage.sourceUrl, '(max-width: 768px) 100vw, 50vw')} alt={wp.engImage.altText || (wp?.engTitle || t.engTitle)} />
               </div>
             )}
           </div>
@@ -441,7 +442,7 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
               <Link className="news-feat3" href={`/actualites/${posts[0].slug}`}>
                 <div className="news-feat3-media">
                   {posts[0].featuredImage?.node?.sourceUrl
-                    ? <img loading="lazy" decoding="async" src={posts[0].featuredImage.node.sourceUrl} alt={posts[0].featuredImage.node.altText || posts[0].title} />
+                    ? <img loading="lazy" decoding="async" {...imgProps(posts[0].featuredImage.node.sourceUrl, '(max-width: 768px) 100vw, 50vw')} alt={posts[0].featuredImage.node.altText || posts[0].title} />
                     : <span className="news-ph"><Icon name="building" /></span>}
                   <span className="news-pill">{posts[0].categorie || t.newsCatActu}</span>
                 </div>
@@ -466,7 +467,7 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
                   <Link className="news-card3" key={p.slug} href={`/actualites/${p.slug}`}>
                     <div className="news-card3-media">
                       {p.featuredImage?.node?.sourceUrl
-                        ? <img loading="lazy" decoding="async" src={p.featuredImage.node.sourceUrl} alt={p.featuredImage.node.altText || p.title} />
+                        ? <img loading="lazy" decoding="async" {...imgProps(p.featuredImage.node.sourceUrl, '(max-width: 768px) 100vw, 33vw')} alt={p.featuredImage.node.altText || p.title} />
                         : <span className="news-ph"><Icon name="building" /></span>}
                     </div>
                     <div className="news-card3-body">

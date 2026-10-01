@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import type { Livret } from '@/lib/wordpress';
+import { imgProps } from '@/lib/image';
 
 // Carte « livret » de la page Documentation : couverture cliquable → modale
 // avec description + bouton Télécharger. Le clic sur le bouton révèle un
@@ -72,7 +73,7 @@ export function LivretCard({ livret }: { livret: Livret }) {
   const cover = (
     <span className={`lvc-cover${paysage ? ' lvc-cover--paysage' : ''}`}>
       {livret.cover?.sourceUrl ? (
-        <img src={livret.cover.sourceUrl} alt={livret.cover.altText || livret.titre} loading="lazy" />
+        <img {...imgProps(livret.cover.sourceUrl, '(max-width: 768px) 100vw, 33vw')} alt={livret.cover.altText || livret.titre} loading="lazy" />
       ) : (
         <span className="lvc-cover-ph" aria-hidden="true">
           <span className="lvc-ph-mark">N|D|C</span>

@@ -10,6 +10,7 @@ import { BrochureButton } from '@/components/BrochureButton';
 import type { Metadata } from 'next';
 import type React from 'react';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
@@ -279,7 +280,7 @@ export default async function DatacenterDetail(props: { params: Promise<{ locale
             <div className="dc-gallery">
               {photos.map((p, i) => (
                 <figure className="dc-gallery-item" key={i}>
-                  <img src={p.sourceUrl} alt={p.altText || `${dc.title} — photo ${i + 1} du data center`} loading="lazy" />
+                  <img {...imgProps(p.sourceUrl, '(max-width: 768px) 100vw, 33vw')} alt={p.altText || `${dc.title} — photo ${i + 1} du data center`} loading="lazy" />
                 </figure>
               ))}
             </div>

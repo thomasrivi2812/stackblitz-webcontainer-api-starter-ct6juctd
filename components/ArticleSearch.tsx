@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { stripHtml, readingMinutes } from '@/lib/wordpress';
 import type { WPPost } from '@/lib/wordpress';
+import { imgProps } from '@/lib/image';
 
 function SearchIcon() {
   return (
@@ -132,7 +133,7 @@ export function ArticleSearch({ posts, categories }: Props) {
                   <img
                     loading="lazy"
                     decoding="async"
-                    src={p.featuredImage.node.sourceUrl}
+                    {...imgProps(p.featuredImage.node.sourceUrl, '(max-width: 768px) 100vw, 33vw')}
                     alt={p.featuredImage.node.altText || p.title}
                   />
                 ) : (

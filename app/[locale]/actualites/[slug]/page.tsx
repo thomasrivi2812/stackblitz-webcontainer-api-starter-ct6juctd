@@ -14,6 +14,7 @@ import { SITE_URL, localePath } from '@/lib/seo';
 import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 interface Props {
   params: Promise<{ locale: WpLocale; slug: string }>;
@@ -230,7 +231,7 @@ export default async function ArticlePage(props: Props) {
               <img
                 fetchPriority="high"
                 decoding="async"
-                src={post.featuredImage.node.sourceUrl}
+                {...imgProps(post.featuredImage.node.sourceUrl, '100vw')}
                 alt={post.featuredImage.node.altText || post.title}
               />
             </div>
@@ -302,7 +303,7 @@ export default async function ArticlePage(props: Props) {
                             <img
                               loading="lazy"
                               decoding="async"
-                              src={r.featuredImage.node.sourceUrl}
+                              {...imgProps(r.featuredImage.node.sourceUrl, '(max-width: 768px) 100vw, 33vw')}
                               alt={r.featuredImage.node.altText || r.title}
                             />
                           ) : (

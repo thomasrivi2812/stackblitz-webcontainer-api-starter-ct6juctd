@@ -4,6 +4,7 @@ import { Link } from '@/i18n/routing';
 import type { Metadata } from 'next';
 import { alternatesFor } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
+import { imgProps } from '@/lib/image';
 
 // ISR : page servie depuis le cache, regeneree au plus toutes les 5 min
 // (revalidation instantanee possible via /api/revalidate au save_post WP).
@@ -83,7 +84,7 @@ export default async function EquipesPage({ params }: { params: Promise<{ locale
                 <article className="team-card" key={m.nom + m.poste}>
                   <div className="team-photo">
                     {m.photo ? (
-                      <img loading="lazy" decoding="async" src={m.photo.sourceUrl} alt={m.photo.altText || m.nom} />
+                      <img loading="lazy" decoding="async" {...imgProps(m.photo.sourceUrl, '(max-width: 768px) 100vw, 33vw')} alt={m.photo.altText || m.nom} />
                     ) : (
                       <span className="team-initials">{initials(m.nom)}</span>
                     )}

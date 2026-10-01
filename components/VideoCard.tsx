@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { DocVideo } from '@/lib/wordpress';
 import { DIDOMI_ENABLED, DIDOMI_VENDORS, didomiVendorConsent, onDidomiConsent, showDidomiPreferences } from '@/lib/didomi';
+import { imgProps } from '@/lib/image';
 
 // Carte vidéo de la page Documentation : vignette (image WP, sinon vignette
 // YouTube déduite de l'URL, sinon dégradé NDC) + bouton lecture + durée.
@@ -71,7 +72,7 @@ export function VideoCard({ video }: { video: DocVideo }) {
     <>
       <span className="vdc-media">
         {video.image ? (
-          <img src={video.image} alt="" loading="lazy" />
+          <img {...imgProps(video.image, '(max-width: 768px) 100vw, 33vw')} alt="" loading="lazy" />
         ) : yt ? (
           <Image src={`https://i.ytimg.com/vi/${yt}/hqdefault.jpg`} alt="" width={480} height={270} sizes="(max-width: 700px) 100vw, 400px" />
         ) : (
