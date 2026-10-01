@@ -21,8 +21,14 @@ unzip ndc-front.zip && cd ndc-front
 npm ci                       # installe les dépendances (dev comprises : nécessaires au build)
 cp .env.local.example .env.production   # puis compléter, voir § 3
 npm run build
-npx next start -p 3000 -H 127.0.0.1   # derrière nginx (§ 5)
+npx next start -p 3000 -H localhost   # derrière nginx (§ 5)
 ```
+
+> ⚠️ **Toujours `-H localhost`, jamais `-H 127.0.0.1`** : avec une adresse IP,
+> Next traite la réécriture interne des URL françaises (`/contact` →
+> `/fr/contact`) comme une requête externe et **toutes les pages FR bouclent en
+> redirection 307**. Sans `-H`, le serveur écoute sur toutes les interfaces
+> (fonctionne, mais fermer alors le port 3000 au pare-feu).
 
 ## 3. Variables d'environnement (`.env.production`)
 
@@ -64,7 +70,7 @@ After=network-online.target
 [Service]
 WorkingDirectory=/srv/ndc-front
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/npx next start -p 3000 -H 127.0.0.1
+ExecStart=/usr/bin/npx next start -p 3000 -H localhost
 Restart=always
 RestartSec=5
 User=ndc
@@ -101,7 +107,7 @@ server {
 
   location / {
     limit_req zone=ndc burst=40 nodelay;
-    proxy_pass http://127.0.0.1:3000;
+    proxy_pass http://localhost:3000;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-Proto $scheme;
