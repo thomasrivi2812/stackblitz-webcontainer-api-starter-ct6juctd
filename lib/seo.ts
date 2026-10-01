@@ -1,6 +1,6 @@
 // Helpers SEO centralisés (canoniques par langue, hreflang, URL du site).
 
-export const SITE_URL = 'https://www.nationdc.fr';
+export const SITE_URL = 'https://nationdatacenter.fr';
 export const SITE_NAME = 'Nation Data Center';
 
 /** Chemin localisé : FR à la racine, EN préfixé /en (localePrefix "as-needed"). */

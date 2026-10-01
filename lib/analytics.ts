@@ -9,9 +9,8 @@
 // (page.display, click.action, click.download, click.navigation, click.exit) :
 // on n'utilise donc QUE ceux-là, pour ne rien perdre sans consentement.
 //
-// ENV : NEXT_PUBLIC_PIANO_COLLECT_DOMAIN (obligatoire pour activer la mesure,
-// ex. https://xxxxxxx.pa-cd.com — fourni dans l'interface Piano) et
-// NEXT_PUBLIC_PIANO_SITE_ID (défaut : site NDC).
+// ENV (facultatives, valeurs NDC par défaut) : NEXT_PUBLIC_PIANO_COLLECT_DOMAIN
+// et NEXT_PUBLIC_PIANO_SITE_ID. NEXT_PUBLIC_PIANO_COLLECT_DOMAIN=off coupe la mesure.
 
 type PianoEventData = Record<string, string | number | boolean>;
 type PianoSdk = {
@@ -26,10 +25,10 @@ declare global {
   }
 }
 
-const COLLECT_DOMAIN = process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN;
+const COLLECT_DOMAIN = process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN || 'https://tjtxkkw.pa-cd.com';
 const SITE_ID = Number(process.env.NEXT_PUBLIC_PIANO_SITE_ID || 642163);
 
-export const analyticsEnabled = Boolean(COLLECT_DOMAIN);
+export const analyticsEnabled = COLLECT_DOMAIN !== 'off';
 
 let sdk: Promise<PianoSdk | null> | null = null;
 

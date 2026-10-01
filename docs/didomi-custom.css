@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Nation Data Center — habillage de la bannière cookies Didomi
+   À coller dans la console Didomi : notice → 2. Customization →
+   Advanced settings (⚙) → Custom CSS. Version de référence : ce fichier.
+   La police Jost est celle du site (variable posée par Next.js) : elle
+   s'applique sur le site, l'aperçu de la console Didomi affiche une police
+   système de repli.
+   ========================================================================== */
+
+#didomi-host,
+#didomi-host button,
+#didomi-host input {
+  font-family: var(--font-jost), system-ui, sans-serif !important;
+}
+
+/* Fenêtres (bandeau, popup, préférences) */
+#didomi-host #didomi-notice,
+#didomi-host .didomi-popup-notice,
+#didomi-host .didomi-popup-container {
+  color: #1b3360 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 22px 48px -28px rgba(20, 40, 73, 0.45) !important;
+}
+#didomi-host .didomi-popup-backdrop {
+  background-color: rgba(11, 22, 44, 0.55) !important;
+}
+#didomi-host h1,
+#didomi-host .didomi-popup-notice-title,
+#didomi-host .didomi-notice__title {
+  color: #1b3360 !important;
+  font-weight: 700 !important;
+}
+
+/* Boutons « Accepter » et « Refuser » strictement identiques : la CNIL exige
+   que refuser soit aussi simple et visible qu'accepter. */
+#didomi-host #didomi-notice-agree-button,
+#didomi-host #didomi-notice-disagree-button,
+#didomi-host .didomi-components-button--color {
+  background: #1b3360 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #1b3360 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+#didomi-host #didomi-notice-agree-button:hover,
+#didomi-host #didomi-notice-disagree-button:hover,
+#didomi-host .didomi-components-button--color:hover {
+  background: #142849 !important;
+  border-color: #142849 !important;
+}
+
+/* « Paramétrer » / boutons secondaires */
+#didomi-host #didomi-notice-learn-more-button,
+#didomi-host .didomi-components-button:not(.didomi-components-button--color) {
+  background: transparent !important;
+  color: #1b3360 !important;
+  border: 1.5px solid #1b3360 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+#didomi-host #didomi-notice-learn-more-button:hover,
+#didomi-host .didomi-components-button:not(.didomi-components-button--color):hover {
+  background: #1b3360 !important;
+  color: #ffffff !important;
+}
+
+/* Liens et interrupteurs */
+#didomi-host a {
+  color: #1b3360 !important;
+  text-decoration: underline !important;
+}
+#didomi-host a:hover {
+  color: #ff0000 !important;
+}
+#didomi-host .didomi-components-radio__option--selected,
+#didomi-host .didomi-switch input:checked + .didomi-switch-label {
+  background-color: #39b184 !important;
+  border-color: #39b184 !important;
+}
+
+/* Accessibilité : focus clavier bien visible */
+#didomi-host :focus-visible {
+  outline: 2px solid #2dafe6 !important;
+  outline-offset: 2px !important;
+}

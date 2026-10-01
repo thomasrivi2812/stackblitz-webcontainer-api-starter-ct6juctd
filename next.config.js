@@ -20,9 +20,8 @@ const WP_HOST = wpHost();
 // Domaine de collecte Piano Analytics (origine seule), autorisé en connect-src.
 function pianoOrigin() {
   try {
-    return process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN
-      ? new URL(process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN).origin
-      : '';
+    const d = process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN || 'https://tjtxkkw.pa-cd.com';
+    return d === 'off' ? '' : new URL(d).origin;
   } catch {
     return '';
   }

@@ -4,16 +4,16 @@
 
 ## Pages principales
 
-- [Accueil](https://www.nationdc.fr/): présentation du réseau, chiffres clés, engagements et raison d'être.
-- [Nos data centers](https://www.nationdc.fr/datacenters): carte et liste des sites du réseau (statut opérationnel / en construction / à venir), avec fiche détaillée par site.
-- [Nos offres](https://www.nationdc.fr/offres): offres d'hébergement et de colocation adaptées par profil client.
-- [Nos services](https://www.nationdc.fr/services): infrastructure et équipes d'exploitation (sécurité, supervision, accompagnement).
-- [Certifications](https://www.nationdc.fr/certifications): certifications et référentiels (sécurité de l'information, santé, souveraineté, énergie/environnement, qualité, conception/Tier).
-- [Notre équipe](https://www.nationdc.fr/equipes): présentation des pôles et des membres de NDC.
-- [Le groupe Altarea](https://www.nationdc.fr/groupe): NDC au sein du Groupe Altarea (modèle multi-métiers, engagement bas carbone).
-- [Actualités](https://www.nationdc.fr/actualites): nouvelles du réseau (nouveaux sites, innovations, RSE, événements).
-- [Documentation](https://www.nationdc.fr/documentation): livrets et brochures téléchargeables.
-- [Contact](https://www.nationdc.fr/contact): prise de contact et demande de visite.
+- [Accueil](https://nationdatacenter.fr/): présentation du réseau, chiffres clés, engagements et raison d'être.
+- [Nos data centers](https://nationdatacenter.fr/datacenters): carte et liste des sites du réseau (statut opérationnel / en construction / à venir), avec fiche détaillée par site.
+- [Nos offres](https://nationdatacenter.fr/offres): offres d'hébergement et de colocation adaptées par profil client.
+- [Nos services](https://nationdatacenter.fr/services): infrastructure et équipes d'exploitation (sécurité, supervision, accompagnement).
+- [Certifications](https://nationdatacenter.fr/certifications): certifications et référentiels (sécurité de l'information, santé, souveraineté, énergie/environnement, qualité, conception/Tier).
+- [Notre équipe](https://nationdatacenter.fr/equipes): présentation des pôles et des membres de NDC.
+- [Le groupe Altarea](https://nationdatacenter.fr/groupe): NDC au sein du Groupe Altarea (modèle multi-métiers, engagement bas carbone).
+- [Actualités](https://nationdatacenter.fr/actualites): nouvelles du réseau (nouveaux sites, innovations, RSE, événements).
+- [Documentation](https://nationdatacenter.fr/documentation): livrets et brochures téléchargeables.
+- [Contact](https://nationdatacenter.fr/contact): prise de contact et demande de visite.
 
 ## Thématiques couvertes
 
@@ -25,13 +25,13 @@
 
 ## Langues
 
-- Français (par défaut) : https://www.nationdc.fr/
-- Anglais : https://www.nationdc.fr/en/
+- Français (par défaut) : https://nationdatacenter.fr/
+- Anglais : https://nationdatacenter.fr/en/
 
 ## Ressources techniques
 
-- Plan du site (XML): https://www.nationdc.fr/sitemap.xml
-- Robots: https://www.nationdc.fr/robots.txt
+- Plan du site (XML): https://nationdatacenter.fr/sitemap.xml
+- Robots: https://nationdatacenter.fr/robots.txt
 
 ## À propos
 

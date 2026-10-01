@@ -543,7 +543,7 @@ export const samplePages: Record<string, CustomPage> = {
     image: null,
     content: `
 <h2>Éditeur du site</h2>
-<p>Le site nationdc.fr est édité par <strong>Nation Data Center</strong>, filiale du groupe Altarea.<br/>
+<p>Le site nationdatacenter.fr est édité par <strong>Nation Data Center</strong>, filiale du groupe Altarea.<br/>
 [Forme juridique, capital social, RCS, SIREN et adresse du siège : à compléter dans WordPress.]</p>
 <h2>Directeur de la publication</h2>
 <p>[Nom et qualité du directeur de la publication : à compléter.]</p>

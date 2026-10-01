@@ -55,7 +55,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const isEn = locale === 'en';
   return {
-    metadataBase: new URL('https://www.nationdc.fr'),
+    metadataBase: new URL(SITE_URL),
     title: {
       default: 'Nation Data Center — Hébergement souverain & responsable',
       template: '%s | Nation Data Center',

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/seo';
 
 // Crawlers IA explicitement autorisés (référencement dans les moteurs de
 // réponse : ChatGPT, Claude, Perplexity, Google AI, Applebot…). Ils sont déjà
@@ -21,7 +22,7 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: '*', allow: '/' },
       ...AI_BOTS.map((userAgent) => ({ userAgent, allow: '/' })),
     ],
-    sitemap: 'https://www.nationdc.fr/sitemap.xml',
-    host: 'https://www.nationdc.fr',
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }
