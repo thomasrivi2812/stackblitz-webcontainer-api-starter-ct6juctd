@@ -3,6 +3,7 @@
 // La solution du captcha ALTCHA est obtenue ici, en un seul point, pour tous
 // les formulaires (null si indisponible : le serveur refusera l'envoi).
 import { getCaptchaToken } from './captcha-client';
+import { track } from './analytics';
 
 export type LeadType = 'contact' | 'question' | 'brochure' | 'download';
 
@@ -33,7 +34,17 @@ export async function sendLead(payload: LeadPayload): Promise<boolean> {
       }),
     });
     const data = await res.json().catch(() => ({ ok: false }));
-    return Boolean(res.ok && data.ok);
+    const ok = Boolean(res.ok && data.ok);
+    // Conversion Piano (événements standard, mesurés même sans consentement) :
+    // téléchargements en click.download, demandes en click.action.
+    if (ok) {
+      if (payload.type === 'brochure' || payload.type === 'download') {
+        track('click.download', { click: payload.ressource || payload.type, click_chapter1: `lead_${payload.type}` });
+      } else {
+        track('click.action', { click: `lead_${payload.type}`, click_chapter1: 'formulaire' });
+      }
+    }
+    return ok;
   } catch {
     return false;
   }

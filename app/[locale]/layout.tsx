@@ -10,6 +10,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { JsonLd } from '@/components/JsonLd';
 import { DidomiConsent } from '@/components/DidomiConsent';
+import { PianoAnalytics } from '@/components/PianoAnalytics';
 import { ChatBot } from '@/components/ChatBot';
 import { buildKnowledge } from '@/lib/chatbot-knowledge';
 import {
@@ -162,6 +163,7 @@ export default async function LocaleLayout({
         {/* CMP Didomi (bannière cookies) — inactive tant que la clé API
             NEXT_PUBLIC_DIDOMI_API_KEY n'est pas configurée. */}
         <DidomiConsent locale={locale} />
+        <PianoAnalytics />
         {/* Données structurées Organization (rich results / knowledge panel,
             compréhension par les moteurs IA). */}
         <JsonLd

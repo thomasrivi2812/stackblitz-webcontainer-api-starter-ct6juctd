@@ -17,6 +17,18 @@ function wpHost() {
 }
 const WP_HOST = wpHost();
 
+// Domaine de collecte Piano Analytics (origine seule), autorisé en connect-src.
+function pianoOrigin() {
+  try {
+    return process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN
+      ? new URL(process.env.NEXT_PUBLIC_PIANO_COLLECT_DOMAIN).origin
+      : '';
+  } catch {
+    return '';
+  }
+}
+const PIANO_ORIGIN = pianoOrigin();
+
 // Tuiles de la carte (Leaflet) chargées en <img> côté client. Les trois
 // fournisseurs de components/MapClient.tsx sont autorisés : Esri (défaut, sans
 // clé), CARTO (avec clé) et OpenStreetMap.
@@ -43,7 +55,7 @@ const securityHeaders = [
       // i.ytimg.com = vignettes YouTube déduites (vidéos de la page Documentation).
       `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://sdk.privacy-center.org https://i.ytimg.com`,
       "font-src 'self' data:",
-      `connect-src 'self' https://${WP_HOST} https://sdk.privacy-center.org https://api.privacy-center.org`,
+      `connect-src 'self' https://${WP_HOST} https://sdk.privacy-center.org https://api.privacy-center.org${PIANO_ORIGIN ? ` ${PIANO_ORIGIN}` : ''}`,
       // Intégrations vidéo (YouTube/Vimeo) ; le reste est bloqué.
       "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
       "object-src 'none'",
