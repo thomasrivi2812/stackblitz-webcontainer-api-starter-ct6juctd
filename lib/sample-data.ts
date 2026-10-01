@@ -537,6 +537,10 @@ export const sampleServices: Service[] = [
  * ------------------------------------------------------------------ */
 import type { CustomPage } from './wordpress';
 
+// Liens d'action utilisables dans le contenu WordPress des pages légales :
+//   href="#gerer-mes-cookies"           → rouvre les préférences Didomi
+//   href="#opposition-mesure-audience"  → opposition à la mesure d'audience
+// (gérés par components/LegalActions.tsx).
 export const samplePages: Record<string, CustomPage> = {
   'mentions-legales': {
     title: 'Mentions légales',
@@ -544,15 +548,17 @@ export const samplePages: Record<string, CustomPage> = {
     content: `
 <h2>Éditeur du site</h2>
 <p>Le site nationdatacenter.fr est édité par <strong>Nation Data Center</strong>, filiale du groupe Altarea.<br/>
-[Forme juridique, capital social, RCS, SIREN et adresse du siège : à compléter dans WordPress.]</p>
+[Forme juridique, capital social, RCS, SIREN, numéro de TVA et adresse du siège : à compléter.]</p>
 <h2>Directeur de la publication</h2>
 <p>[Nom et qualité du directeur de la publication : à compléter.]</p>
 <h2>Hébergement</h2>
-<p>[Hébergeur du site (raison sociale, adresse, téléphone) : à compléter.]</p>
+<p>Le site est hébergé sur l'infrastructure de Nation Data Center, en France. [Raison sociale, adresse et téléphone de l'hébergeur : à compléter.]</p>
 <h2>Propriété intellectuelle</h2>
 <p>L'ensemble des contenus du site (textes, images, logos, vidéos, structure) est protégé par le droit de la propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation écrite préalable est interdite.</p>
 <h2>Responsabilité</h2>
 <p>Nation Data Center s'efforce d'assurer l'exactitude des informations publiées sur ce site, sans toutefois pouvoir garantir qu'elles soient exemptes d'erreurs ou d'omissions. Les informations sont fournies à titre indicatif et sont susceptibles d'évoluer.</p>
+<h2>Données personnelles et cookies</h2>
+<p>Voir la <a href="/politique-de-protection-des-donnees-personnelles">politique de protection des données personnelles</a> et la <a href="/politique-de-cookies">politique de cookies</a>.</p>
 <h2>Contact</h2>
 <p>Pour toute question relative au site, utilisez la <a href="/contact">page contact</a>.</p>
 `,
@@ -562,19 +568,21 @@ export const samplePages: Record<string, CustomPage> = {
     image: null,
     content: `
 <h2>Responsable de traitement</h2>
-<p><strong>Nation Data Center</strong>, filiale du groupe Altarea, est responsable des traitements de données personnelles réalisés sur ce site. [Coordonnées complètes : à compléter dans WordPress.]</p>
+<p><strong>Nation Data Center</strong>, filiale du groupe Altarea, est responsable des traitements de données personnelles réalisés sur ce site. [Adresse et coordonnées complètes : à compléter.]</p>
 <h2>Données collectées</h2>
-<p>Les formulaires du site (contact, question, téléchargement de brochure ou de document) collectent uniquement les données que vous renseignez : adresse e-mail, et le cas échéant nom, prénom, téléphone, entreprise et message.</p>
+<p>Les formulaires du site (contact, question, téléchargement de brochure ou de document) et l'assistant en ligne collectent uniquement les données que vous renseignez : adresse e-mail, et le cas échéant nom, prénom, téléphone, entreprise et message. La page d'origine de la demande est également enregistrée.</p>
 <h2>Finalités et bases légales</h2>
 <ul>
 <li>Répondre à vos demandes de contact et de renseignement (mesures précontractuelles / intérêt légitime) ;</li>
 <li>Vous transmettre la documentation demandée (consentement) ;</li>
-<li>Assurer le suivi commercial des demandes (intérêt légitime).</li>
+<li>Assurer le suivi commercial des demandes (intérêt légitime) ;</li>
+<li>Mesurer l'audience du site (exemption de consentement pour la mesure strictement anonyme, consentement pour la mesure complète — voir la <a href="/politique-de-cookies">politique de cookies</a>).</li>
 </ul>
 <h2>Durées de conservation</h2>
 <p>[Durées de conservation par finalité : à compléter — usuellement 3 ans après le dernier contact pour les prospects.]</p>
-<h2>Destinataires</h2>
-<p>Les données sont destinées aux équipes commerciales et marketing de Nation Data Center. [Sous-traitants éventuels (CRM, e-mailing…) : à compléter.]</p>
+<h2>Destinataires et sous-traitants</h2>
+<p>Les données sont destinées aux équipes commerciales et marketing de Nation Data Center. Elles sont hébergées en France sur l'infrastructure de Nation Data Center. Sous-traitants : Piano (mesure d'audience, France), Didomi (gestion du consentement, France). [Autres sous-traitants éventuels (CRM, e-mailing…) : à compléter.]</p>
+<p>La protection anti-robots des formulaires est hébergée sur nos propres serveurs et ne transmet aucune donnée à un tiers.</p>
 <h2>Vos droits</h2>
 <p>Conformément au RGPD et à la loi Informatique et Libertés, vous disposez de droits d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité sur vos données. Pour les exercer : [adresse e-mail du référent données personnelles / DPO : à compléter]. Vous pouvez également saisir la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>).</p>
 `,
@@ -584,18 +592,111 @@ export const samplePages: Record<string, CustomPage> = {
     image: null,
     content: `
 <h2>Qu'est-ce qu'un cookie&nbsp;?</h2>
-<p>Un cookie est un petit fichier déposé sur votre appareil lors de la consultation d'un site, permettant notamment de mémoriser des préférences de navigation.</p>
-<h2>Cookies utilisés sur ce site</h2>
-<p>Ce site n'utilise <strong>aucun cookie publicitaire</strong>. Les seuls cookies déposés sont&nbsp;:</p>
+<p>Un cookie est un petit fichier déposé sur votre appareil lors de la consultation d'un site, permettant notamment de mémoriser des préférences de navigation ou de mesurer l'audience.</p>
+<h2>Cookies et traceurs utilisés sur ce site</h2>
+<p>Ce site n'utilise <strong>aucun cookie publicitaire</strong>.</p>
+<h3>Strictement nécessaires (sans consentement)</h3>
 <ul>
-<li><strong>NEXT_LOCALE</strong> — mémorise votre préférence de langue (français / anglais). Durée : 12 mois. Ce cookie strictement nécessaire est exempté de consentement.</li>
+<li><strong>NEXT_LOCALE</strong> (nationdatacenter.fr) — mémorise la langue d'affichage. Durée : session.</li>
+<li><strong>didomi_token</strong> et cookies associés (Didomi) — mémorisent vos choix en matière de cookies. Durée : [à vérifier dans la console Didomi].</li>
+<li>Assistant en ligne — la conversation est conservée dans le navigateur (stockage de session) pendant 30 minutes d'inactivité.</li>
 </ul>
-<p>La protection anti-robots des formulaires (contact, question, téléchargement) est hébergée sur nos propres serveurs : elle ne dépose aucun cookie et ne transmet aucune donnée à un tiers.</p>
-<p>[Si des outils de mesure d'audience ou d'autres services tiers sont ajoutés ultérieurement, compléter cette liste dans WordPress.]</p>
-<h2>Gérer les cookies</h2>
-<p>Vous pouvez à tout moment supprimer les cookies ou configurer votre navigateur pour les refuser (rubrique « confidentialité » des réglages du navigateur). Le refus du cookie de langue n'empêche pas la navigation : la langue par défaut (français) sera utilisée.</p>
+<h3>Mesure d'audience (Piano Analytics)</h3>
+<ul>
+<li><strong>_pcid</strong>, <strong>_pctx</strong>, <strong>_pprv</strong> (nationdatacenter.fr) — Durée : 13 mois.</li>
+</ul>
+<p>Sans votre consentement, la mesure fonctionne en mode <strong>exempté</strong> conformément aux recommandations de la CNIL : statistiques strictement anonymes, sans recoupement avec d'autres traitements ni transmission à des tiers. Si vous acceptez Piano dans le gestionnaire de cookies, la mesure devient complète.</p>
+<p>Vous pouvez à tout moment <a href="#opposition-mesure-audience">vous opposer à la mesure d'audience</a> sur ce navigateur.</p>
+<h3>Contenus tiers (avec votre consentement)</h3>
+<ul>
+<li><strong>YouTube</strong> et <strong>Vimeo</strong> — les vidéos de la page Documentation ne sont chargées qu'après votre accord (dans le gestionnaire de cookies ou au moment de lancer la vidéo). Ces plateformes peuvent alors déposer leurs propres cookies.</li>
+</ul>
+<p>La protection anti-robots des formulaires est hébergée sur nos propres serveurs : elle ne dépose aucun cookie et ne transmet aucune donnée à un tiers.</p>
+<h2>Gérer vos choix</h2>
+<p>Vous pouvez modifier vos choix à tout moment : <a href="#gerer-mes-cookies">gérer mes cookies</a> (également accessible en bas de chaque page). Vous pouvez aussi supprimer les cookies depuis les réglages de votre navigateur.</p>
 <h2>Contact</h2>
 <p>Pour toute question : voir la <a href="/politique-de-protection-des-donnees-personnelles">politique de protection des données personnelles</a>.</p>
+`,
+  },
+};
+
+// Versions anglaises (affichées sur /en/… tant que la traduction n'existe pas
+// dans WordPress ; servent aussi à pré-remplir les pages EN créées par le snippet).
+export const samplePagesEn: Record<string, CustomPage> = {
+  'mentions-legales': {
+    title: 'Legal notice',
+    image: null,
+    content: `
+<h2>Publisher</h2>
+<p>The website nationdatacenter.fr is published by <strong>Nation Data Center</strong>, a subsidiary of the Altarea group.<br/>
+[Legal form, share capital, trade register (RCS), SIREN, VAT number and registered office address: to be completed.]</p>
+<h2>Publication director</h2>
+<p>[Name and position of the publication director: to be completed.]</p>
+<h2>Hosting</h2>
+<p>The website is hosted on Nation Data Center's infrastructure, in France. [Host's company name, address and phone number: to be completed.]</p>
+<h2>Intellectual property</h2>
+<p>All content on this website (texts, images, logos, videos, structure) is protected by intellectual property law. Any reproduction or representation, in whole or in part, without prior written authorisation is prohibited.</p>
+<h2>Liability</h2>
+<p>Nation Data Center strives to ensure the accuracy of the information published on this website but cannot guarantee that it is free of errors or omissions. Information is provided for guidance only and may change.</p>
+<h2>Personal data and cookies</h2>
+<p>See the <a href="/en/politique-de-protection-des-donnees-personnelles">privacy policy</a> and the <a href="/en/politique-de-cookies">cookie policy</a>.</p>
+<h2>Contact</h2>
+<p>For any question about the website, please use the <a href="/en/contact">contact page</a>.</p>
+`,
+  },
+  'politique-de-protection-des-donnees-personnelles': {
+    title: 'Privacy policy',
+    image: null,
+    content: `
+<h2>Data controller</h2>
+<p><strong>Nation Data Center</strong>, a subsidiary of the Altarea group, is the controller of the personal data processed on this website. [Full address and contact details: to be completed.]</p>
+<h2>Data collected</h2>
+<p>The website's forms (contact, question, brochure or document download) and the online assistant only collect the data you provide: e-mail address and, where applicable, first name, last name, phone number, company and message. The page from which the request was sent is also recorded.</p>
+<h2>Purposes and legal bases</h2>
+<ul>
+<li>Answering your contact and information requests (pre-contractual measures / legitimate interest);</li>
+<li>Sending you the documents you requested (consent);</li>
+<li>Following up on requests commercially (legitimate interest);</li>
+<li>Measuring website audience (consent exemption for strictly anonymous measurement, consent for full measurement — see the <a href="/en/politique-de-cookies">cookie policy</a>).</li>
+</ul>
+<h2>Retention periods</h2>
+<p>[Retention periods per purpose: to be completed — usually 3 years after the last contact for prospects.]</p>
+<h2>Recipients and processors</h2>
+<p>Data is intended for Nation Data Center's sales and marketing teams. It is hosted in France on Nation Data Center's infrastructure. Processors: Piano (audience measurement, France), Didomi (consent management, France). [Other processors, if any (CRM, e-mailing…): to be completed.]</p>
+<p>The forms' anti-bot protection is hosted on our own servers and does not send any data to third parties.</p>
+<h2>Your rights</h2>
+<p>Under the GDPR and the French Data Protection Act, you have the rights of access, rectification, erasure, objection, restriction and portability. To exercise them: [e-mail address of the data protection officer / contact: to be completed]. You may also lodge a complaint with the CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a>).</p>
+`,
+  },
+  'politique-de-cookies': {
+    title: 'Cookie policy',
+    image: null,
+    content: `
+<h2>What is a cookie?</h2>
+<p>A cookie is a small file stored on your device when you visit a website, used for example to remember browsing preferences or to measure audience.</p>
+<h2>Cookies and trackers used on this website</h2>
+<p>This website uses <strong>no advertising cookies</strong>.</p>
+<h3>Strictly necessary (no consent required)</h3>
+<ul>
+<li><strong>NEXT_LOCALE</strong> (nationdatacenter.fr) — remembers the display language. Duration: session.</li>
+<li><strong>didomi_token</strong> and related cookies (Didomi) — remember your cookie choices. Duration: [to be checked in the Didomi console].</li>
+<li>Online assistant — the conversation is kept in the browser (session storage) for 30 minutes of inactivity.</li>
+</ul>
+<h3>Audience measurement (Piano Analytics)</h3>
+<ul>
+<li><strong>_pcid</strong>, <strong>_pctx</strong>, <strong>_pprv</strong> (nationdatacenter.fr) — Duration: 13 months.</li>
+</ul>
+<p>Without your consent, measurement runs in <strong>exempt</strong> mode, in line with the CNIL's recommendations: strictly anonymous statistics, with no cross-referencing with other processing and no transfer to third parties. If you accept Piano in the cookie manager, full measurement is enabled.</p>
+<p>You can <a href="#opposition-mesure-audience">opt out of audience measurement</a> on this browser at any time.</p>
+<h3>Third-party content (with your consent)</h3>
+<ul>
+<li><strong>YouTube</strong> and <strong>Vimeo</strong> — videos on the Documentation page are only loaded once you agree (in the cookie manager or when starting the video). These platforms may then set their own cookies.</li>
+</ul>
+<p>The forms' anti-bot protection is hosted on our own servers: it sets no cookies and sends no data to third parties.</p>
+<h2>Managing your choices</h2>
+<p>You can change your choices at any time: <a href="#gerer-mes-cookies">manage my cookies</a> (also available at the bottom of every page). You can also delete cookies in your browser settings.</p>
+<h2>Contact</h2>
+<p>For any question, see the <a href="/en/politique-de-protection-des-donnees-personnelles">privacy policy</a>.</p>
 `,
   },
 };

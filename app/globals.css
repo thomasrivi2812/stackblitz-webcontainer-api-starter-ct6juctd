@@ -3180,6 +3180,8 @@ select:focus-visible,
   color: var(--ink);
 }
 .page-richtext > *:first-child { margin-top: 0; }
+.actu-hero .page-updated { margin-top: 10px; font-size: 14px; color: var(--muted); }
+.page-richtext h3 { margin-top: 1.4em; }
 
 .page-richtext h2 {
   font-size: 26px;

@@ -5,6 +5,7 @@ import { alternatesFor } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
 import { imgProps } from '@/lib/image';
+import { LegalActions } from '@/components/LegalActions';
 
 
 // Page « simple » : on lit une Page native de WordPress (Titre + contenu + image
@@ -42,6 +43,12 @@ export default async function CustomPage(props: { params: Promise<{ locale: WpLo
       <section className="actu-hero">
         <div className="container">
           <h1 className="fil-rouge">{page.title}</h1>
+          {page.modified && (
+            <p className="page-updated">
+              {params.locale === 'en' ? 'Last updated: ' : 'Dernière mise à jour : '}
+              {new Intl.DateTimeFormat(params.locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(page.modified))}
+            </p>
+          )}
         </div>
       </section>
 
@@ -63,6 +70,7 @@ export default async function CustomPage(props: { params: Promise<{ locale: WpLo
           )}
         </div>
       </section>
+      <LegalActions locale={params.locale} />
     </main>
   );
 }

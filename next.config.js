@@ -73,6 +73,11 @@ const nextConfig = {
   images: {
     // Plafond du cache disque de l'optimiseur (défaut : 50 % du disque libre).
     maximumDiskCacheSize: 500 * 1024 * 1024,
+    // WordPress sur la MÊME machine (ou réseau privé) : son domaine résout en
+    // IP locale/privée, que Next refuse par défaut (anti-SSRF) → images WP
+    // absentes. NDC_IMAGES_ALLOW_LOCAL_IP=1 lève ce blocage ; sans risque ici,
+    // l'optimiseur n'acceptant que les hôtes de remotePatterns ci-dessous.
+    dangerouslyAllowLocalIP: process.env.NDC_IMAGES_ALLOW_LOCAL_IP === '1',
     remotePatterns: [
       { protocol: 'https', hostname: WP_HOST },
       // Vignettes YouTube (page Documentation), servies via le site.

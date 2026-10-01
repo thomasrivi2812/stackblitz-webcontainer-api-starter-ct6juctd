@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { sendLead } from '@/lib/send-lead';
 
 type FormData = {
@@ -47,6 +47,7 @@ export function ContactForm({
   objets?: string[];
 }) {
   const t = useTranslations('contactForm');
+  const locale = useLocale();
   // Avec une liste WordPress, le libellé affiché est aussi la valeur envoyée :
   // c'est ce que l'équipe a écrit, dans la langue de la page.
   const options: { value: string; label: string }[] = objets.length
@@ -240,7 +241,7 @@ export function ContactForm({
         />
         <span>
           {t('consent1')}{' '}
-          <a href="/politique-de-protection-des-donnees-personnelles">{t('consentLink')}</a>.
+          <a href={locale === 'en' ? '/en/politique-de-protection-des-donnees-personnelles' : '/politique-de-protection-des-donnees-personnelles'}>{t('consentLink')}</a>.
           <span className="contact-req"> *</span>
         </span>
       </label>

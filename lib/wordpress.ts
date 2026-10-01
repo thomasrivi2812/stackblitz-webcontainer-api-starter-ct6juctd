@@ -185,6 +185,8 @@ export type CustomPage = {
   title: string;
   content: string;
   image: { sourceUrl: string; altText: string } | null;
+  /** Date de dernière modification dans WordPress (absente pour les textes par défaut). */
+  modified?: string | null;
 };
 
 // --- Requêtes Datacenters --------------------------------------------------
@@ -337,7 +339,31 @@ const PAGE_BY_SLUG_QUERY = gql`
       nodes {
         title
         content
+        modified
         featuredImage { node { sourceUrl altText } }
+      }
+    }
+  }
+`;
+
+// Page FR + ses traductions Polylang : avec Polylang, la traduction anglaise
+// a son propre slug (« mentions-legales-2 », « legal-notice »…), introuvable
+// par le slug FR de l'URL. On passe donc par la page FR pour la retrouver.
+const PAGE_TRANSLATIONS_QUERY = gql`
+  query CustomPageTranslations($slug: String!) {
+    pages(first: 1, where: { name: $slug, language: FR }) {
+      nodes {
+        title
+        content
+        modified
+        featuredImage { node { sourceUrl altText } }
+        translations {
+          title
+          content
+          modified
+          featuredImage { node { sourceUrl altText } }
+          language { code }
+        }
       }
     }
   }
@@ -620,27 +646,52 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
   // Repli local pour certaines pages (légales…) tant qu'elles n'existent pas
   // dans WP — dès que la page WP est créée avec le même slug, elle gagne.
   const fallback = async (): Promise<CustomPage | null> => {
-    const { samplePages } = await import('./sample-data');
-    return samplePages[slug] ?? null;
+    const { samplePages, samplePagesEn } = await import('./sample-data');
+    return (locale === 'en' ? samplePagesEn[slug] : undefined) ?? samplePages[slug] ?? null;
   };
   if (!endpoint) {
     assertSampleAllowed();
     return fallback();
   }
+  type PageNode = {
+    title: string;
+    content: string | null;
+    modified?: string | null;
+    featuredImage: { node: { sourceUrl: string; altText: string } } | null;
+  };
+  const toPage = (node: PageNode): CustomPage => ({
+    title: decodeEntities(node.title),
+    content: node.content ?? '',
+    modified: node.modified ?? null,
+    image: node.featuredImage?.node
+      ? { sourceUrl: node.featuredImage.node.sourceUrl, altText: node.featuredImage.node.altText ?? '' }
+      : null,
+  });
   try {
     const client = new GraphQLClient(endpoint);
-    const data = await wpSingle<{
-      pages: { nodes: { title: string; content: string | null; featuredImage: { node: { sourceUrl: string; altText: string } } | null }[] };
-    }>(client, PAGE_BY_SLUG_QUERY, { slug }, locale, (d) => d.pages.nodes[0]);
-    const node = data.pages.nodes[0];
-    if (!node) return fallback();
-    return {
-      title: decodeEntities(node.title),
-      content: node.content ?? '',
-      image: node.featuredImage?.node
-        ? { sourceUrl: node.featuredImage.node.sourceUrl, altText: node.featuredImage.node.altText ?? '' }
-        : null,
-    };
+    // 1) Page dans la langue demandée (slug identique d'une langue à l'autre).
+    const data = await client.request<{ pages: { nodes: PageNode[] } }>(PAGE_BY_SLUG_QUERY, {
+      slug,
+      language: wpLang(locale),
+    });
+    if (data.pages.nodes[0]) return toPage(data.pages.nodes[0]);
+    if (locale === 'fr') return fallback();
+
+    // 2) Anglais : traduction Polylang de la page FR, sinon la page FR elle-même.
+    let fr: (PageNode & { translations?: (PageNode & { language: { code: string | null } | null })[] | null }) | undefined;
+    try {
+      const tr = await client.request<{ pages: { nodes: NonNullable<typeof fr>[] } }>(PAGE_TRANSLATIONS_QUERY, { slug });
+      fr = tr.pages.nodes[0];
+    } catch (error) {
+      // Schéma sans traductions Polylang : on retombe sur la page FR seule.
+      logWpError(`page ${slug} (traductions Polylang)`, error, { soft: true });
+      const d = await client.request<{ pages: { nodes: PageNode[] } }>(PAGE_BY_SLUG_QUERY, { slug, language: 'FR' });
+      fr = d.pages.nodes[0];
+    }
+    const en = fr?.translations?.find((t) => (t?.language?.code ?? '').toUpperCase() === 'EN');
+    if (en) return toPage(en);
+    if (fr) return toPage(fr);
+    return fallback();
   } catch (error) {
     logWpError('page', error);
     return fallback();

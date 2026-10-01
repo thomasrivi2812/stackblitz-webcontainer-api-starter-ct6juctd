@@ -32,13 +32,25 @@ export const analyticsEnabled = COLLECT_DOMAIN !== 'off';
 
 let sdk: Promise<PianoSdk | null> | null = null;
 
+// Opposition à la mesure d'audience (condition de l'exemption CNIL) :
+// mémorisée dans ce navigateur, prioritaire sur le mode exempté. Seul un
+// consentement explicite à Piano dans Didomi la lève.
+const OPTOUT_KEY = 'ndc-pa-optout';
+function optedOut(): boolean {
+  try {
+    return localStorage.getItem(OPTOUT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 function loadSdk(): Promise<PianoSdk | null> {
   if (!analyticsEnabled || typeof window === 'undefined') return Promise.resolve(null);
   if (!sdk) {
     // Doit être posé AVANT le chargement du SDK, qui le lit à l'initialisation.
     window.pdl = {
       requireConsent: 'v2',
-      consent: { products: ['PA'], defaultPreset: { PA: 'essential' } },
+      consent: { products: ['PA'], defaultPreset: { PA: optedOut() ? 'opt-out' : 'essential' } },
       migration: { browserId: { source: 'PA' } },
       cookies: { storageMode: 'fixed' },
     };
@@ -57,12 +69,34 @@ export function track(
   name: 'page.display' | 'click.action' | 'click.download' | 'click.navigation' | 'click.exit',
   data: PianoEventData,
 ): void {
+  if (optedOut()) return; // opposition : aucun envoi, même anonyme
   loadSdk().then((pa) => pa?.sendEvent(name, data));
 }
 
-/** Bascule mesure complète (consentement donné) / exemptée (refus ou pas de choix). */
+/**
+ * Bascule mesure complète (consentement donné) / exemptée (refus ou pas de
+ * choix) — ou aucune mesure si le visiteur s'y est opposé.
+ */
 export function setAnalyticsConsent(granted: boolean): void {
-  loadSdk().then((pa) => pa?.consent.setMode(granted ? 'opt-in' : 'essential'));
+  if (granted) {
+    try {
+      localStorage.removeItem(OPTOUT_KEY);
+    } catch {
+      /* stockage indisponible : sans conséquence */
+    }
+  }
+  const mode = granted ? 'opt-in' : optedOut() ? 'opt-out' : 'essential';
+  loadSdk().then((pa) => pa?.consent.setMode(mode));
+}
+
+/** Opposition à la mesure d'audience sur ce navigateur (lien des pages légales). */
+export function optOutAnalytics(): void {
+  try {
+    localStorage.setItem(OPTOUT_KEY, '1');
+  } catch {
+    /* stockage indisponible : l'opposition vaut pour la session */
+  }
+  loadSdk().then((pa) => pa?.consent.setMode('opt-out'));
 }
 
 /**

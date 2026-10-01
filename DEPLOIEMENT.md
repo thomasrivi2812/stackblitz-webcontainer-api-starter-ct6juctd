@@ -43,6 +43,7 @@ npx next start -p 3000 -H localhost   # derrière nginx (§ 5)
 | `TRUSTED_PROXY_HOPS` | non | Nombre de proxys devant Next (défaut 1 = un nginx) |
 | `NODE_EXTRA_CA_CERTS` | cas InstaWP | `./certs/instawp-ca.pem` si WordPress est hébergé chez InstaWP |
 | `WP_LIVE` | non | `1` = aucun cache (édition en direct) ; `0` en temps normal |
+| `NDC_IMAGES_ALLOW_LOCAL_IP` | cas WP local | `1` si le domaine WordPress résout en IP locale/privée sur la machine (voir `MIGRATION-WORDPRESS.md`) |
 
 Déjà intégrés dans le code, **rien à renseigner** : Piano Analytics
 (site 642163, collecte `tjtxkkw.pa-cd.com`), Didomi (clé + notice), ALTCHA.
@@ -156,6 +157,9 @@ Supervision conseillée : sonde sur `/api/health` (toutes les minutes) et
 `/api/health?deep=1` (alerte si WordPress ne répond plus).
 
 ## 8. Côté WordPress
+
+- Migration InstaWP → machine : voir `MIGRATION-WORDPRESS.md`.
+- Pages légales : bloc `wordpress/ndc-snippet-ajout-pages-legales.php` à coller à la fin du snippet NDC.
 
 - Hook de revalidation : `POST /api/revalidate` avec `{"secret": …, "path": "/"}`
   (tout le site) ou un chemin précis (`/actualites`) — les versions FR et EN
