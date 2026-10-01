@@ -8,10 +8,14 @@ import { analyticsEnabled, setAnalyticsConsent, trackPage } from '@/lib/analytic
 // depuis le cache, le comptage ne peut se faire que dans le navigateur), et
 // passage en mesure complète si le visiteur y consent dans Didomi.
 //
-// NEXT_PUBLIC_DIDOMI_PIANO_VENDOR_ID : identifiant du fournisseur « Piano
-// Analytics » dans la console Didomi. Sans lui, la mesure reste en mode
-// exempté (conforme sans consentement), quel que soit le choix du visiteur.
-const DIDOMI_VENDOR = process.env.NEXT_PUBLIC_DIDOMI_PIANO_VENDOR_ID;
+// Fournisseurs Didomi qui couvrent Piano (« SDK ID » de la console Didomi) :
+// « Piano Analytics » et son ancien nom « AT Internet ». Le consentement à
+// l'un des deux suffit. Surchargeable par NEXT_PUBLIC_DIDOMI_PIANO_VENDOR_ID
+// (liste séparée par des virgules).
+const DIDOMI_VENDORS = (process.env.NEXT_PUBLIC_DIDOMI_PIANO_VENDOR_ID || 'c:pianohybr-R3VKC2r4,c:atinterne-biiwHkMQ')
+  .split(',')
+  .map((v) => v.trim())
+  .filter(Boolean);
 
 type DidomiApi = {
   getCurrentUserStatus?: () => { vendors?: Record<string, { enabled?: boolean }> };
@@ -40,8 +44,11 @@ export function PianoAnalytics() {
 
   // Consentement Didomi → mode Piano (au chargement, puis à chaque changement).
   useEffect(() => {
-    if (!analyticsEnabled || !DIDOMI_VENDOR) return;
-    const sync = () => setAnalyticsConsent(vendorConsent(window.Didomi as DidomiApi | undefined, DIDOMI_VENDOR));
+    if (!analyticsEnabled || !DIDOMI_VENDORS.length) return;
+    const sync = () => {
+      const d = window.Didomi as DidomiApi | undefined;
+      setAnalyticsConsent(DIDOMI_VENDORS.some((id) => vendorConsent(d, id)));
+    };
     window.didomiOnReady = window.didomiOnReady || [];
     window.didomiOnReady.push(sync);
     window.didomiEventListeners = window.didomiEventListeners || [];
