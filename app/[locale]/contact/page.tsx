@@ -82,7 +82,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   // chaque champ vide retombe sur le texte par défaut du site.
   const [c, objets] = await Promise.all([getContact(locale), getContactObjets(locale)]);
 
-  const email = c?.email || 'contact@nationdatacenter.com';
+  const email = c?.email || 'contact@nationdatacenter.fr';
   const telephone = c?.telephone || '+33 1 00 00 00 00';
   // Adresse multi-ligne : chaque ligne du champ WP devient une ligne affichée.
   const adresse = (c?.adresse || '87 rue de Richelieu\n75002 Paris, France').split('\n');
