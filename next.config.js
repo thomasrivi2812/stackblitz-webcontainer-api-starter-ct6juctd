@@ -36,16 +36,16 @@ const securityHeaders = [
       "default-src 'self'",
       // 'unsafe-inline' requis par le runtime Next.js (App Router) et les
       // <style>/styles inline des composants ; 'unsafe-eval' seulement en dev.
-      // google.com/gstatic.com = reCAPTCHA v3 (chargé à l'envoi des formulaires).
       // sdk.privacy-center.org / api.privacy-center.org = CMP Didomi (cookies).
-      `script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://sdk.privacy-center.org${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
+      // (Captcha ALTCHA auto-hébergé : rien à autoriser, tout passe par 'self'.)
+      `script-src 'self' 'unsafe-inline' https://sdk.privacy-center.org${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
       // i.ytimg.com = vignettes YouTube déduites (vidéos de la page Documentation).
-      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://www.gstatic.com https://sdk.privacy-center.org https://i.ytimg.com`,
+      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://sdk.privacy-center.org https://i.ytimg.com`,
       "font-src 'self' data:",
-      `connect-src 'self' https://${WP_HOST} https://www.google.com https://sdk.privacy-center.org https://api.privacy-center.org`,
-      // Intégrations vidéo (YouTube/Vimeo) + iframe reCAPTCHA ; le reste est bloqué.
-      "frame-src 'self' https://www.google.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+      `connect-src 'self' https://${WP_HOST} https://sdk.privacy-center.org https://api.privacy-center.org`,
+      // Intégrations vidéo (YouTube/Vimeo) ; le reste est bloqué.
+      "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

@@ -1,84 +1,70 @@
-// Captcha Google reCAPTCHA v3 — côté client.
-// --------------------------------------------
-// v3 = invisible : pas de case à cocher ni d'image à sélectionner, Google
-// attribue un score au visiteur et le serveur rejette les envois suspects.
+// Captcha ALTCHA — côté client.
+// ------------------------------
+// Invisible : pas de case à cocher ni d'image. Le navigateur récupère un défi
+// sur /api/altcha et le résout par calcul (~1 s), puis la solution est jointe
+// au formulaire. Auto-hébergé : aucun script ni cookie tiers.
 //
-// Fonctionnement : le script Google n'est chargé QU'AU MOMENT de l'envoi
-// d'un formulaire (aucun impact sur le chargement des pages, et pas de
-// cookie Google déposé tant qu'on n'envoie rien). Le badge reCAPTCHA
-// apparaît en bas à droite une fois le script chargé (exigence Google).
-//
-// Activation : poser NEXT_PUBLIC_RECAPTCHA_SITE_KEY (et RECAPTCHA_SECRET_KEY
-// côté serveur). Sans clé, ce module ne fait rien : les formulaires
-// fonctionnent comme avant (honeypot + rate-limit + origine restent actifs).
-//
-// Note cookies : reCAPTCHA dépose le cookie _GRECAPTCHA (google.com) —
-// mentionné dans la politique de cookies du site.
+// Pour que le visiteur n'attende pas, la résolution démarre dès qu'il entre
+// dans un champ de saisie ; à l'envoi, la solution est en général déjà prête.
 
-declare global {
-  interface Window {
-    grecaptcha?: {
-      ready: (cb: () => void) => void;
-      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
-    };
-  }
-}
+import { solveChallenge, type Challenge, type Solution } from 'altcha-lib';
+import { deriveKey } from 'altcha-lib/algorithms/web/pbkdf2';
 
-const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-const TIMEOUT_MS = 12_000;
+const TIMEOUT_MS = 20_000;
+/** Une solution préparée est jetée au-delà (le défi expire à 10 min côté serveur). */
+const MAX_AGE_MS = 8 * 60_000;
 
-let scriptPromise: Promise<void> | null = null;
+let pending: { promise: Promise<string | null>; at: number } | null = null;
 
-function loadScript(): Promise<void> {
-  if (window.grecaptcha) return Promise.resolve();
-  if (!scriptPromise) {
-    scriptPromise = new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(SITE_KEY ?? '')}`;
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => {
-        scriptPromise = null; // permet une nouvelle tentative au prochain envoi
-        reject(new Error('recaptcha script'));
-      };
-      document.head.appendChild(s);
-    });
-  }
-  return scriptPromise;
-}
-
-/**
- * Obtient un jeton reCAPTCHA v3 (action « lead »), ou null si le captcha
- * n'est pas configuré / indisponible. Le serveur décide quoi faire d'un
- * jeton absent.
- */
-export async function getCaptchaToken(): Promise<string | null> {
-  if (!SITE_KEY || typeof window === 'undefined') return null;
+async function fetchAndSolve(): Promise<string | null> {
   try {
-    await loadScript();
+    const res = await fetch('/api/altcha', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const challenge = (await res.json()) as Challenge;
+    const solution: Solution | null = await solveChallenge({ challenge, deriveKey, timeout: TIMEOUT_MS });
+    if (!solution) return null;
+    return btoa(JSON.stringify({ challenge, solution }));
   } catch {
     return null;
   }
-  const g = window.grecaptcha;
-  if (!g) return null;
+}
 
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = (token: string | null) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolve(token);
-    };
-    const timer = setTimeout(() => finish(null), TIMEOUT_MS);
-    try {
-      g.ready(() => {
-        g.execute(SITE_KEY, { action: 'lead' })
-          .then((token) => finish(token))
-          .catch(() => finish(null));
-      });
-    } catch {
-      finish(null);
-    }
+/** Lance la résolution en avance (sans effet si une solution récente est en cours/prête). */
+export function prepareCaptcha(): void {
+  if (typeof window === 'undefined') return;
+  if (pending && Date.now() - pending.at < MAX_AGE_MS) return;
+  const promise = fetchAndSolve();
+  pending = { promise, at: Date.now() };
+  // Échec : on oublie, pour retenter au prochain appel.
+  promise.then((t) => {
+    if (!t && pending?.promise === promise) pending = null;
   });
+}
+
+/**
+ * Renvoie la solution du captcha (à joindre au formulaire), ou null si
+ * indisponible : le serveur refusera alors l'envoi et le visiteur pourra
+ * réessayer. Chaque solution ne sert qu'une fois.
+ */
+export async function getCaptchaToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+  prepareCaptcha();
+  const current = pending;
+  pending = null; // usage unique
+  return current ? current.promise : null;
+}
+
+// Démarrage anticipé : premier focus dans un champ de saisie (formulaire,
+// modale « question », téléchargement…), hors champs de recherche.
+if (typeof window !== 'undefined') {
+  document.addEventListener(
+    'focusin',
+    (e) => {
+      const el = e.target as HTMLElement | null;
+      if (el?.matches('input:not([type=search]):not([type=hidden]), textarea') && !el.closest('[role=search]')) {
+        prepareCaptcha();
+      }
+    },
+    { passive: true },
+  );
 }

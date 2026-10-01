@@ -1,7 +1,7 @@
 // Helper client partagé par tous les formulaires/modales du site.
 // Envoie la capture vers /api/lead (qui relaie ensuite vers WordPress).
-// Le jeton captcha (Turnstile) est obtenu ici, en un seul point, pour tous
-// les formulaires — null si le captcha n'est pas configuré.
+// La solution du captcha ALTCHA est obtenue ici, en un seul point, pour tous
+// les formulaires (null si indisponible : le serveur refusera l'envoi).
 import { getCaptchaToken } from './captcha-client';
 
 export type LeadType = 'contact' | 'question' | 'brochure' | 'download';

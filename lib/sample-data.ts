@@ -589,8 +589,8 @@ export const samplePages: Record<string, CustomPage> = {
 <p>Ce site n'utilise <strong>aucun cookie publicitaire</strong>. Les seuls cookies déposés sont&nbsp;:</p>
 <ul>
 <li><strong>NEXT_LOCALE</strong> — mémorise votre préférence de langue (français / anglais). Durée : 12 mois. Ce cookie strictement nécessaire est exempté de consentement.</li>
-<li><strong>_GRECAPTCHA</strong> (google.com) — déposé par le dispositif anti-robots Google reCAPTCHA, chargé uniquement lors de l'envoi d'un formulaire (contact, question, téléchargement) pour protéger le site contre le spam. Durée : 6 mois.</li>
 </ul>
+<p>La protection anti-robots des formulaires (contact, question, téléchargement) est hébergée sur nos propres serveurs : elle ne dépose aucun cookie et ne transmet aucune donnée à un tiers.</p>
 <p>[Si des outils de mesure d'audience ou d'autres services tiers sont ajoutés ultérieurement, compléter cette liste dans WordPress.]</p>
 <h2>Gérer les cookies</h2>
 <p>Vous pouvez à tout moment supprimer les cookies ou configurer votre navigateur pour les refuser (rubrique « confidentialité » des réglages du navigateur). Le refus du cookie de langue n'empêche pas la navigation : la langue par défaut (français) sera utilisée.</p>
