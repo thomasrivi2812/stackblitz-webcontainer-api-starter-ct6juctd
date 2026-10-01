@@ -51,9 +51,25 @@ function rateLimited(ip: string): boolean {
   return arr.length > RL_MAX;
 }
 
+/**
+ * IP du visiteur, lue dans X-Forwarded-For en partant de la DROITE : la
+ * première entrée (gauche) est fournie par le client et donc falsifiable
+ * (un bot pouvait changer d'« IP » à chaque envoi et contourner la limite).
+ * Chaque proxy de confiance ajoute l'IP qu'il voit à la fin de la liste :
+ * avec TRUSTED_PROXY_HOPS proxys devant Next (défaut 1, ex. un nginx avec
+ * `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`), l'IP réelle
+ * est la N-ième en partant de la fin.
+ */
+const TRUSTED_PROXY_HOPS = Math.max(1, Number(process.env.TRUSTED_PROXY_HOPS) || 1);
+
 function clientIp(request: Request): string {
   const xff = request.headers.get('x-forwarded-for');
-  if (xff) return xff.split(',')[0].trim();
+  if (xff) {
+    const parts = xff.split(',').map((p) => p.trim()).filter(Boolean);
+    const ip = parts[Math.max(0, parts.length - TRUSTED_PROXY_HOPS)];
+    if (ip) return ip;
+  }
+  // Repli : en-tête posé (et écrasé) par le proxy, ex. `proxy_set_header X-Real-IP $remote_addr;`.
   return request.headers.get('x-real-ip') || 'unknown';
 }
 

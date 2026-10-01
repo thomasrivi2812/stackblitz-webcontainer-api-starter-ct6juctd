@@ -5,9 +5,35 @@ import { PERSONAS, type Persona } from './personas';
 
 const endpoint = process.env.WORDPRESS_GRAPHQL_ENDPOINT;
 
-/** Log toujours l'erreur WordPress (y compris en production) pour le diagnostic via les logs Vercel. */
-function logWpError(label: string, error: unknown) {
-  console.error(`[NDC] API injoignable — données d'exemple (${label}) :`, error instanceof Error ? error.message : error);
+// En production, un WordPress injoignable ou en erreur ne doit JAMAIS faire
+// publier les données d'exemple (faux data centers, faux articles…) : on lève
+// l'erreur. Au build, la compilation échoue avec un message clair ; en ISR,
+// Next conserve la dernière version valide de la page et réessaiera plus tard.
+// Le repli reste actif en dev (et via WP_SAMPLE_FALLBACK=1, ex. démo/StackBlitz).
+// N.B. : les replis « WP répond mais sans contenu » (pages légales pas encore
+// créées, etc.) ne sont pas concernés, seulement les PANNES.
+const STRICT_WP = process.env.NODE_ENV === 'production' && process.env.WP_SAMPLE_FALLBACK !== '1';
+
+/** Endpoint absent : repli sur les exemples en dev, erreur explicite en production. */
+function assertSampleAllowed(): void {
+  if (STRICT_WP) {
+    throw new Error('[NDC] WORDPRESS_GRAPHQL_ENDPOINT manquant en production (WP_SAMPLE_FALLBACK=1 pour forcer les données d\'exemple).');
+  }
+}
+
+/**
+ * Journalise toujours l'erreur WordPress. En production (STRICT_WP), relance
+ * l'erreur au lieu de laisser l'appelant servir ses données d'exemple.
+ * `soft` : repli sur un contenu réel du site (personas, textes par défaut de
+ * l'accueil, logo par défaut) → acceptable en prod, on ne relance pas.
+ */
+function logWpError(label: string, error: unknown, { soft = false }: { soft?: boolean } = {}) {
+  const msg = error instanceof Error ? error.message : error;
+  if (STRICT_WP && !soft) {
+    console.error(`[NDC] WordPress en erreur (${label}) — page non régénérée :`, msg);
+    throw error;
+  }
+  console.error(`[NDC] API injoignable — données de repli (${label}) :`, msg);
 }
 
 // ===========================================================================
@@ -319,7 +345,10 @@ const PAGE_BY_SLUG_QUERY = gql`
 
 // --- Accès aux données : Datacenters ---------------------------------------
 async function _getDatacenters(locale: WpLocale = 'fr'): Promise<Datacenter[]> {
-  if (!endpoint) return sampleDatacenters;
+  if (!endpoint) {
+    assertSampleAllowed();
+    return sampleDatacenters;
+  }
   try {
     const client = new GraphQLClient(endpoint);
     const data = await wpList<{ datacenters: { nodes: (Datacenter & { language?: { code: string | null } | null })[] } }>(
@@ -339,6 +368,7 @@ async function _getDatacenters(locale: WpLocale = 'fr'): Promise<Datacenter[]> {
 
 async function _getDatacenter(slug: string, locale: WpLocale = 'fr'): Promise<Datacenter | null> {
   if (!endpoint) {
+    assertSampleAllowed();
     return sampleDatacenters.find((d) => d.slug === slug) ?? null;
   }
   try {
@@ -396,7 +426,10 @@ async function sampleRecentPosts(): Promise<Post[]> {
 }
 
 export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
-  if (!endpoint) return sampleRecentPosts();
+  if (!endpoint) {
+    assertSampleAllowed();
+    return sampleRecentPosts();
+  }
   type Node = Post & {
     content?: string | null;
     categories?: { nodes: ({ name: string | null } | null)[] | null } | null;
@@ -440,6 +473,7 @@ export async function getRecentPosts(locale: WpLocale = 'fr'): Promise<Post[]> {
 // --- Accès aux données : Articles (page Actualités) ------------------------
 async function _getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts;
   }
@@ -475,6 +509,7 @@ async function _getAllPosts(locale: WpLocale = 'fr'): Promise<WPPost[]> {
 
 async function _getPostBySlug(slug: string, locale: WpLocale = 'fr'): Promise<WPPost | null> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleAllPosts } = await import('./sample-data');
     return sampleAllPosts.find((p) => p.slug === slug) ?? null;
   }
@@ -538,6 +573,7 @@ async function _getPostBySlug(slug: string, locale: WpLocale = 'fr'): Promise<WP
 
 export async function getCategories(locale: WpLocale = 'fr'): Promise<WPCategory[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleCategories } = await import('./sample-data');
     return sampleCategories;
   }
@@ -562,6 +598,7 @@ export async function getCategories(locale: WpLocale = 'fr'): Promise<WPCategory
 // --- Accès aux données : FAQ ← NOUVEAU -------------------------------------
 async function _getFaqs(locale: WpLocale = 'fr'): Promise<Faq[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleFaqs } = await import('./sample-data');
     return sampleFaqs;
   }
@@ -586,7 +623,10 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
     const { samplePages } = await import('./sample-data');
     return samplePages[slug] ?? null;
   };
-  if (!endpoint) return fallback();
+  if (!endpoint) {
+    assertSampleAllowed();
+    return fallback();
+  }
   try {
     const client = new GraphQLClient(endpoint);
     const data = await wpSingle<{
@@ -926,7 +966,10 @@ function mapWpPersona(node: WpPersonaNode): Persona {
 }
 
 async function _getPersonas(locale: WpLocale = 'fr'): Promise<Persona[]> {
-  if (!endpoint) return PERSONAS;
+  if (!endpoint) {
+    assertSampleAllowed();
+    return PERSONAS;
+  }
   try {
     // POST via GraphQLClient, comme toutes les autres requêtes du fichier.
     // (Le GET « simple » échouait sur certains WPGraphQL qui n'acceptent pas
@@ -940,7 +983,7 @@ async function _getPersonas(locale: WpLocale = 'fr'): Promise<Persona[]> {
     if (nodes.length === 0) return PERSONAS;
     return nodes.map(mapWpPersona);
   } catch (error) {
-    logWpError('personas', error);
+    logWpError('personas', error, { soft: true });
     return PERSONAS;
   }
 }
@@ -990,6 +1033,7 @@ type WpCertificationNode = {
 
 async function _getCertifications(locale: WpLocale = 'fr'): Promise<Certification[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleCertifications } = await import('./sample-data');
     return sampleCertifications;
   }
@@ -1164,6 +1208,7 @@ type WpMembreNode = {
 
 export async function getMembres(locale: WpLocale = 'fr'): Promise<Membre[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleMembres } = await import('./sample-data');
     return sampleMembres;
   }
@@ -1270,6 +1315,7 @@ type WpServiceNode = {
 
 async function _getServices(locale: WpLocale = 'fr'): Promise<Service[]> {
   if (!endpoint) {
+    assertSampleAllowed();
     const { sampleServices } = await import('./sample-data');
     return sampleServices;
   }
@@ -1812,7 +1858,10 @@ function mapHome(f: NonNullable<WpHomeFields>): HomeContent {
  *   3) sinon repli sur le contenu FR, puis sur les textes par défaut du site.
  */
 async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
-  if (!endpoint) return null;
+  if (!endpoint) {
+    assertSampleAllowed();
+    return null;
+  }
   const client = new GraphQLClient(endpoint);
 
   // 1) Lookup classique : page de slug « accueil » dans la langue demandée.
@@ -1842,7 +1891,7 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
       return mapHome(node.homeFields);
     }
   } catch (error) {
-    logWpError('accueil', error);
+    logWpError('accueil', error, { soft: true });
   }
 
   // FR : la page principale ; pas de repli traduction possible.
@@ -1875,7 +1924,7 @@ async function _getHome(locale: WpLocale = 'fr'): Promise<HomeContent | null> {
     // 3) Repli final : contenu FR de la page principale.
     if (node?.homeFields) return mapHome(node.homeFields);
   } catch (error) {
-    logWpError('accueil (traductions Polylang)', error);
+    logWpError('accueil (traductions Polylang)', error, { soft: true });
   }
 
   return null;
@@ -1948,7 +1997,10 @@ const SITE_BRANDING_QUERY_LEGACY = gql`
 
 async function _getSiteBranding(): Promise<SiteBranding> {
   const empty: SiteBranding = { logo: null, logoWhite: null, equipeImage: null, offresImage: null, reseauImage: null };
-  if (!endpoint) return empty;
+  if (!endpoint) {
+    assertSampleAllowed();
+    return empty;
+  }
   type F = {
     siteLogo: { node: { sourceUrl: string | null } | null } | null;
     siteLogoWhite: { node: { sourceUrl: string | null } | null } | null;
@@ -1982,7 +2034,7 @@ async function _getSiteBranding(): Promise<SiteBranding> {
       reseauImage: f?.headerReseauImage?.node?.sourceUrl || null,
     };
   } catch (error) {
-    logWpError('branding (logo du site)', error);
+    logWpError('branding (logo du site)', error, { soft: true });
     return empty;
   }
 }
@@ -2007,7 +2059,10 @@ async function getPageFields<F>(
   selection: string,
   locale: WpLocale,
 ): Promise<F | null> {
-  if (!endpoint) return null;
+  if (!endpoint) {
+    assertSampleAllowed();
+    return null;
+  }
   const client = new GraphQLClient(endpoint);
   type PageNode = Record<string, unknown> & {
     translations?: ({ language: { code: string | null } | null } & Record<string, unknown>)[] | null;
@@ -2323,7 +2378,10 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
     const { sampleLivrets } = await import('./sample-data');
     return sampleLivrets;
   };
-  if (!endpoint) return fallback();
+  if (!endpoint) {
+    assertSampleAllowed();
+    return fallback();
+  }
   type Node = {
     title: string;
     slug: string;

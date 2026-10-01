@@ -93,10 +93,10 @@ export async function generateMetadata({
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
-// Tout autre premier segment (/favicon.ico, /image-absente.jpg, /xx) est un
-// 404 immédiat : sans cela, la route [locale] tentait de rendre la page avec
-// un dictionnaire « favicon.ico.json » inexistant → erreur serveur à chaque visite.
-export const dynamicParams = false;
+// Pas de `dynamicParams = false` : sous Next 16, il fait répondre 404 à TOUT le
+// site après une revalidation à la demande (/api/revalidate → NoFallbackError).
+// Un premier segment inconnu (/favicon.ico, /xx…) reste un 404 grâce au
+// notFound() ci-dessous, et loadMessages retombe sur le FR sans planter.
 
 export default async function LocaleLayout({
   children,
