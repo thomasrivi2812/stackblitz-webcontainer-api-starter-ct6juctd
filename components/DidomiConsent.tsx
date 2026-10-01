@@ -1,16 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
+import { DIDOMI_API_KEY as API_KEY, DIDOMI_NOTICE_ID as NOTICE_ID } from '@/lib/didomi';
 
 // CMP Didomi (bannière cookies + registre des consentements).
-// Ne charge RIEN tant que la clé API publique n'est pas configurée :
-//   NEXT_PUBLIC_DIDOMI_API_KEY   (Didomi Console → paramètres du SDK)
-//   NEXT_PUBLIC_DIDOMI_NOTICE_ID (optionnel : id de la notice si plusieurs)
+// Clé API et notice NDC : voir lib/didomi.ts.
 // La bannière, la modale de préférences et le registre de preuves sont
 // entièrement gérés par Didomi ; le bouton « Gérer mes cookies » du footer
 // rouvre la modale (window.Didomi.preferences.show()).
-const API_KEY = process.env.NEXT_PUBLIC_DIDOMI_API_KEY;
-const NOTICE_ID = process.env.NEXT_PUBLIC_DIDOMI_NOTICE_ID;
 
 declare global {
   interface Window {

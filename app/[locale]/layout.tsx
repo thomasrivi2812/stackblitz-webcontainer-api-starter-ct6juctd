@@ -160,8 +160,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={jost.variable}>
       <body>
-        {/* CMP Didomi (bannière cookies) — inactive tant que la clé API
-            NEXT_PUBLIC_DIDOMI_API_KEY n'est pas configurée. */}
+        {/* CMP Didomi (bannière cookies), configuration dans lib/didomi.ts. */}
         <DidomiConsent locale={locale} />
         <PianoAnalytics />
         {/* Données structurées Organization (rich results / knowledge panel,

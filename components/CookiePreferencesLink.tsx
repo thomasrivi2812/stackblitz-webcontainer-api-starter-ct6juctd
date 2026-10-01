@@ -3,7 +3,7 @@
 // Bouton « Gérer mes cookies » du footer : rouvre la modale de préférences
 // Didomi (obligation CNIL : le retrait du consentement doit rester aussi
 // simple que son octroi). Rendu seulement quand la CMP est configurée.
-const ENABLED = !!process.env.NEXT_PUBLIC_DIDOMI_API_KEY;
+import { DIDOMI_ENABLED as ENABLED } from '@/lib/didomi';
 
 declare global {
   interface Window {
