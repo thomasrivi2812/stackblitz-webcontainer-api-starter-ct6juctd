@@ -51,8 +51,8 @@ const securityHeaders = [
       // (Captcha ALTCHA auto-hébergé : rien à autoriser, tout passe par 'self'.)
       `script-src 'self' 'unsafe-inline' https://sdk.privacy-center.org${process.env.NODE_ENV !== 'production' ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline'",
-      // i.ytimg.com = vignettes YouTube déduites (vidéos de la page Documentation).
-      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://sdk.privacy-center.org https://i.ytimg.com`,
+      // (Vignettes YouTube servies par /_next/image : rien à autoriser.)
+      `img-src 'self' data: blob: https://${WP_HOST} ${TILE_HOSTS} https://sdk.privacy-center.org`,
       "font-src 'self' data:",
       `connect-src 'self' https://${WP_HOST} https://sdk.privacy-center.org https://api.privacy-center.org${PIANO_ORIGIN ? ` ${PIANO_ORIGIN}` : ''}`,
       // Intégrations vidéo (YouTube/Vimeo) ; le reste est bloqué.
@@ -71,7 +71,11 @@ const nextConfig = {
   // Optimiseur d'images restreint au domaine WordPress (plus de wildcard '**' :
   // empêche l'abus de /_next/image comme proxy d'images ouvert).
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: WP_HOST }],
+    remotePatterns: [
+      { protocol: 'https', hostname: WP_HOST },
+      // Vignettes YouTube (page Documentation), servies via le site.
+      { protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**' },
+    ],
   },
   poweredByHeader: false, // masque l'en-tête X-Powered-By: Next.js
   // Embarque certs/ dans chaque fonction serveur déployée (Vercel) : requis

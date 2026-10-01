@@ -512,7 +512,11 @@
     "docsNote": "Plaquettes, fiches et livrets · PDF",
     "videosTitle": "En vidéo",
     "videosSeeAll": "Voir toutes les vidéos",
-    "playVideo": "Lire la vidéo"
+    "playVideo": "Lire la vidéo",
+    "videoConsentText": "Cette vidéo est hébergée par {platform}, qui peut déposer des cookies et collecter des données sur votre navigation. En la lisant ici, vous acceptez ces cookies.",
+    "videoConsentPlay": "Accepter et lire la vidéo",
+    "videoConsentExternal": "Voir sur {platform}",
+    "videoConsentManage": "Gérer mes cookies"
   },
   "chatbot": {
     "title": "Assistant NDC",

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { analyticsEnabled, setAnalyticsConsent, trackPage } from '@/lib/analytics';
+import { didomiVendorConsent, onDidomiConsent } from '@/lib/didomi';
 
 // Piano Analytics : une page vue à chaque navigation (les pages sont servies
 // depuis le cache, le comptage ne peut se faire que dans le navigateur), et
@@ -17,42 +18,13 @@ const DIDOMI_VENDORS = (process.env.NEXT_PUBLIC_DIDOMI_PIANO_VENDOR_ID || 'c:pia
   .map((v) => v.trim())
   .filter(Boolean);
 
-type DidomiApi = {
-  getCurrentUserStatus?: () => { vendors?: Record<string, { enabled?: boolean }> };
-  getUserConsentStatusForVendor?: (id: string) => boolean | undefined;
-};
-
-declare global {
-  interface Window {
-    didomiOnReady?: ((d: DidomiApi) => void)[];
-    didomiEventListeners?: { event: string; listener: () => void }[];
-  }
-}
-
-function vendorConsent(d: DidomiApi | undefined, id: string): boolean {
-  try {
-    const v = d?.getCurrentUserStatus?.().vendors?.[id];
-    if (v) return v.enabled === true;
-    return d?.getUserConsentStatusForVendor?.(id) === true;
-  } catch {
-    return false;
-  }
-}
-
 export function PianoAnalytics() {
   const pathname = usePathname();
 
   // Consentement Didomi → mode Piano (au chargement, puis à chaque changement).
   useEffect(() => {
     if (!analyticsEnabled || !DIDOMI_VENDORS.length) return;
-    const sync = () => {
-      const d = window.Didomi as DidomiApi | undefined;
-      setAnalyticsConsent(DIDOMI_VENDORS.some((id) => vendorConsent(d, id)));
-    };
-    window.didomiOnReady = window.didomiOnReady || [];
-    window.didomiOnReady.push(sync);
-    window.didomiEventListeners = window.didomiEventListeners || [];
-    window.didomiEventListeners.push({ event: 'consent.changed', listener: sync });
+    onDidomiConsent(() => setAnalyticsConsent(DIDOMI_VENDORS.some(didomiVendorConsent)));
   }, []);
 
   useEffect(() => {

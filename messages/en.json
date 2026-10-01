@@ -512,7 +512,11 @@
     "docsNote": "Booklets, sheets and brochures · PDF",
     "videosTitle": "On video",
     "videosSeeAll": "See all videos",
-    "playVideo": "Play video"
+    "playVideo": "Play video",
+    "videoConsentText": "This video is hosted by {platform}, which may set cookies and collect data about your browsing. By playing it here, you accept these cookies.",
+    "videoConsentPlay": "Accept and play the video",
+    "videoConsentExternal": "Watch on {platform}",
+    "videoConsentManage": "Manage my cookies"
   },
   "chatbot": {
     "title": "NDC assistant",
