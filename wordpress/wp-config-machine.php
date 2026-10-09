@@ -51,6 +51,9 @@ define( 'WP_AUTO_UPDATE_CORE', 'minor' );  // correctifs de sécurité automatiq
 define( 'WP_DEBUG', false );
 define( 'WP_DEBUG_LOG', false );
 define( 'WP_DEBUG_DISPLAY', false );
+// Aucun avertissement PHP dans les réponses : sinon l'éditeur reçoit du texte
+// avant le JSON (« La réponse n'est pas une réponse JSON valide »).
+@ini_set( 'display_errors', '0' );
 
 // ** Liaison avec le site Next.js (mêmes valeurs que dans son .env.production) ** //
 define( 'NDC_LEAD_SECRET', 'A_REMPLACER_meme_valeur_que_LEAD_SHARED_SECRET' );

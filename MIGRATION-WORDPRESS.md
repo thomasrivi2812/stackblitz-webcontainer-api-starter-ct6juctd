@@ -173,6 +173,22 @@ Vérifications : `curl https://nationdatacenter.fr/api/health?deep=1` →
 `DEPLOIEMENT.md` (formulaire → lead reçu dans le nouveau WordPress, modification
 d'une page WP → visible sur le site).
 
+## 6 bis. Dépannage : « La réponse n'est pas une réponse JSON valide »
+
+L'éditeur enregistre via `/wp-json/…` et a reçu autre chose que du JSON.
+F12 → Réseau → requête en rouge (`pages/123`, `posts/…`) → onglet Réponse :
+
+| La réponse contient | Cause | Correctif |
+|---|---|---|
+| Page 404 **nginx** | `/wp-json` non routé vers WordPress | `location / { try_files $uri $uri/ /index.php?$args; }` puis `wp rewrite flush` |
+| `Warning:` / `Deprecated:` / `Notice:` avant le `{` | Erreurs PHP affichées (souvent `Constant WP_HOME already defined`) | Supprimer les `define` en double dans `wp-config.php` ; `WP_DEBUG_DISPLAY` à false + `@ini_set('display_errors','0')` |
+| `413 Request Entity Too Large` | Contenu trop gros pour nginx | `client_max_body_size 64m;` |
+| `403` nginx / page HTML de connexion | Restriction d'IP ou HTTPS non détecté (cookie sécurisé ignoré) | Laisser `/wp-json` hors restriction ; vérifier `is_ssl()` |
+| URL de la requête en `http://` (bloquée) | HTTPS non détecté par PHP | Voir `$_SERVER['HTTPS']` / `fastcgi_param HTTPS on;` |
+
+Test rapide : `curl -s https://core.nationdatacenter.fr/wp-json/ | head -c 200` doit
+commencer par `{"name":`.
+
 ## 7. Après la migration
 
 - [ ] Sauvegardes quotidiennes : `mariadb-dump ndc_wp | gzip` + copie de
