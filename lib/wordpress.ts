@@ -36,6 +36,15 @@ function logWpError(label: string, error: unknown, { soft = false }: { soft?: bo
   console.error(`[NDC] API injoignable — données de repli (${label}) :`, msg);
 }
 
+// Erreur de schéma « attendue » (champ, groupe ACF ou argument absent du
+// WordPress) : ce n'est pas une panne. Les contenus facultatifs retombent
+// alors sur leurs textes par défaut, même en production, au lieu de bloquer
+// la page entière (ex. groupe « Contact — Formulaire » pas encore créé).
+function isSchemaError(e: unknown): boolean {
+  const m = e instanceof Error ? e.message : String(e);
+  return /not defined by type|Cannot query field|Unknown argument|Unknown type|WhereArgs/i.test(m);
+}
+
 // ===========================================================================
 // MULTILINGUE (Polylang via wp-graphql-polylang)
 // ---------------------------------------------------------------------------
@@ -2132,7 +2141,7 @@ async function getPageFields<F>(
     const f = data.pages?.nodes?.[0]?.[graphqlField] as F | null | undefined;
     if (f) return f;
   } catch (error) {
-    logWpError(`page ${slug}`, error);
+    logWpError(`page ${slug}`, error, { soft: isSchemaError(error) });
     return null;
   }
   if (locale === 'fr') return null;
@@ -2161,7 +2170,7 @@ async function getPageFields<F>(
     if (tr?.[graphqlField]) return tr[graphqlField] as F;
     if (node?.[graphqlField]) return node[graphqlField] as F;
   } catch (error) {
-    logWpError(`page ${slug} (traductions Polylang)`, error);
+    logWpError(`page ${slug} (traductions Polylang)`, error, { soft: isSchemaError(error) });
   }
   return null;
 }
@@ -2464,12 +2473,6 @@ export async function getLivrets(locale: WpLocale = 'fr'): Promise<Livret[]> {
       meta: n.livretFields?.meta || null,
     }));
 
-  // Erreur de schéma « attendue » lors du sondage (argument/champ absent) :
-  // on dégrade la requête sans la journaliser comme une panne d'API.
-  const isSchemaError = (e: unknown): boolean => {
-    const m = e instanceof Error ? e.message : String(e);
-    return /not defined by type|Cannot query field|Unknown argument|WhereArgs/i.test(m);
-  };
   // Le CPT « livret » n'est pas géré par Polylang → l'argument `language`
   // n'existe pas sur cette connexion : inutile d'insister avec la langue.
   const isLangArgError = (e: unknown): boolean => {
