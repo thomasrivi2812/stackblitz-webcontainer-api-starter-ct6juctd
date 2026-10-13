@@ -124,6 +124,25 @@ statiques (`/_next/static`, immuables) et les en-têtes de sécurité (CSP, HSTS
 
 ## 6. Mise à jour
 
+### En une commande (recommandé)
+
+Décompresser la nouvelle version à côté, puis :
+
+```bash
+cd ~ && rm -rf ndc-front && unzip -q ndc-front.zip && cd ndc-front
+node scripts/deploy.mjs --front /chemin/du/front --check   # vérifie la configuration, ne touche à rien
+node scripts/deploy.mjs --front /chemin/du/front           # déploie
+```
+
+Le script reprend la configuration (`.env.local` / `.env.production`) du site
+en service, compile **pendant que le site actuel reste en ligne**, bascule,
+contrôle `/api/health?deep=1` et **remet l'ancienne version automatiquement**
+en cas d'échec. Service détecté automatiquement (`ndc-front`…), sinon
+`--service <nom>` ou `--pm2 <nom>`. Retour arrière manuel :
+`node scripts/deploy.mjs --front /chemin/du/front --rollback`.
+
+### À la main
+
 ```bash
 systemctl stop ndc-front       # le build remplace .next : ne pas compiler sous le serveur en marche
 # remplacer le code (nouveau zip ou git pull), en conservant .env.production
