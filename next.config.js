@@ -5,14 +5,14 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 // Hôte WordPress déduit de l'endpoint GraphQL (mêmes médias). Sert à la fois à
 // restreindre l'optimiseur d'images next/image ET la directive img-src de la CSP.
-// Repli sur l'hôte de test si la variable n'est pas encore renseignée.
+// Repli sur le WordPress de production si la variable n'est pas renseignée.
 function wpHost() {
   try {
     return new URL(
-      process.env.WORDPRESS_GRAPHQL_ENDPOINT || 'https://ndc-site-test.instawp.site/graphql',
+      process.env.WORDPRESS_GRAPHQL_ENDPOINT || 'https://core.nationdatacenter.fr/graphql',
     ).hostname;
   } catch {
-    return 'ndc-site-test.instawp.site';
+    return 'core.nationdatacenter.fr';
   }
 }
 const WP_HOST = wpHost();
@@ -87,13 +87,6 @@ const nextConfig = {
   // Hôtes d'images optimisables côté client (lib/image.ts).
   env: { NDC_IMAGE_HOSTS: WP_HOST },
   poweredByHeader: false, // masque l'en-tête X-Powered-By: Next.js
-  // Embarque certs/ dans chaque fonction serveur déployée (Vercel) : requis
-  // pour NODE_EXTRA_CA_CERTS=/var/task/certs/instawp-ca.pem — le serveur
-  // InstaWP n'envoie pas ses certificats intermédiaires, on les fournit à Node.
-  // (Option sortie de `experimental` depuis Next 15.)
-  outputFileTracingIncludes: {
-    '/**': ['./certs/**'],
-  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

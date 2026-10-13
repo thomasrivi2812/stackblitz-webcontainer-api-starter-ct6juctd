@@ -120,7 +120,7 @@ function checkEnv(dir) {
   const ep = vars.WORDPRESS_GRAPHQL_ENDPOINT || '';
   if (/instawp/i.test(ep)) warn('WORDPRESS_GRAPHQL_ENDPOINT pointe encore vers InstaWP');
   if (ep && !/^https:\/\/.+\/graphql\/?$/.test(ep)) warn('WORDPRESS_GRAPHQL_ENDPOINT devrait être https://…/graphql');
-  if (vars.NODE_EXTRA_CA_CERTS && !/instawp/i.test(ep)) warn('NODE_EXTRA_CA_CERTS ne sert qu\'à InstaWP : peut être retiré');
+  if (vars.NODE_EXTRA_CA_CERTS && !/instawp/i.test(ep)) warn('NODE_EXTRA_CA_CERTS ne sert qu\'à InstaWP : à retirer du fichier .env (le dossier certs/ n\'existe plus)');
   if (vars.WP_LIVE === '1') warn('WP_LIVE=1 : aucun cache, site plus lent (mettre 0 en temps normal)');
   if (errors) fail(`${errors} réglage(s) à corriger avant de déployer.`);
   return vars;

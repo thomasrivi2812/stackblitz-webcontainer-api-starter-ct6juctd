@@ -41,7 +41,6 @@ npx next start -p 3000 -H localhost   # derrière nginx (§ 5)
 | `LEAD_SHARED_SECRET` | **oui** | Secret partagé avec l'endpoint WordPress des formulaires |
 | `ALTCHA_HMAC_SECRET` | non | Secret du captcha ; obligatoire seulement si plusieurs instances |
 | `TRUSTED_PROXY_HOPS` | non | Nombre de proxys devant Next (défaut 1 = un nginx) |
-| `NODE_EXTRA_CA_CERTS` | cas InstaWP | `./certs/instawp-ca.pem` si WordPress est hébergé chez InstaWP |
 | `WP_LIVE` | non | `1` = aucun cache (édition en direct) ; `0` en temps normal |
 | `NDC_IMAGES_ALLOW_LOCAL_IP` | cas WP local | `1` si le domaine WordPress résout en IP locale/privée sur la machine (voir `MIGRATION-WORDPRESS.md`) |
 

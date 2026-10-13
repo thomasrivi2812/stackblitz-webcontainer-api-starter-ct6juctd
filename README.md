@@ -18,11 +18,11 @@ données dès que tu renseignes l'endpoint GraphQL.
 1. Copie `.env.local.example` en `.env.local`.
 2. Renseigne l'URL de ton endpoint WordPress GraphQL, par exemple :
    ```
-   WORDPRESS_GRAPHQL_ENDPOINT=https://ton-site.instawp.xyz/graphql
+   WORDPRESS_GRAPHQL_ENDPOINT=https://core.nationdatacenter.fr/graphql
    ```
 3. Redémarre le serveur de dev. Le bandeau en haut de `/datacenters` passe de « données d'exemple » à « données en direct ».
 
-> ⚠️ L'endpoint de WordPress Playground n'est **pas** joignable depuis ce front (il vit uniquement dans ton navigateur). Il faut un WordPress persistant et public (InstaWP, ou l'hébergement Alterway final).
+> ⚠️ L'endpoint de WordPress Playground n'est **pas** joignable depuis ce front (il vit uniquement dans ton navigateur). Il faut un WordPress persistant et public : en production, `core.nationdatacenter.fr`.
 
 ## Structure
 
