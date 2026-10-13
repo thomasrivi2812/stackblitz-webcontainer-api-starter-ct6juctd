@@ -101,6 +101,10 @@ chown -R www-data:www-data wp-content/uploads
 (MySQL 8), MariaDB peut refuser l'import. Le corriger avant :
 `sed -i 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' ndc.sql`
 
+> **Remplacement des adresses en une commande** : `node scripts/wp-replace-urls.mjs --wp /chemin/du/wordpress`
+> (sauvegarde, simulation, confirmation, toutes les variantes d'adresse, caches,
+> vérification, rafraîchissement du site). Équivalent manuel ci-dessous.
+
 ```bash
 wp db import ndc.sql
 # Remplacer l'ancienne adresse partout (gère les données sérialisées ACF) :
