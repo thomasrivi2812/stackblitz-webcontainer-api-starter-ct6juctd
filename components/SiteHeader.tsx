@@ -24,6 +24,8 @@ type Props = {
   reseauImageUrl?: string | null;
   /** Version anglaise visible (case WordPress « Version anglaise ») : sélecteur FR/EN. */
   enEnabled?: boolean;
+  /** Adresse du Portail client (WordPress → Réglages → Site NDC) ; null = lien masqué. */
+  portalUrl?: string | null;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -61,7 +63,7 @@ const STATUT_MSG: Record<string, string> = {
   avenir: 'statutAvenir',
 };
 
-export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null, offresImageUrl = null, reseauImageUrl = null, enEnabled = false }: Props) {
+export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null, offresImageUrl = null, reseauImageUrl = null, enEnabled = false, portalUrl = null }: Props) {
   const t = useTranslations('nav');
   // Libellés de statut réutilisés tels quels depuis les cards data centers.
   const td = useTranslations('datacenters');
@@ -177,8 +179,6 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
   const servicesChildren = services
     .filter((s) => s.slug)
     .map((s) => ({ href: `/services#${s.slug}`, label: s.titre }));
-
-  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || '#';
 
   return (
     <header className="site-header">
@@ -361,15 +361,17 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
                 <span className="nav-dd-name">{t('actualites')}</span>
                 <span className="sub">{t('actualitesSub')}</span>
               </Link>
-              <a
-                className="nav-dd-item row nav-dd-portal"
-                href={portalUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <LockIcon />
-                <span className="nav-dd-name">{t('portail')}</span>
-              </a>
+              {portalUrl && (
+                <a
+                  className="nav-dd-item row nav-dd-portal"
+                  href={portalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LockIcon />
+                  <span className="nav-dd-name">{t('portail')}</span>
+                </a>
+              )}
             </div>
           </div>
 
@@ -503,9 +505,11 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
             <div className={`mnav-sub${mobileSub === 'ressources' ? ' open' : ''}`}>
               <Link href="/documentation" onClick={close}>{t('documentation')}</Link>
               <Link href="/actualites" onClick={close}>{t('actualites')}</Link>
-              <a href={portalUrl} target="_blank" rel="noopener noreferrer" onClick={close}>
-                {t('portail')}
-              </a>
+              {portalUrl && (
+                <a href={portalUrl} target="_blank" rel="noopener noreferrer" onClick={close}>
+                  {t('portail')}
+                </a>
+              )}
             </div>
           </div>
 

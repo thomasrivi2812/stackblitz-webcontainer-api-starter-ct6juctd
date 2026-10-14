@@ -42,7 +42,7 @@ npx next start -p 3000 -H localhost   # derrière nginx (§ 5)
 | `ALTCHA_HMAC_SECRET` | non | Secret du captcha ; obligatoire seulement si plusieurs instances |
 | `TRUSTED_PROXY_HOPS` | non | Nombre de proxys devant Next (défaut 1 = un nginx) |
 | `WP_LIVE` | non | `1` = aucun cache (édition en direct) ; `0` en temps normal |
-| `NEXT_PUBLIC_EN_ENABLED` | non | Repli si WordPress ne répond pas : `1` = version anglaise visible, absent = masquée. Le réglage normal se fait dans **WordPress → Réglages → Version anglaise** (snippet `wordpress/ndc-snippet-version-anglaise.php`) |
+| `NEXT_PUBLIC_EN_ENABLED` | non | Repli si WordPress ne répond pas : `1` = version anglaise visible, absent = masquée. Le réglage normal se fait dans **WordPress → Réglages → Site NDC** (snippet `wordpress/ndc-snippet-reglages-site.php`) |
 | `NDC_IMAGES_ALLOW_LOCAL_IP` | cas WP local | `1` si le domaine WordPress résout en IP locale/privée sur la machine (voir `MIGRATION-WORDPRESS.md`) |
 
 Déjà intégrés dans le code, **rien à renseigner** : Piano Analytics
@@ -180,7 +180,7 @@ Supervision conseillée : sonde sur `/api/health` (toutes les minutes) et
 - Migration InstaWP → machine : voir `MIGRATION-WORDPRESS.md`.
 - Pages légales : bloc `wordpress/ndc-snippet-ajout-pages-legales.php` à coller à la fin du snippet NDC.
 - Formulaires (routage, accusé de réception, accès aux ressources) : snippet `wordpress/ndc-snippet-formulaires.php`, voir `docs/formulaires-v1.md`.
-- Version anglaise affichée ou masquée : snippet `wordpress/ndc-snippet-version-anglaise.php`.
+- Version anglaise, Portail client, réseaux sociaux : snippet `wordpress/ndc-snippet-reglages-site.php` (Réglages → Site NDC).
 
 - Hook de revalidation : `POST /api/revalidate` avec `{"secret": …, "path": "/"}`
   (tout le site) ou un chemin précis (`/actualites`) — les versions FR et EN
