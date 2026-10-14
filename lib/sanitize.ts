@@ -42,6 +42,24 @@ const OPTIONS: sanitizeHtml.IOptions = {
   allowProtocolRelative: false,
   // Les <script>/<style> sont supprimés AVEC leur contenu (pas seulement la balise).
   nonTextTags: ['script', 'style', 'textarea', 'option', 'noscript'],
+  transformTags: {
+    // Documents (PDF, Office, archives, fichiers de la médiathèque) : ouverts
+    // dans un nouvel onglet, comme les ressources du site — sans avoir à
+    // cocher « Ouvrir dans un nouvel onglet » à chaque lien dans WordPress.
+    // Tout lien en nouvel onglet reçoit rel="noopener noreferrer".
+    a: (tagName, attribs) => {
+      const href = attribs.href || '';
+      const isDocument =
+        /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|zip|csv)(\?|#|$)/i.test(href) || /\/wp-content\/uploads\//i.test(href);
+      const target = isDocument ? '_blank' : attribs.target;
+      const out: Record<string, string> = { ...attribs };
+      if (target === '_blank') {
+        out.target = '_blank';
+        out.rel = 'noopener noreferrer';
+      }
+      return { tagName, attribs: out };
+    },
+  },
 };
 
 export function sanitizeWpHtml(html: string | null | undefined): string {
