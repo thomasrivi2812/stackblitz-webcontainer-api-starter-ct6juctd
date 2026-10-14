@@ -19,6 +19,12 @@ export const routing = defineRouting({
 
 export type Locale = (typeof routing.locales)[number];
 
+// Version anglaise masquée tant qu'elle n'est pas complète : sélecteur FR/EN
+// caché, /en/… redirigé vers la page française (redirection temporaire 307),
+// hreflang et sitemap sans l'anglais. Réactivation : NEXT_PUBLIC_EN_ENABLED=1
+// dans .env.local puis recompiler (valeur intégrée à la compilation).
+export const EN_ENABLED = process.env.NEXT_PUBLIC_EN_ENABLED === '1';
+
 // Helpers de navigation conscients de la locale : à utiliser PARTOUT à la place
 // de next/link et next/navigation pour que les liens pointent vers la bonne langue.
 export const { Link, redirect, usePathname, useRouter, getPathname } =

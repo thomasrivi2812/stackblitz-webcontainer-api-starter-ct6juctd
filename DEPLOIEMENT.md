@@ -42,6 +42,7 @@ npx next start -p 3000 -H localhost   # derrière nginx (§ 5)
 | `ALTCHA_HMAC_SECRET` | non | Secret du captcha ; obligatoire seulement si plusieurs instances |
 | `TRUSTED_PROXY_HOPS` | non | Nombre de proxys devant Next (défaut 1 = un nginx) |
 | `WP_LIVE` | non | `1` = aucun cache (édition en direct) ; `0` en temps normal |
+| `NEXT_PUBLIC_EN_ENABLED` | non | `1` = version anglaise visible. Absent = **masquée** (sélecteur FR/EN caché, `/en/…` redirigé vers le français, ni hreflang ni sitemap EN) |
 | `NDC_IMAGES_ALLOW_LOCAL_IP` | cas WP local | `1` si le domaine WordPress résout en IP locale/privée sur la machine (voir `MIGRATION-WORDPRESS.md`) |
 
 Déjà intégrés dans le code, **rien à renseigner** : Piano Analytics

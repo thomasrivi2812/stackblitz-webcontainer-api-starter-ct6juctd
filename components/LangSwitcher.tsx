@@ -4,13 +4,18 @@ import { useState, useTransition } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/routing';
-import type { Locale } from '@/i18n/routing';
+import { EN_ENABLED, type Locale } from '@/i18n/routing';
 
 // Sélecteur de langue FR/EN du header.
 // Navigue réellement vers la version traduite de la PAGE COURANTE : usePathname()
 // de next-intl renvoie le chemin sans préfixe de locale, et router.replace(...,
 // { locale }) reconstruit l'URL dans la langue cible (FR à la racine, EN sous /en).
 export function LangSwitcher() {
+  // Version anglaise masquée : pas de sélecteur (voir EN_ENABLED).
+  return EN_ENABLED ? <LangSwitcherInner /> : null;
+}
+
+function LangSwitcherInner() {
   const t = useTranslations('langSwitcher');
   const active = useLocale();
   const pathname = usePathname();

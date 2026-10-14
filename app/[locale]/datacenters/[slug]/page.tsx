@@ -1,3 +1,4 @@
+import { EN_ENABLED } from '@/i18n/routing';
 import { getDatacenter, getDatacenters, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
 import { loadMessages } from '@/lib/messages';
 import { notFound, redirect } from 'next/navigation';
@@ -42,7 +43,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: WpLoca
     languages.fr = `/datacenters/${frSlug}`;
     languages['x-default'] = `/datacenters/${frSlug}`;
   }
-  if (enSlug) languages.en = `/en/datacenters/${enSlug}`;
+  if (enSlug && EN_ENABLED) languages.en = `/en/datacenters/${enSlug}`;
   const canonical = localePath(cur, `/datacenters/${dc.slug}`);
 
   return {

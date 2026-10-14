@@ -1,4 +1,5 @@
 // Helpers SEO centralisés (canoniques par langue, hreflang, URL du site).
+import { EN_ENABLED } from '@/i18n/routing';
 
 export const SITE_URL = 'https://nationdatacenter.fr';
 export const SITE_NAME = 'Nation Data Center';
@@ -21,7 +22,8 @@ export function alternatesFor(locale: string, path: string) {
     canonical: localePath(locale, path),
     languages: {
       fr: path,
-      en: localePath('en', path),
+      // Version anglaise masquée : pas de hreflang vers des pages redirigées.
+      ...(EN_ENABLED ? { en: localePath('en', path) } : {}),
       'x-default': path,
     },
   };

@@ -1,13 +1,15 @@
 import type { MetadataRoute } from 'next';
 import { getDatacenters, getAllPosts } from '@/lib/wordpress';
 import { SITE_URL, localePath } from '@/lib/seo';
+import { EN_ENABLED } from '@/i18n/routing';
 
 // Sitemap bilingue : chaque URL FR ET sa version EN (préfixe /en).
 // - Articles : getAllPosts (tous, pas seulement les 5 récents) avec leur
 //   vraie date de publication comme lastModified.
 // - Pas de lastModified artificiel (« maintenant ») sur les pages statiques :
 //   un sitemap qui prétend que tout vient de changer finit ignoré par Google.
-const LOCALES = ['fr', 'en'] as const;
+// Version anglaise masquée (EN_ENABLED) : sitemap français uniquement.
+const LOCALES = EN_ENABLED ? (['fr', 'en'] as const) : (['fr'] as const);
 
 const STATIC_PATHS: { path: string; changeFrequency: 'weekly' | 'monthly' | 'yearly'; priority: number }[] = [
   { path: '/', changeFrequency: 'weekly', priority: 1 },
