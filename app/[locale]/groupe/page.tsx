@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: W
   return {
     title: m.groupeTitle,
     description: m.groupeDesc,
-    alternates: alternatesFor(locale, '/groupe'),
+    alternates: await alternatesFor(locale, '/groupe'),
   };
 }
 

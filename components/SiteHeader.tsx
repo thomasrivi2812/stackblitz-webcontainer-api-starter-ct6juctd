@@ -22,6 +22,8 @@ type Props = {
   offresImageUrl?: string | null;
   /** Image de la carte « Demander une visite » du menu réseau (WP, sinon défaut). */
   reseauImageUrl?: string | null;
+  /** Version anglaise visible (case WordPress « Version anglaise ») : sélecteur FR/EN. */
+  enEnabled?: boolean;
 };
 
 function Chevron({ className }: { className?: string }) {
@@ -59,7 +61,7 @@ const STATUT_MSG: Record<string, string> = {
   avenir: 'statutAvenir',
 };
 
-export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null, offresImageUrl = null, reseauImageUrl = null }: Props) {
+export function SiteHeader({ personas = [], datacenters = [], services = [], logoUrl = null, equipeImageUrl = null, offresImageUrl = null, reseauImageUrl = null, enEnabled = false }: Props) {
   const t = useTranslations('nav');
   // Libellés de statut réutilisés tels quels depuis les cards data centers.
   const td = useTranslations('datacenters');
@@ -396,7 +398,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
           {/* Actions : Contact mis en valeur (portail déplacé dans Ressources) */}
           <div className="nav-actions">
             <Link href="/contact" className="nav-cta">{t('contact')}</Link>
-            <LangSwitcher />
+            <LangSwitcher enabled={enEnabled} />
           </div>
         </nav>
 
@@ -527,7 +529,7 @@ export function SiteHeader({ personas = [], datacenters = [], services = [], log
           <div className="mnav-actions">
             <Link href="/contact" className="nav-cta" onClick={close}>{t('contact')}</Link>
           </div>
-          <LangSwitcher />
+          <LangSwitcher enabled={enEnabled} />
         </nav>
 
         <div

@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: W
     // circuite le template « %s | Nation Data Center » du layout.
     title: { absolute: m.homeTitle },
     description: m.homeDesc,
-    alternates: alternatesFor(locale, '/'),
+    alternates: await alternatesFor(locale, '/'),
   };
 }
 

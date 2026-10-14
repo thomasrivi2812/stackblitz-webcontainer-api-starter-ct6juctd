@@ -10,9 +10,9 @@ import { EN_ENABLED, type Locale } from '@/i18n/routing';
 // Navigue réellement vers la version traduite de la PAGE COURANTE : usePathname()
 // de next-intl renvoie le chemin sans préfixe de locale, et router.replace(...,
 // { locale }) reconstruit l'URL dans la langue cible (FR à la racine, EN sous /en).
-export function LangSwitcher() {
-  // Version anglaise masquée : pas de sélecteur (voir EN_ENABLED).
-  return EN_ENABLED ? <LangSwitcherInner /> : null;
+export function LangSwitcher({ enabled = EN_ENABLED }: { enabled?: boolean }) {
+  // Version anglaise masquée (case WordPress) : pas de sélecteur.
+  return enabled ? <LangSwitcherInner /> : null;
 }
 
 function LangSwitcherInner() {

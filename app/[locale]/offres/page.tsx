@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: W
   return {
     title: m.offresTitle,
     description: m.offresDesc,
-    alternates: alternatesFor(locale, '/offres'),
+    alternates: await alternatesFor(locale, '/offres'),
   };
 }
 

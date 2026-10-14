@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 
 import { SiteHeader } from '@/components/SiteHeader';
+import { getEnEnabled } from '@/lib/site-settings';
 import { SiteFooter } from '@/components/SiteFooter';
 import { JsonLd } from '@/components/JsonLd';
 import { DidomiConsent } from '@/components/DidomiConsent';
@@ -129,7 +130,7 @@ export default async function LocaleLayout({
   // Récupéré côté serveur pour alimenter les menus déroulants du header.
   // Les deux fonctions retombent sur les données d'exemple si WP est absent,
   // et sur le contenu FR si la traduction EN n'existe pas encore (fallback).
-  const [personas, datacenters, services, branding, faqs, certifications, posts, livrets, home] =
+  const [personas, datacenters, services, branding, faqs, certifications, posts, livrets, home, enEnabled] =
     await Promise.all([
     getPersonas(locale as Locale),
     getDatacenters(locale as Locale),
@@ -148,6 +149,8 @@ export default async function LocaleLayout({
     getAllPosts(locale as Locale),
     getLivrets(locale as Locale),
     getHome(locale as Locale),
+    // Case WordPress « Version anglaise » (sélecteur FR/EN affiché ou non).
+    getEnEnabled(),
   ]);
 
   // Base de connaissances de l'assistant, construite à partir des contenus
@@ -218,6 +221,7 @@ export default async function LocaleLayout({
             equipeImageUrl={branding.equipeImage}
             offresImageUrl={branding.offresImage}
             reseauImageUrl={branding.reseauImage}
+            enEnabled={enEnabled}
           />
 
           {children}

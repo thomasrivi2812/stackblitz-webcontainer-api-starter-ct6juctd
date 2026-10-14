@@ -1,15 +1,13 @@
 import type { MetadataRoute } from 'next';
 import { getDatacenters, getAllPosts } from '@/lib/wordpress';
 import { SITE_URL, localePath } from '@/lib/seo';
-import { EN_ENABLED } from '@/i18n/routing';
+import { getEnEnabled } from '@/lib/site-settings';
 
 // Sitemap bilingue : chaque URL FR ET sa version EN (préfixe /en).
 // - Articles : getAllPosts (tous, pas seulement les 5 récents) avec leur
 //   vraie date de publication comme lastModified.
 // - Pas de lastModified artificiel (« maintenant ») sur les pages statiques :
 //   un sitemap qui prétend que tout vient de changer finit ignoré par Google.
-// Version anglaise masquée (EN_ENABLED) : sitemap français uniquement.
-const LOCALES = EN_ENABLED ? (['fr', 'en'] as const) : (['fr'] as const);
 
 const STATIC_PATHS: { path: string; changeFrequency: 'weekly' | 'monthly' | 'yearly'; priority: number }[] = [
   { path: '/', changeFrequency: 'weekly', priority: 1 },
@@ -27,8 +25,13 @@ const STATIC_PATHS: { path: string; changeFrequency: 'weekly' | 'monthly' | 'yea
   { path: '/politique-de-cookies', changeFrequency: 'yearly', priority: 0.3 },
 ];
 
+// Régénéré toutes les heures (nouveaux articles, case « Version anglaise »).
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
+  // Version anglaise masquée (case WordPress) : sitemap français uniquement.
+  const LOCALES = (await getEnEnabled()) ? (['fr', 'en'] as const) : (['fr'] as const);
 
   for (const locale of LOCALES) {
     for (const { path, changeFrequency, priority } of STATIC_PATHS) {

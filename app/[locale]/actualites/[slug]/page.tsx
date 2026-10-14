@@ -1,4 +1,4 @@
-import { EN_ENABLED } from '@/i18n/routing';
+import { getEnEnabled } from '@/lib/site-settings';
 import { notFound, redirect } from 'next/navigation';
 import { loadMessages } from '@/lib/messages';
 import {
@@ -56,7 +56,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     languages.fr = `/actualites/${frSlug}`;
     languages['x-default'] = `/actualites/${frSlug}`;
   }
-  if (enSlug && EN_ENABLED) languages.en = `/en/actualites/${enSlug}`;
+  if (enSlug && (await getEnEnabled())) languages.en = `/en/actualites/${enSlug}`;
 
   // Description : excerpt WP, avec repli sur le début du contenu si vide.
   const desc = (stripHtml(post.excerpt).slice(0, 158) || stripHtml(post.content).slice(0, 158)).trim();

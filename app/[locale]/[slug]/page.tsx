@@ -28,7 +28,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: WpLoca
     title: page.title,
     // Description tirée du début du contenu (sinon aucune meta description).
     description: stripHtml(page.content ?? '').slice(0, 158).trim() || undefined,
-    alternates: alternatesFor(params.locale, `/${params.slug}`),
+    alternates: await alternatesFor(params.locale, `/${params.slug}`),
   };
 }
 
