@@ -179,6 +179,16 @@ export async function POST(request: Request) {
     message: clip(body.message, 5000),
     ressource: clip(body.ressource, 200),
     source_url: clip(body.source_url, 300),
+    // Accès aux ressources (catégorie, langue, adresse du document) et
+    // paramètres de campagne : enregistrés par le snippet « Formulaires NDC ».
+    categorie: clip(body.categorie, 80),
+    langue: /^(fr|en)$/.test(String(body.langue ?? '')) ? String(body.langue) : '',
+    ressource_url: /^https?:\/\//.test(clip(body.ressource_url, 500)) ? clip(body.ressource_url, 500) : '',
+    utm_source: clip(body.utm_source, 100),
+    utm_medium: clip(body.utm_medium, 100),
+    utm_campaign: clip(body.utm_campaign, 100),
+    utm_term: clip(body.utm_term, 100),
+    utm_content: clip(body.utm_content, 100),
   };
 
   if (type === 'contact' && payload.message.length < 10) {

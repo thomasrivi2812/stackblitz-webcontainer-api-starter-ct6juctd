@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { sendLead } from '@/lib/send-lead';
+import { useLocale, useTranslations } from 'next-intl';
+import { openResource } from '@/lib/open-resource';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 
 // Bouton « Télécharger la brochure » → vraie popup modale (centrée, fond assombri).
 // Les styles sont ENCAPSULÉS dans le composant pour ne pas dépendre de globals.css.
-// L'email est capté côté client ; l'envoi vers Monday/Brevo se fera via une route serveur.
+// La demande est enregistrée dans WordPress, puis le document s'ouvre dans un
+// nouvel onglet (lib/open-resource.ts) ; rien n'est envoyé par e-mail.
 
 // Document par défaut (public/) si aucun fichier n'est défini dans WordPress.
 const DEFAULT_PDF_URL = '/brochure-ndc.pdf';
@@ -24,10 +25,14 @@ type Props = {
   downloadName?: string;
   /** Contenu enrichi du déclencheur (icône…) — prioritaire sur label. */
   children?: React.ReactNode;
+  /** Catégorie enregistrée avec la demande (vue « Accès aux ressources »). */
+  categorie?: string;
 };
 
-export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, label = null, ns = 'brochure', downloadName = 'Brochure-Nation-Data-Center', children }: Props) {
+export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, label = null, ns = 'brochure', downloadName = 'Brochure-Nation-Data-Center', children, categorie = 'Brochure' }: Props) {
   const t = useTranslations(ns);
+  const locale = useLocale();
+  const [sending, setSending] = useState(false);
   const PDF_URL = pdfUrl || DEFAULT_PDF_URL;
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
@@ -63,15 +68,13 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
       return;
     }
     setError('');
-    // Enregistre le lead (sans bloquer le téléchargement si l'API est indisponible).
-    void sendLead({ type: 'brochure', email, ressource: downloadName });
-    const a = document.createElement('a');
-    a.href = PDF_URL;
-    a.download = `${downloadName}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setDone(true);
+    setSending(true);
+    // Demande enregistrée AVANT l'ouverture ; échec → message, pas de document.
+    void openResource({ type: 'brochure', email, ressource: downloadName, categorie, langue: locale, url: PDF_URL }).then((r) => {
+      setSending(false);
+      if (r === 'error') setError(t('errSave'));
+      else setDone(true);
+    });
   }
 
   return (
@@ -112,7 +115,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
 
                 {error && <p className="ndcm-error">{error}</p>}
 
-                <button type="button" className="ndcm-submit" onClick={handleSubmit}>{t('submit')}</button>
+                <button type="button" className="ndcm-submit" onClick={handleSubmit} disabled={sending}>{sending ? t('sending') : t('submit')}</button>
               </>
             ) : (
               <div className="ndcm-done">
@@ -120,7 +123,7 @@ export function BrochureButton({ className = 'btn btn-ghost', pdfUrl = null, lab
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
                 <h3 className="ndcm-title">{t('doneTitle')}</h3>
-                <p className="ndcm-text">{t('doneText')} <a href={PDF_URL} download>{t('doneLink')}</a>.</p>
+                <p className="ndcm-text">{t('doneText')} <a href={PDF_URL} target="_blank" rel="noopener">{t('doneLink')}</a>.</p>
                 <button type="button" className="ndcm-ghost" onClick={close}>{t('close')}</button>
               </div>
             )}

@@ -388,10 +388,13 @@
     "consent": "J'accepte d'être recontacté par Nation Data Center conformément à la politique de confidentialité.",
     "errEmail": "Merci de saisir une adresse e-mail valide.",
     "errConsent": "Merci de cocher la case.",
-    "submit": "Télécharger le document",
+    "submit": "Accéder au document",
     "doneTitle": "Merci !",
-    "doneText": "Votre téléchargement a démarré.",
-    "close": "Fermer"
+    "doneText": "Le document s'est ouvert dans un nouvel onglet. S'il ne s'affiche pas,",
+    "close": "Fermer",
+    "doneLink": "cliquez ici",
+    "sending": "Ouverture…",
+    "errSave": "Votre demande n'a pas pu être enregistrée. Merci de réessayer dans quelques instants."
   },
   "faq": {
     "eyebrow": "Questions fréquentes",
@@ -421,11 +424,13 @@
     "consent": "J'accepte d'être recontacté par Nation Data Center et la conservation de mes données conformément à la politique de confidentialité.",
     "errEmail": "Merci de saisir une adresse e-mail valide.",
     "errConsent": "Merci d'accepter d'être recontacté pour télécharger la plaquette.",
-    "submit": "Recevoir la plaquette",
+    "submit": "Accéder à la plaquette",
     "doneTitle": "Merci !",
-    "doneText": "Votre téléchargement a démarré. S'il ne se lance pas,",
+    "doneText": "Le document s'est ouvert dans un nouvel onglet. S'il ne s'affiche pas,",
     "doneLink": "cliquez ici",
-    "close": "Fermer"
+    "close": "Fermer",
+    "sending": "Ouverture…",
+    "errSave": "Votre demande n'a pas pu être enregistrée. Merci de réessayer dans quelques instants."
   },
   "brochure": {
     "trigger": "Télécharger notre brochure",
@@ -437,11 +442,13 @@
     "consent": "J'accepte d'être recontacté par Nation Data Center et la conservation de mes données conformément à la politique de confidentialité.",
     "errEmail": "Merci de saisir une adresse e-mail valide.",
     "errConsent": "Merci d'accepter d'être recontacté pour télécharger la brochure.",
-    "submit": "Recevoir la brochure",
+    "submit": "Accéder à la brochure",
     "doneTitle": "Merci !",
-    "doneText": "Votre téléchargement a démarré. S'il ne se lance pas,",
+    "doneText": "Le document s'est ouvert dans un nouvel onglet. S'il ne s'affiche pas,",
     "doneLink": "cliquez ici",
-    "close": "Fermer"
+    "close": "Fermer",
+    "sending": "Ouverture…",
+    "errSave": "Votre demande n'a pas pu être enregistrée. Merci de réessayer dans quelques instants."
   },
   "meta": {
     "homeTitle": "Nation Data Center — Hébergement souverain & responsable",
@@ -491,14 +498,14 @@
     "empty": "Aucun document disponible pour le moment.",
     "eyebrowModal": "Document",
     "downloadBtn": "Télécharger",
-    "confirmBtn": "Recevoir le document",
-    "emailLabel": "Votre e-mail professionnel",
+    "confirmBtn": "Accéder au document",
+    "emailLabel": "E-mail professionnel",
     "emailPlaceholder": "jean.dupont@entreprise.fr",
     "consent": "J'accepte que mon e-mail soit utilisé pour me recontacter au sujet des offres NDC.",
     "errEmail": "Merci de saisir une adresse e-mail valide.",
     "errConsent": "Merci de cocher la case de consentement.",
     "doneTitle": "Bonne lecture !",
-    "doneText": "Le téléchargement a démarré. Sinon,",
+    "doneText": "Le document s'est ouvert dans un nouvel onglet. S'il ne s'affiche pas,",
     "doneLink": "cliquez ici",
     "close": "Fermer",
     "brochureEyebrow": "Brochure réseau",
@@ -507,7 +514,7 @@
     "brochureMeta1": "PDF",
     "brochureMeta2": "FR / EN",
     "brochureCta": "Télécharger la brochure",
-    "brochureNote": "Envoi contre e-mail professionnel",
+    "brochureNote": "Accès contre e-mail professionnel",
     "docsTitle": "Documents à télécharger",
     "docsNote": "Plaquettes, fiches et livrets · PDF",
     "videosTitle": "En vidéo",
@@ -516,7 +523,9 @@
     "videoConsentText": "Cette vidéo est hébergée par {platform}, qui peut déposer des cookies et collecter des données sur votre navigation. En la lisant ici, vous acceptez ces cookies.",
     "videoConsentPlay": "Accepter et lire la vidéo",
     "videoConsentExternal": "Voir sur {platform}",
-    "videoConsentManage": "Gérer mes cookies"
+    "videoConsentManage": "Gérer mes cookies",
+    "sending": "Ouverture…",
+    "errSave": "Votre demande n'a pas pu être enregistrée. Merci de réessayer dans quelques instants."
   },
   "chatbot": {
     "title": "Assistant NDC",

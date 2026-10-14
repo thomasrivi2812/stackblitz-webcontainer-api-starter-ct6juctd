@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslations } from 'next-intl';
-import { sendLead } from '@/lib/send-lead';
+import { useLocale, useTranslations } from 'next-intl';
+import { openResource } from '@/lib/open-resource';
 
 type Props = {
   url: string;
@@ -12,6 +12,8 @@ type Props = {
 
 export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
   const t = useTranslations('download');
+  const locale = useLocale();
+  const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
@@ -57,14 +59,13 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
       return;
     }
     setError('');
-    void sendLead({ type: 'download', email, ressource: title });
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setDone(true);
+    setSending(true);
+    // Demande enregistrée AVANT l'ouverture ; échec → message, pas de document.
+    void openResource({ type: 'download', email, ressource: title, categorie: "Document d'article", langue: locale, url }).then((r) => {
+      setSending(false);
+      if (r === 'error') setError(t('errSave'));
+      else setDone(true);
+    });
   }
 
   const blue: React.CSSProperties = {
@@ -152,8 +153,8 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
             {error !== '' && (
               <div style={{ color: '#e3051b', fontSize: 13, marginBottom: 14 }}>{error}</div>
             )}
-            <button type="button" style={blue} onClick={handleSubmit}>
-              {t('submit')}
+            <button type="button" style={{ ...blue, opacity: sending ? 0.7 : 1 }} onClick={handleSubmit} disabled={sending}>
+              {sending ? t('sending') : t('submit')}
             </button>
           </div>
         ) : (
@@ -165,7 +166,8 @@ export function ArticleDownloadButton({ url, title = 'Document' }: Props) {
             </div>
             <h3 style={{ fontSize: 22, marginBottom: 10, color: '#1b3360' }}>{t('doneTitle')}</h3>
             <p style={{ color: '#5d6b85', fontSize: 14.5, marginBottom: 22 }}>
-              {t('doneText')}
+              {t('doneText')}{' '}
+              <a href={url} target="_blank" rel="noopener" style={{ color: '#1c8cbd' }}>{t('doneLink')}</a>.
             </p>
             <button
               type="button"

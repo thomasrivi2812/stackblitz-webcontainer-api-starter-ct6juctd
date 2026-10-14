@@ -179,6 +179,8 @@ Supervision conseillée : sonde sur `/api/health` (toutes les minutes) et
 
 - Migration InstaWP → machine : voir `MIGRATION-WORDPRESS.md`.
 - Pages légales : bloc `wordpress/ndc-snippet-ajout-pages-legales.php` à coller à la fin du snippet NDC.
+- Formulaires (routage, accusé de réception, accès aux ressources) : snippet `wordpress/ndc-snippet-formulaires.php`, voir `docs/formulaires-v1.md`.
+- Version anglaise affichée ou masquée : snippet `wordpress/ndc-snippet-version-anglaise.php`.
 
 - Hook de revalidation : `POST /api/revalidate` avec `{"secret": …, "path": "/"}`
   (tout le site) ou un chemin précis (`/actualites`) — les versions FR et EN

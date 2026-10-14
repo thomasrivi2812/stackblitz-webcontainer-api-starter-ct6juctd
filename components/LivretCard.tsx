@@ -1,19 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { sendLead } from '@/lib/send-lead';
+import { useLocale, useTranslations } from 'next-intl';
+import { openResource } from '@/lib/open-resource';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 import type { Livret } from '@/lib/wordpress';
 import { imgProps } from '@/lib/image';
 
 // Carte « livret » de la page Documentation : couverture cliquable → modale
 // avec description + bouton Télécharger. Le clic sur le bouton révèle un
-// champ e-mail (capture de lead type « download ») avant de lancer le
-// téléchargement. Styles encapsulés (comme la modale brochure).
+// champ e-mail (capture de lead type « download ») : la demande est enregistrée
+// dans WordPress, puis le livret s'ouvre dans un nouvel onglet. Styles encapsulés (comme la modale brochure).
 
 export function LivretCard({ livret }: { livret: Livret }) {
   const t = useTranslations('documentation');
+  const locale = useLocale();
+  const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
   const [askEmail, setAskEmail] = useState(false); // input révélé sous le bouton
   const [email, setEmail] = useState('');
@@ -39,16 +41,6 @@ export function LivretCard({ livret }: { livret: Livret }) {
     setTimeout(() => { setAskEmail(false); setDone(false); setError(''); }, 200);
   }
 
-  function download() {
-    if (!livret.fichierUrl) return;
-    const a = document.createElement('a');
-    a.href = livret.fichierUrl;
-    a.download = `${livret.titre}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
   function submit() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError(t('errEmail'));
@@ -59,10 +51,14 @@ export function LivretCard({ livret }: { livret: Livret }) {
       return;
     }
     setError('');
-    // Lead enregistré côté WP (sans bloquer le téléchargement si l'API est indisponible).
-    void sendLead({ type: 'download', email, ressource: livret.titre });
-    download();
-    setDone(true);
+    if (!livret.fichierUrl) return;
+    setSending(true);
+    // Demande enregistrée AVANT l'ouverture ; échec → message, pas de document.
+    void openResource({ type: 'download', email, ressource: livret.titre, categorie: 'Livret', langue: locale, url: livret.fichierUrl }).then((r) => {
+      setSending(false);
+      if (r === 'error') setError(t('errSave'));
+      else setDone(true);
+    });
   }
 
   // Format choisi dans WP : les couvertures portrait sont présentées entières
@@ -139,7 +135,7 @@ export function LivretCard({ livret }: { livret: Livret }) {
                           <span>{t('consent')}</span>
                         </label>
                         {error && <p className="lvc-error">{error}</p>}
-                        <button type="button" className="lvc-submit" onClick={submit}>{t('confirmBtn')}</button>
+                        <button type="button" className="lvc-submit" onClick={submit} disabled={sending}>{sending ? t('sending') : t('confirmBtn')}</button>
                       </div>
                     )}
                   </>
@@ -151,7 +147,7 @@ export function LivretCard({ livret }: { livret: Livret }) {
                     <h3 className="lvc-title">{t('doneTitle')}</h3>
                     <p className="lvc-desc">
                       {t('doneText')}{' '}
-                      {livret.fichierUrl && <a href={livret.fichierUrl} download>{t('doneLink')}</a>}
+                      {livret.fichierUrl && <a href={livret.fichierUrl} target="_blank" rel="noopener">{t('doneLink')}</a>}
                     </p>
                     <button type="button" className="lvc-ghost" onClick={close}>{t('close')}</button>
                   </div>

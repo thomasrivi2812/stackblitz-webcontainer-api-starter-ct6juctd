@@ -4,6 +4,7 @@
 // les formulaires (null si indisponible : le serveur refusera l'envoi).
 import { getCaptchaToken } from './captcha-client';
 import { track } from './analytics';
+import { getUtm } from './utm';
 
 export type LeadType = 'contact' | 'question' | 'brochure' | 'download';
 
@@ -17,6 +18,10 @@ export type LeadPayload = {
   objet?: string;
   message?: string;
   ressource?: string;
+  /** Accès aux ressources : catégorie, langue et adresse du document. */
+  categorie?: string;
+  langue?: string;
+  ressource_url?: string;
   /** Champ honeypot anti-spam (doit rester vide). */
   hp?: string;
 };
@@ -30,6 +35,7 @@ export async function sendLead(payload: LeadPayload): Promise<boolean> {
       body: JSON.stringify({
         ...payload,
         ...(captcha ? { captcha } : {}),
+        ...getUtm(),
         source_url: typeof window !== 'undefined' ? window.location.href : '',
       }),
     });

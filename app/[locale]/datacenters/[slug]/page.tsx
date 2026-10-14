@@ -267,7 +267,7 @@ export default async function DatacenterDetail(props: { params: Promise<{ locale
             {/* Plaquette du site à télécharger (repli : brochure NDC générale) */}
             {/* La plaquette du site est l'action première de cette colonne :
                 elle porte le style plein ; les offres passent en contour. */}
-            <BrochureButton className="btn btn-primary dc-aside-cta" pdfUrl={f.document?.url ?? null} label={t.plaquette} ns="plaquette" downloadName={f.document?.titre || 'Plaquette-NDC'} />
+            <BrochureButton className="btn btn-primary dc-aside-cta" pdfUrl={f.document?.url ?? null} label={t.plaquette} ns="plaquette" downloadName={f.document?.titre || 'Plaquette-NDC'} categorie="Plaquette data center" />
             <Link className="btn btn-ghost dc-aside-cta" href="/offres" style={{ marginTop: 14 }}>{t.ctaOffres}</Link>
           </aside>
         </div>

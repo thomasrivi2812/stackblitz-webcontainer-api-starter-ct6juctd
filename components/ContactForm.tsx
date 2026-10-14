@@ -87,6 +87,7 @@ export function ContactForm({
       telephone: form.telephone,
       entreprise: form.entreprise,
       objet: form.objet,
+      langue: locale,
       message: form.message,
     });
 
