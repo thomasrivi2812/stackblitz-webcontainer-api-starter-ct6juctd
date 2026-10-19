@@ -346,6 +346,7 @@ const PAGE_BY_SLUG_QUERY = gql`
   query CustomPage($slug: String!, $language: LanguageCodeFilterEnum) {
     pages(first: 1, where: { name: $slug, language: $language }) {
       nodes {
+        language { code }
         title
         content
         modified
@@ -663,6 +664,7 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
     return fallback();
   }
   type PageNode = {
+    language?: { code: string | null } | null;
     title: string;
     content: string | null;
     modified?: string | null;
@@ -683,7 +685,11 @@ export async function getPage(slug: string, locale: WpLocale = 'fr'): Promise<Cu
       slug,
       language: wpLang(locale),
     });
-    if (data.pages.nodes[0]) return toPage(data.pages.nodes[0]);
+    // Contrôle de langue : avec un slug, WordPress peut ignorer le filtre de
+    // langue et renvoyer la page FR (même défense que la page d'accueil).
+    const node = data.pages.nodes[0];
+    const code = (node?.language?.code ?? '').toUpperCase();
+    if (node && (locale === 'fr' || code === wpLang(locale) || code === '')) return toPage(node);
     if (locale === 'fr') return fallback();
 
     // 2) Anglais : traduction Polylang de la page FR, sinon la page FR elle-même.
@@ -2134,13 +2140,17 @@ async function getPageFields<F>(
     const QUERY = gql`
       query PageFields($language: LanguageCodeFilterEnum) {
         pages(first: 1, where: { name: "${slug}", language: $language }) {
-          nodes { ${graphqlField} { ${selection} } }
+          nodes { language { code } ${graphqlField} { ${selection} } }
         }
       }
     `;
     const data = await client.request<{ pages: { nodes: PageNode[] } }>(QUERY, { language: wpLang(locale) });
-    const f = data.pages?.nodes?.[0]?.[graphqlField] as F | null | undefined;
-    if (f) return f;
+    const node = data.pages?.nodes?.[0] as (PageNode & { language?: { code: string | null } | null }) | undefined;
+    // Contrôle de langue : avec un slug, WordPress peut ignorer le filtre de
+    // langue et renvoyer la page FR à la place de sa traduction.
+    const code = (node?.language?.code ?? '').toUpperCase();
+    const f = node?.[graphqlField] as F | null | undefined;
+    if (f && (locale === 'fr' || code === wpLang(locale) || code === '')) return f;
   } catch (error) {
     logWpError(`page ${slug}`, error, { soft: isSchemaError(error) });
     return null;
