@@ -1,4 +1,5 @@
 import { KpiBand } from '@/components/KpiBand';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { AltareaLogo, AltareaMark } from '@/components/AltareaLogo';
 import { getGroupe, type WpLocale } from '@/lib/wordpress';
@@ -78,17 +79,17 @@ export default async function GroupePage({ params }: { params: Promise<{ locale:
             <div className="cta-row">
               <a
                 className="btn btn-primary"
-                href={wp?.heroCta1Url || 'https://altarea.com'}
+                href={localizeHref(wp?.heroCta1Url || 'https://altarea.com', locale)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {wp?.heroCta1Label || t.heroCta1}
+                {localizeCta(wp?.heroCta1Label, locale) || t.heroCta1}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn btn-ghost" href={wp?.heroCta2Url || '#engagement'}>
-                {wp?.heroCta2Label || t.heroCta2}
+              <a className="btn btn-ghost" href={localizeHref(wp?.heroCta2Url || '#engagement', locale)}>
+                {localizeCta(wp?.heroCta2Label, locale) || t.heroCta2}
               </a>
             </div>
           </div>
@@ -191,7 +192,7 @@ export default async function GroupePage({ params }: { params: Promise<{ locale:
           <div className="op-cta-row">
             <a
               className="op-btn-primary"
-              href={wp?.finalCtaUrl || 'https://altarea.com'}
+              href={localizeHref(wp?.finalCtaUrl || 'https://altarea.com', locale)}
               target="_blank"
               rel="noopener noreferrer"
               style={{ background: '#fff', color: ALTAREA }}

@@ -9,6 +9,7 @@
 // d'hydratation. L'objet `banner` vaut déjà null quand la bannière est
 // désactivée, sans titre ou périmée (voir mapHome dans lib/wordpress.ts).
 import type { HomeBanner as Banner, WpLocale } from '@/lib/wordpress';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 
 function ArrowIcon() {
@@ -27,8 +28,8 @@ export async function HomeBanner({ banner, locale = 'fr' }: { banner: Banner; lo
   const en = locale === 'en';
 
   const label = banner.label || t.label || (en ? 'Headline' : 'À la une');
-  const ctaLabel = banner.ctaLabel || t.cta || (en ? 'Read more' : 'Lire la suite');
-  const href = banner.ctaUrl || null;
+  const ctaLabel = localizeCta(banner.ctaLabel, locale) || t.cta || (en ? 'Read more' : 'Lire la suite');
+  const href = banner.ctaUrl ? localizeHref(banner.ctaUrl, locale) : null;
 
   const inner = (
     <>

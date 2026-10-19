@@ -3,6 +3,7 @@
 // repli sur les traductions codées (messages/*.json) si le champ WP est vide.
 import { AltareaMark } from '@/components/AltareaLogo';
 import { loadMessages } from '@/lib/messages';
+import { localizeHref } from '@/lib/links';
 import type { HomeContent, WpLocale } from '@/lib/wordpress';
 
 function ShieldIcon() {
@@ -27,10 +28,10 @@ export async function CertBanner({ locale = 'fr', wp }: { locale?: WpLocale; wp?
 
   const certTitle = wp?.certBannerCertTitle || t.certTitle;
   const certSub = wp?.certBannerCertSub || t.certSub;
-  const certUrl = wp?.certBannerCertUrl || '/certifications';
+  const certUrl = localizeHref(wp?.certBannerCertUrl || '/certifications', locale);
   const altareaTitle = wp?.certBannerAltareaTitle || t.altareaTitle;
   const altareaSub = wp?.certBannerAltareaSub || t.altareaSub;
-  const altareaUrl = wp?.certBannerAltareaUrl || '/groupe';
+  const altareaUrl = localizeHref(wp?.certBannerAltareaUrl || '/groupe', locale);
 
   return (
     <section className="section cert-banner-section" id="certifications-groupe">

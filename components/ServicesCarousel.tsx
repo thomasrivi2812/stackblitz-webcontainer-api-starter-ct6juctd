@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { ServiceMedia } from './ServiceMedia';
 import type { Service } from '@/lib/wordpress';
 
@@ -15,6 +16,7 @@ function Arrow({ dir }: { dir: 'prev' | 'next' }) {
 
 export function ServicesCarousel({ services }: { services: Service[] }) {
   const t = useTranslations('carousel');
+  const locale = useLocale();
   const n = services.length;
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -47,8 +49,8 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
           <span className="eyebrow"><span className="eyebrow-dot" />{s.accroche || t('eyebrowFallback')}</span>
           <h3>{s.titre}</h3>
           <p>{s.description}</p>
-          <a className="btn btn-ghost" href={s.lienUrl || '/services'}>
-            {s.lienLabel || t('linkFallback')}
+          <a className="btn btn-ghost" href={localizeHref(s.lienUrl || '/services', locale)}>
+            {localizeCta(s.lienLabel, locale) || t('linkFallback')}
           </a>
         </div>
       </article>

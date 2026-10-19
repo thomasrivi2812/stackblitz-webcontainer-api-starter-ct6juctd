@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { loadMessages } from '@/lib/messages';
 import { OffresPersonas } from '@/components/OffresPersonas';
 import { getPersonas, type WpLocale } from '@/lib/wordpress';
@@ -29,9 +28,8 @@ export default async function OffresPage({ params }: { params: Promise<{ locale:
   const personas = await getPersonas(locale);
   return (
     <main>
-      <Suspense fallback={null}>
-        <OffresPersonas personas={personas} />
-      </Suspense>
+      {/* Pas de <Suspense> ici : la page est rendue côté serveur (SEO). */}
+      <OffresPersonas personas={personas} />
     </main>
   );
 }

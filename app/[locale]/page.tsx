@@ -1,4 +1,5 @@
 import { ServicesCarousel } from '@/components/ServicesCarousel';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { HeroSlideshow } from '@/components/HeroSlideshow';
 import { HomeBanner } from '@/components/HomeBanner';
@@ -180,13 +181,13 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
             </h1>
             <p className="hero-lead">{wp?.heroLead || t.heroLead}</p>
             <div className="cta-row">
-              <a className="btn btn-primary" href={wp?.heroCtaPrimaryUrl || "/datacenters"}>
-                {wp?.heroCtaPrimaryLabel || t.heroCtaPrimary}
+              <a className="btn btn-primary" href={localizeHref(wp?.heroCtaPrimaryUrl || "/datacenters", locale)}>
+                {localizeCta(wp?.heroCtaPrimaryLabel, locale) || t.heroCtaPrimary}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
               </a>
-              <a className="btn btn-ghost" href={wp?.heroCtaSecondaryUrl || "/contact"}>{wp?.heroCtaSecondaryLabel || t.heroCtaSecondary}</a>
+              <a className="btn btn-ghost" href={localizeHref(wp?.heroCtaSecondaryUrl || "/contact", locale)}>{localizeCta(wp?.heroCtaSecondaryLabel, locale) || t.heroCtaSecondary}</a>
             </div>
           </div>
           <div className="hero-visual">

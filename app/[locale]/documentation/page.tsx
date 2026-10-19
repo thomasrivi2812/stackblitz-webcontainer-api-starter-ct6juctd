@@ -1,4 +1,5 @@
 import { getLivrets, getDocumentationHead, type WpLocale } from '@/lib/wordpress';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { LivretCard } from '@/components/LivretCard';
 import { VideoCard } from '@/components/VideoCard';
@@ -116,11 +117,11 @@ export default async function DocumentationPage({ params }: { params: Promise<{ 
               {head?.videosSeeAllUrl && (
                 <a
                   className="link-arrow"
-                  href={head.videosSeeAllUrl}
+                  href={localizeHref(head.videosSeeAllUrl, locale)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {head?.videosSeeAllLabel || t.videosSeeAll}
+                  {localizeCta(head?.videosSeeAllLabel, locale) || t.videosSeeAll}
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M5 12h14M13 5l7 7-7 7" />
                   </svg>

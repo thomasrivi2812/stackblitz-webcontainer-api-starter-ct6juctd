@@ -1,4 +1,5 @@
 import { getServices, getServicesPage, type WpLocale } from '@/lib/wordpress';
+import { localizeCta, localizeHref } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { ServiceMedia } from '@/components/ServiceMedia';
 import { Link } from '@/i18n/routing';
@@ -61,8 +62,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ local
                     <span><em>{t.benefice}</em>{s.benefice}</span>
                   </div>
                 )}
-                <a className="btn btn-ghost svc-row-btn" href={s.lienUrl || '/contact'}>
-                  {s.lienLabel || t.fallbackLink}
+                <a className="btn btn-ghost svc-row-btn" href={localizeHref(s.lienUrl || '/contact', locale)}>
+                  {localizeCta(s.lienLabel, locale) || t.fallbackLink}
                 </a>
               </div>
             </article>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useCallback, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
@@ -30,27 +30,31 @@ function highlight(text: string, words: string[]) {
   return text;
 }
 
+// Suit ?profil=… (menu déroulant, lien partagé). Isolé dans son propre
+// <Suspense> : useSearchParams fait basculer en rendu navigateur tout ce qui
+// se trouve sous la frontière Suspense la plus proche. Autour de la page
+// entière, le HTML servi était VIDE (illisible par Google et les IA) ; ici,
+// seul ce composant sans affichage est concerné.
+function ProfilSync({ personas, onChange }: { personas: Persona[]; onChange: (id: string) => void }) {
+  const profil = useSearchParams().get('profil');
+  useEffect(() => {
+    if (profil && personas.some((p) => p.id === profil)) onChange(profil);
+  }, [profil, personas, onChange]);
+  return null;
+}
+
 export function OffresPersonas({ personas }: { personas: Persona[] }) {
   const t = useTranslations('offres');
-  const searchParams = useSearchParams();
-  const profil = searchParams.get('profil');
 
-  // Persona initial : ?profil=… (depuis le menu déroulant) sinon le premier.
-  const initial =
-    personas.find((p) => p.id === profil)?.id ?? personas[0]?.id ?? 'dsi';
-
-  const [active, setActive] = useState<string>(initial);
+  // Persona affiché au rendu serveur : le premier ; ?profil=… est appliqué
+  // ensuite dans le navigateur (ProfilSync).
+  const [active, setActive] = useState<string>(personas[0]?.id ?? 'dsi');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const persona = personas.find((p) => p.id === active) ?? personas[0];
-
-  // Si l'URL change (clic sur un autre profil dans le menu sans rechargement),
-  // on met à jour le profil affiché.
-  useEffect(() => {
-    if (profil && personas.some((p) => p.id === profil)) {
-      setActive(profil);
-      setOpenFaq(null);
-    }
-  }, [profil, personas]);
+  const syncProfil = useCallback((id: string) => {
+    setActive(id);
+    setOpenFaq(null);
+  }, []);
 
   function changePersona(id: string) {
     setActive(id);
@@ -73,6 +77,9 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
 
   return (
     <div className="op" style={accentVars}>
+      <Suspense fallback={null}>
+        <ProfilSync personas={personas} onChange={syncProfil} />
+      </Suspense>
       <div className="op-switch-wrap">
         <div className="container op-switch-inner">
           <label className="op-switch-label" htmlFor="op-profil">{t('youAre')}</label>
@@ -188,7 +195,8 @@ export function OffresPersonas({ personas }: { personas: Persona[] }) {
                   <span>{item.q}</span>
                   <span className="op-faq-toggle" aria-hidden="true">+</span>
                 </button>
-                {openFaq === i && <div className="op-faq-a">{item.a}</div>}
+                {/* Toujours dans le HTML (lisible par les moteurs), masquée si fermée. */}
+                <div className="op-faq-a" hidden={openFaq !== i}>{item.a}</div>
               </div>
             ))}
           </div>
