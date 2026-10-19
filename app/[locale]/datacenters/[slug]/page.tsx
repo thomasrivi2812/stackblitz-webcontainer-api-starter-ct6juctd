@@ -1,4 +1,5 @@
 import { getEnEnabled } from '@/lib/site-settings';
+import { localizeRegion } from '@/lib/links';
 import { getDatacenter, getDatacenters, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
 import { loadMessages } from '@/lib/messages';
 import { notFound, redirect } from 'next/navigation';
@@ -170,7 +171,7 @@ export default async function DatacenterDetail(props: { params: Promise<{ locale
                 <path d="M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z" />
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
-              {f.ville}{f.region ? ` — ${f.region}` : ''}
+              {f.ville}{f.region ? ` — ${localizeRegion(f.region, params.locale)}` : ''}
             </p>
           )}
           {f.accroche && <p className="dc-accroche">{f.accroche}</p>}

@@ -1,5 +1,5 @@
 import { ServicesCarousel } from '@/components/ServicesCarousel';
-import { localizeCta, localizeHref } from '@/lib/links';
+import { localizeCta, localizeHref, localizeRegion } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { HeroSlideshow } from '@/components/HeroSlideshow';
 import { HomeBanner } from '@/components/HomeBanner';
@@ -127,6 +127,9 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
   // Dictionnaire de la page chargé par import direct (compatible WebContainer).
   const dict = (await loadMessages(locale)) as Record<string, unknown>;
   const t = dict.home as Record<string, string>;
+  // Statuts des data centers dans la langue de la page (dictionnaire « datacenters »).
+  const tdc = dict.datacenters as Record<string, string>;
+  const statutLabel = (key: string) => tdc[`statut${key.charAt(0).toUpperCase()}${key.slice(1)}`] || tdc.statutInconnu;
   // Libellés du diaporama passés en props : le composant porte ses propres
   // textes de repli, un namespace absent ne fait donc rien échouer.
   const sliderLabels = (dict.heroSlider ?? {}) as Record<string, string>;
@@ -234,7 +237,8 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
           <div className="dc-showcase">
             {preview[0] && (() => {
               const dc = preview[0];
-              const { key, label } = statutInfo(dc.datacenterFields.statut);
+              const { key } = statutInfo(dc.datacenterFields.statut);
+              const label = statutLabel(key);
               return (
                 <Link className="dc-feature" href={`/datacenters/${dc.slug}`}>
                   <div className="dc-feature-media">
@@ -252,7 +256,7 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
                         <li><span>{t.specPuissance}</span><strong>{dc.datacenterFields.puissance}</strong></li>
                       )}
                       {dc.datacenterFields.region && (
-                        <li><span>{t.specRegion}</span><strong>{dc.datacenterFields.region}</strong></li>
+                        <li><span>{t.specRegion}</span><strong>{localizeRegion(dc.datacenterFields.region, locale)}</strong></li>
                       )}
                     </ul>
                   </div>
@@ -262,7 +266,8 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
 
             <div className="dc-side">
               {preview.slice(1, 3).map((dc) => {
-                const { key, label } = statutInfo(dc.datacenterFields.statut);
+                const { key } = statutInfo(dc.datacenterFields.statut);
+              const label = statutLabel(key);
                 return (
                   <Link className="dc-mini" key={dc.slug} href={`/datacenters/${dc.slug}`}>
                     <div className="dc-mini-media">
@@ -277,7 +282,7 @@ export default async function Home({ params }: { params: Promise<{ locale: WpLoc
                       <p className="dc-mini-specs">
                         {dc.datacenterFields.puissance && <strong>{dc.datacenterFields.puissance}</strong>}
                         {dc.datacenterFields.puissance && dc.datacenterFields.region && <span aria-hidden="true"> · </span>}
-                        {dc.datacenterFields.region}
+                        {localizeRegion(dc.datacenterFields.region, locale)}
                       </p>
                     </div>
                   </Link>

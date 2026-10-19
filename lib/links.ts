@@ -50,3 +50,20 @@ export function localizeCta(label: string | null | undefined, locale: string): s
   if (locale !== 'en' || !label) return label;
   return CTA_EN[label.trim().toLowerCase()] ?? label;
 }
+
+// Régions françaises saisies dans WordPress : nom anglais usuel sur le site
+// anglais (les autres régions gardent leur nom, identique en anglais).
+const REGION_EN: Record<string, string> = {
+  'bretagne': 'Brittany',
+  'normandie': 'Normandy',
+  'corse': 'Corsica',
+  'ile-de-france': 'Île-de-France',
+  'île-de-france': 'Île-de-France',
+  "provence-alpes-côte d'azur": "Provence-Alpes-Côte d'Azur",
+};
+
+/** Région WordPress, en anglais sur le site anglais. */
+export function localizeRegion(region: string | null | undefined, locale: string): string | null | undefined {
+  if (locale !== 'en' || !region) return region;
+  return REGION_EN[region.trim().toLowerCase()] ?? region;
+}

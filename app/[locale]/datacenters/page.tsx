@@ -1,4 +1,5 @@
 import { getDatacenters, getDatacentersVisit, statutInfo, toMapPoints, type WpLocale } from '@/lib/wordpress';
+import { localizeRegion } from '@/lib/links';
 import { loadMessages } from '@/lib/messages';
 import { DcTileImage } from '@/components/DcTileImage';
 import { NetworkMap } from '@/components/NetworkMap';
@@ -97,7 +98,7 @@ export default async function DatacentersPage({ params }: { params: Promise<{ lo
                             <li><span>{t.specPuissance || 'Puissance'}</span><strong>{f.puissance}</strong></li>
                           )}
                           {f.region && (
-                            <li><span>{t.specRegion || 'Région'}</span><strong>{f.region}</strong></li>
+                            <li><span>{t.specRegion || 'Région'}</span><strong>{localizeRegion(f.region, locale)}</strong></li>
                           )}
                         </ul>
                       )}
