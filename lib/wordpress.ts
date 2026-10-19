@@ -2111,13 +2111,14 @@ async function _getSiteBranding(): Promise<SiteBranding> {
 /**
  * Récupère le groupe de champs ACF `graphqlField` de la page de slug `slug`,
  * pour la langue demandée. Repli 1 : traductions Polylang de la page FR.
- * Repli 2 : champs FR. Retour null si WP absent / page absente / erreur.
+ * Repli 2 : champs FR (sauf `strict`). Retour null si WP absent / page absente / erreur.
  */
 async function getPageFields<F>(
   slug: string,
   graphqlField: string,
   selection: string,
   locale: WpLocale,
+  strict = false,
 ): Promise<F | null> {
   if (!endpoint) {
     assertSampleAllowed();
@@ -2168,9 +2169,34 @@ async function getPageFields<F>(
     const want = wpLang(locale);
     const tr = node?.translations?.find((t) => (t?.language?.code ?? '').toUpperCase() === want);
     if (tr?.[graphqlField]) return tr[graphqlField] as F;
-    if (node?.[graphqlField]) return node[graphqlField] as F;
+    if (!strict && node?.[graphqlField]) return node[graphqlField] as F;
   } catch (error) {
     logWpError(`page ${slug} (traductions Polylang)`, error, { soft: isSchemaError(error) });
+  }
+  return null;
+}
+
+/**
+ * Comme getPageFields, pour une page dont le slug a plusieurs variantes
+ * (« datacenters », « datacenters-2 »…) : en anglais, la vraie traduction est
+ * cherchée sous TOUTES les variantes avant de retomber sur une page FR, sinon
+ * une ancienne page FR sans traduction masquerait la page anglaise.
+ */
+async function getPageFieldsFromSlugs<F>(
+  slugs: string[],
+  graphqlField: string,
+  selection: string,
+  locale: WpLocale,
+): Promise<F | null> {
+  if (locale !== 'fr') {
+    for (const slug of slugs) {
+      const f = await getPageFields<F>(slug, graphqlField, selection, locale, true);
+      if (f) return f;
+    }
+  }
+  for (const slug of slugs) {
+    const f = await getPageFields<F>(slug, graphqlField, selection, locale);
+    if (f) return f;
   }
   return null;
 }
@@ -2345,19 +2371,10 @@ export async function getEquipesHead(locale: WpLocale = 'fr'): Promise<EquipesHe
   // 1) Requête complète sur chaque variante de slug. 2) Si tout échoue
   //    (champ polesOrdre pas encore créé côté WP → erreur de schéma), on
   //    retente SANS lui : l'en-tête reste éditable même si WP n'est pas à jour.
-  let f: F | null = null;
-  for (const slug of EQUIPES_SLUGS) {
-    f = await getPageFields<F>(
-      slug, 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
-    );
-    if (f) break;
-  }
-  if (!f) {
-    for (const slug of EQUIPES_SLUGS) {
-      f = await getPageFields<F>(slug, 'equipesFields', 'eyebrow titre intro', locale);
-      if (f) break;
-    }
-  }
+  let f = await getPageFieldsFromSlugs<F>(
+    EQUIPES_SLUGS, 'equipesFields', 'eyebrow titre intro polesOrdre { pole }', locale,
+  );
+  if (!f) f = await getPageFieldsFromSlugs<F>(EQUIPES_SLUGS, 'equipesFields', 'eyebrow titre intro', locale);
   if (!f) return null;
   // Normalisation : la valeur du select peut arriver en chaîne, tableau ou
   // objet {value} selon le réglage du champ — on ramène tout à une chaîne.
@@ -2571,10 +2588,7 @@ export async function getDocumentationHead(locale: WpLocale = 'fr'): Promise<Doc
   // complète puis repli en-tête seul (WP pas encore à jour).
   let f: F | null = null;
   for (const selection of [DOC_SELECTION_FULL, 'eyebrow titre intro']) {
-    for (const slug of ['documentation', 'documentation-2']) {
-      f = await getPageFields<F>(slug, 'documentationFields', selection, locale);
-      if (f) break;
-    }
+    f = await getPageFieldsFromSlugs<F>(['documentation', 'documentation-2'], 'documentationFields', selection, locale);
     if (f) break;
   }
   if (!f) return null;
@@ -2636,10 +2650,9 @@ export async function getDatacentersVisit(locale: WpLocale = 'fr'): Promise<Data
     'eyebrow titre intro visitEyebrow visitTitle visitText visitCta',
     'visitEyebrow visitTitle visitText visitCta',
   ]) {
-    for (const slug of ['datacenters', 'datacenters-2', 'nos-data-centers']) {
-      f = await getPageFields<F>(slug, 'datacentersPageFields', selection, locale);
-      if (f) break;
-    }
+    f = await getPageFieldsFromSlugs<F>(
+      ['datacenters', 'datacenters-2', 'nos-data-centers'], 'datacentersPageFields', selection, locale,
+    );
     if (f) break;
   }
   if (!f) return null;
@@ -2664,13 +2677,10 @@ export type ServicesPageHead = {
 
 export async function getServicesPage(locale: WpLocale = 'fr'): Promise<ServicesPageHead | null> {
   type F = { eyebrow: string | null; titre: string | null; intro: string | null };
-  for (const slug of ['services', 'services-2', 'nos-services']) {
-    const f = await getPageFields<F>(slug, 'servicesPageFields', 'eyebrow titre intro', locale);
-    if (f) {
-      return { eyebrow: f.eyebrow || null, titre: f.titre || null, intro: f.intro || null };
-    }
-  }
-  return null;
+  const f = await getPageFieldsFromSlugs<F>(
+    ['services', 'services-2', 'nos-services'], 'servicesPageFields', 'eyebrow titre intro', locale,
+  );
+  return f ? { eyebrow: f.eyebrow || null, titre: f.titre || null, intro: f.intro || null } : null;
 }
 
 // --- Page Contact ------------------------------------------------------------
