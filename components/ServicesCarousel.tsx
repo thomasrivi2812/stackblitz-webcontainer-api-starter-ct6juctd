@@ -57,10 +57,10 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
 
       {n > 1 && (
         <div className="svc-carousel-controls">
-          <button className="svc-arrow" type="button" onClick={() => go(i - 1)} aria-label="Service précédent">
+          <button className="svc-arrow" type="button" onClick={() => go(i - 1)} aria-label={t('prev')}>
             <Arrow dir="prev" />
           </button>
-          <div className="svc-dots" role="tablist" aria-label="Sélecteur de service">
+          <div className="svc-dots" role="tablist" aria-label={t('selector')}>
             {services.map((sv, idx) => (
               <button
                 key={sv.slug || idx}
@@ -73,7 +73,7 @@ export function ServicesCarousel({ services }: { services: Service[] }) {
               />
             ))}
           </div>
-          <button className="svc-arrow" type="button" onClick={next} aria-label="Service suivant">
+          <button className="svc-arrow" type="button" onClick={next} aria-label={t('next')}>
             <Arrow dir="next" />
           </button>
         </div>

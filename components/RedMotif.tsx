@@ -9,7 +9,7 @@ export function RedMotif() {
     { x: 170, fill: '#ff2a2a' },
   ];
   return (
-    <svg className="motif" viewBox="0 0 420 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Motif graphique NDC">
+    <svg className="motif" viewBox="0 0 420 460" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.28" />

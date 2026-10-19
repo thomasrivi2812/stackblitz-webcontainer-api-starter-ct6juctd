@@ -406,7 +406,10 @@
   },
   "carousel": {
     "eyebrowFallback": "Our services",
-    "linkFallback": "Learn more"
+    "linkFallback": "Learn more",
+    "prev": "Previous service",
+    "next": "Next service",
+    "selector": "Service selector"
   },
   "certBanner": {
     "certTitle": "Discover our certifications",

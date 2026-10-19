@@ -27,9 +27,10 @@ export async function generateMetadata(props: { params: Promise<{ locale: WpLoca
   const t = (await loadMessages(params.locale)).datacenters as Record<string, string>;
   if (!dc) return { title: t.notFound };
   const f = dc.datacenterFields;
-  const ville = f.ville ? ` à ${f.ville}` : '';
   const desc = f.accroche
-    || `Data center NDC${ville} : hébergement souverain, conception Tier III et écoresponsable. Découvrez ses caractéristiques techniques.`;
+    || (params.locale === 'en'
+      ? `NDC data center${f.ville ? ` in ${f.ville}` : ''}: sovereign hosting, Tier III design and eco-responsible. Discover its technical specifications.`
+      : `Data center NDC${f.ville ? ` à ${f.ville}` : ''} : hébergement souverain, conception Tier III et écoresponsable. Découvrez ses caractéristiques techniques.`);
   // hreflang avec les vrais slugs par langue (Polylang) : l'alternative n'est
   // déclarée que si la traduction existe.
   const cur = params.locale;
@@ -48,11 +49,11 @@ export async function generateMetadata(props: { params: Promise<{ locale: WpLoca
   const canonical = localePath(cur, `/datacenters/${dc.slug}`);
 
   return {
-    title: `${dc.title}${ville ? ' — ' + f.ville : ''}`,
+    title: `${dc.title}${f.ville ? ' — ' + f.ville : ''}`,
     description: desc,
     alternates: { canonical, languages },
     openGraph: {
-      title: `${dc.title}${ville ? ' — ' + f.ville : ''}`,
+      title: `${dc.title}${f.ville ? ' — ' + f.ville : ''}`,
       description: desc,
       type: 'article',
       url: canonical,

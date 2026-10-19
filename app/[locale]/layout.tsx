@@ -159,6 +159,9 @@ export default async function LocaleLayout({
     getSiteSettings(),
   ]);
 
+  const isEn = locale === 'en';
+  const sameAs = [siteSettings.linkedinUrl, siteSettings.youtubeUrl, siteSettings.vimeoUrl].filter(Boolean);
+
   // Base de connaissances de l'assistant, construite à partir des contenus
   // réels du site : une fiche ajoutée dans WordPress l'enrichit sans code.
   const chatbotEntries = buildKnowledge(
@@ -183,26 +186,30 @@ export default async function LocaleLayout({
             alternateName: 'NDC',
             url: SITE_URL,
             logo: `${SITE_URL}/favicon.svg`,
-            description:
-              'Réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
+            description: isEn
+              ? 'Network of French, sovereign and eco-responsible data centers serving the critical needs of businesses.'
+              : 'Réseau de data centers français, souverains et écoresponsables, au service des enjeux critiques des entreprises.',
             parentOrganization: { '@type': 'Organization', name: 'Altarea' },
             address: { '@type': 'PostalAddress', addressCountry: 'FR' },
             areaServed: { '@type': 'Country', name: 'France' },
-            knowsAbout: [
-              'Data center',
-              'Hébergement souverain',
-              'Colocation',
-              'Cloud souverain',
-              'Infrastructure numérique',
-              'Écoresponsabilité',
-            ],
+            knowsAbout: isEn
+              ? ['Data center', 'Sovereign hosting', 'Colocation', 'Sovereign cloud', 'Digital infrastructure', 'Eco-responsibility']
+              : [
+                  'Data center',
+                  'Hébergement souverain',
+                  'Colocation',
+                  'Cloud souverain',
+                  'Infrastructure numérique',
+                  'Écoresponsabilité',
+                ],
             contactPoint: {
               '@type': 'ContactPoint',
               contactType: 'customer support',
-              url: `${SITE_URL}/contact`,
+              url: `${SITE_URL}${isEn ? '/en' : ''}/contact`,
               availableLanguage: ['French', 'English'],
             },
-            // sameAs (LinkedIn…) : à ajouter quand les URLs officielles seront actives.
+            // Réseaux sociaux renseignés dans « Réglages → Site NDC ».
+            ...(sameAs.length ? { sameAs } : {}),
           }}
         />
         {/* Données structurées WebSite : ancre l'entité « site » dans le
