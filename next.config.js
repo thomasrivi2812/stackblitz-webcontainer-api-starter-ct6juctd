@@ -87,6 +87,10 @@ const nextConfig = {
   // Hôtes d'images optimisables côté client (lib/image.ts).
   env: { NDC_IMAGE_HOSTS: WP_HOST },
   poweredByHeader: false, // masque l'en-tête X-Powered-By: Next.js
+  // Compilation sur un seul processus (NDC_BUILD_CPUS pour changer) : la
+  // mémoire des réponses WordPress (lib/wp-fetch.ts) est alors partagée par
+  // toutes les pages, au lieu de rafales parallèles sur le serveur mutualisé.
+  experimental: { cpus: Math.max(1, Number(process.env.NDC_BUILD_CPUS) || 1) },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

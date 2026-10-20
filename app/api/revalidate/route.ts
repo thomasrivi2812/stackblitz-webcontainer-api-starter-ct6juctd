@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { expireWpCache } from '@/lib/wp-fetch';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
 // Revalidation à la demande, appelée par WordPress (hook save_post) pour
@@ -47,6 +48,8 @@ export async function POST(request: Request) {
   const paths =
     path === '/' || /^\/(fr|en)(\/|$)/.test(path) ? [path] : [`/fr${path}`, `/en${path}`];
   try {
+    // Les pages régénérées doivent relire WordPress, pas la mémoire des réponses.
+    expireWpCache();
     // « / » en mode layout = tout le site. Pour un chemin précis, PAS de type :
     // `revalidatePath('/fr/x', 'layout')` ne vise que les layouts situés à ce
     // chemin (il n'y en a pas) et ne rafraîchissait donc rien.

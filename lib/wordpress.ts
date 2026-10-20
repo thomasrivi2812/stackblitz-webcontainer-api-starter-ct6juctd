@@ -1,5 +1,7 @@
 import { cache } from 'react';
-import { GraphQLClient, gql } from 'graphql-request';
+import { gql } from 'graphql-request';
+// Client mémorisé et limité (lib/wp-fetch.ts) : ménage le WordPress mutualisé.
+import { WpClient as GraphQLClient } from './wp-fetch';
 import { sampleDatacenters } from './sample-data';
 import { PERSONAS, type Persona } from './personas';
 

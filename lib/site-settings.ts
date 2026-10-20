@@ -7,22 +7,16 @@
 // NEXT_PUBLIC_PORTAL_URL, réseaux sociaux non affichés.
 import { cache } from 'react';
 import { EN_ENABLED as EN_DEFAULT } from '@/i18n/routing';
+import { wpQuery } from './wp-fetch';
 
 const QUERY = '{ ndcSiteSettings { enEnabled } }';
 
-async function fetchEnFlag(init: RequestInit): Promise<boolean | null> {
+async function fetchEnFlag(): Promise<boolean | null> {
   const endpoint = process.env.WORDPRESS_GRAPHQL_ENDPOINT;
   if (!endpoint) return null;
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: QUERY }),
-      signal: AbortSignal.timeout(3000),
-      ...init,
-    });
-    const json = (await res.json()) as { data?: { ndcSiteSettings?: { enEnabled?: unknown } | null } };
-    const v = json.data?.ndcSiteSettings?.enEnabled;
+    const data = await wpQuery<{ ndcSiteSettings?: { enEnabled?: unknown } | null }>(endpoint, QUERY);
+    const v = data?.ndcSiteSettings?.enEnabled;
     return typeof v === 'boolean' ? v : null;
   } catch {
     return null;
@@ -54,14 +48,8 @@ export const getSiteSettings = cache(async (): Promise<{ enEnabled: boolean } & 
   const endpoint = process.env.WORDPRESS_GRAPHQL_ENDPOINT;
   if (endpoint) {
     try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: LINKS_QUERY }),
-        signal: AbortSignal.timeout(3000),
-      });
-      const json = (await res.json()) as { data?: { ndcSiteSettings?: Record<string, unknown> | null } };
-      const s = json.data?.ndcSiteSettings;
+      const data = await wpQuery<{ ndcSiteSettings?: Record<string, unknown> | null }>(endpoint, LINKS_QUERY);
+      const s = data?.ndcSiteSettings;
       if (s && typeof s.enEnabled === 'boolean') {
         return {
           enEnabled: s.enEnabled,
@@ -76,7 +64,7 @@ export const getSiteSettings = cache(async (): Promise<{ enEnabled: boolean } & 
     }
   }
   // Ancien snippet (case anglaise seule) ou WordPress injoignable.
-  return { enEnabled: (await fetchEnFlag({})) ?? EN_DEFAULT, ...empty };
+  return { enEnabled: (await fetchEnFlag()) ?? EN_DEFAULT, ...empty };
 });
 
 export const getEnEnabled = cache(async (): Promise<boolean> => (await getSiteSettings()).enEnabled);
@@ -89,7 +77,7 @@ const TTL_MS = 60_000;
 export async function isEnEnabledForProxy(): Promise<boolean> {
   const c = g.__ndcEn;
   if (c && Date.now() - c.at < TTL_MS) return c.v;
-  const v = (await fetchEnFlag({ cache: 'no-store' })) ?? c?.v ?? EN_DEFAULT;
+  const v = (await fetchEnFlag()) ?? c?.v ?? EN_DEFAULT;
   g.__ndcEn = { v, at: Date.now() };
   return v;
 }
