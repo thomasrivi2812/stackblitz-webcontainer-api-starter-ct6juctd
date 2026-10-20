@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { wpFetch } from '@/lib/wp-fetch';
 import { verifyAltchaPayload } from '@/lib/altcha-server';
 
 export const runtime = 'nodejs';
@@ -215,11 +216,11 @@ export async function POST(request: Request) {
   const bodyToSend = secret ? { ...payload, token: secret } : payload;
 
   try {
-    const res = await fetch(endpoint, {
+    const res = await wpFetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyToSend),
-      cache: 'no-store',
+      timeoutMs: 15000,
     });
 
     if (!res.ok) {

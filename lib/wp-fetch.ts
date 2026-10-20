@@ -12,6 +12,10 @@
 // - WordPress en panne : la dernière réponse connue est servie, et l'échec est
 //   mémorisé 15 s (pas de nouvelles tentatives en rafale).
 // /api/revalidate (enregistrement dans WordPress) périme toute la mémoire.
+//
+// WORDPRESS_INTERNAL_URL (ex. http://127.0.0.1:81) : appels envoyés directement
+// à Apache sur la machine, sans repasser par HAProxy. L'adresse publique garde
+// son hôte, transmis dans l'en-tête Host pour qu'Apache choisisse le bon site.
 
 type Entry = { data?: unknown; dataAt?: number; err?: string; errGql?: boolean; errAt?: number };
 type Store = {
@@ -51,13 +55,59 @@ async function withSlot<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-async function post(endpoint: string, query: string, variables: Record<string, unknown>): Promise<unknown> {
+type WpResponse = { status: number; ok: boolean; text(): Promise<string>; json(): Promise<any> };
+
+/**
+ * Requête HTTP vers WordPress (GraphQL, REST), directe vers Apache si
+ * WORDPRESS_INTERNAL_URL est défini. fetch() ne laisse pas imposer l'en-tête
+ * Host : on passe alors par le module http de Node, chargé à l'exécution
+ * seulement (ce fichier est aussi inclus dans du code navigateur).
+ */
+export async function wpFetch(
+  url: string,
+  { method = 'GET', headers = {}, body, timeoutMs = TIMEOUT }: { method?: string; headers?: Record<string, string>; body?: string; timeoutMs?: number } = {},
+): Promise<WpResponse> {
+  const internal = process.env.WORDPRESS_INTERNAL_URL;
   // Pas d'option `cache` : sous Next, `no-store` rendrait les pages dynamiques.
-  const res = await fetch(endpoint, {
+  if (!internal) return fetch(url, { method, headers, body, signal: AbortSignal.timeout(timeoutMs) });
+
+  const pub = new URL(url);
+  const target = new URL(pub.pathname + pub.search, internal);
+  const mod = target.protocol === 'https:'
+    ? await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'node:https')
+    : await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'node:http');
+  return new Promise<WpResponse>((resolve, reject) => {
+    const req = mod.request(target, {
+      method,
+      headers: {
+        ...headers,
+        host: pub.host,
+        'x-forwarded-host': pub.host,
+        'x-forwarded-proto': pub.protocol.replace(':', ''),
+        ...(body !== undefined ? { 'content-length': String(Buffer.byteLength(body)) } : {}),
+      },
+    }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on('data', (c: Buffer) => chunks.push(c));
+      res.on('error', reject);
+      res.on('end', () => {
+        const text = Buffer.concat(chunks).toString('utf8');
+        const status = res.statusCode ?? 0;
+        resolve({ status, ok: status >= 200 && status < 300, text: async () => text, json: async () => JSON.parse(text) });
+      });
+    });
+    req.setTimeout(timeoutMs, () => req.destroy(new Error(`WordPress : pas de réponse en ${timeoutMs} ms`)));
+    req.on('error', reject);
+    if (body !== undefined) req.write(body);
+    req.end();
+  });
+}
+
+async function post(endpoint: string, query: string, variables: Record<string, unknown>): Promise<unknown> {
+  const res = await wpFetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
-    signal: AbortSignal.timeout(TIMEOUT),
   });
   let json: { data?: unknown; errors?: { message?: string }[] };
   try {

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { wpFetch } from '@/lib/wp-fetch';
 
 // Sonde de supervision : GET /api/health → 200 si le serveur Next répond.
 // GET /api/health?deep=1 vérifie aussi que WordPress répond (503 sinon) —
@@ -15,12 +16,11 @@ export async function GET(request: Request) {
     let wp = false;
     if (endpoint) {
       try {
-        const res = await fetch(endpoint, {
+        const res = await wpFetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: '{ __typename }' }),
-          cache: 'no-store',
-          signal: AbortSignal.timeout(5000),
+          timeoutMs: 5000,
         });
         wp = res.ok;
       } catch {
