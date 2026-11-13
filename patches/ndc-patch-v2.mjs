@@ -2,8 +2,8 @@
 /**
  * NDC — Patch v2 « logo officiel + accueil mobile + page vide Google » (nov. 2026)
  * ------------------------------------------------------------------------------
- * Écrit pour le code en production (archive ndc-front du 13/11/2026).
- * À lancer sur le SERVEUR NEXT.JS, depuis le dossier du projet :
+ * Écrit et testé sur le code en production : dossier htdocs (archive du 13/11/2026).
+ * À lancer sur le SERVEUR NEXT.JS, depuis /var/www/sites/prod/nationdatacenter/htdocs :
  *
  *   node ndc-patch-v2.mjs              → APERÇU : liste les modifications, n'écrit rien
  *   node ndc-patch-v2.mjs --apply      → applique (avec sauvegardes)
